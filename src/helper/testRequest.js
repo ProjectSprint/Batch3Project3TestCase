@@ -1,5 +1,5 @@
 import http from "k6/http";
-import { assert } from "./assertion.js";
+import { assert } from "./testAssertion.js";
 import { generateParamFromObj } from "./generator.js";
 
 /**
@@ -24,7 +24,7 @@ export function testGet(route, params, headersObj, tags = {}) {
  * @param {import('../types/schema.d.ts').Params} params
  * @param {{[name: string]: string}} headersObj
  * @param {import("../types/k6.d.ts").Checkers<import("k6/http").RefinedResponse<any>>} expectedCase
- * @param {import("../types/config.d.ts").Config} config
+ * @param {import("../entity/config.d.ts").Config} config
  * @param {{[name: string]: string}} tags
  * @returns {import("../types/schema.d.ts").RequestAssertResponse<any>} - k6 http response.
  */
@@ -78,7 +78,7 @@ export function testPostMultipart(
  * @param {import("k6/http").StructuredRequestBody} body
  * @param {{[name: string]: string}} headers
  * @param {import("../types/k6.d.ts").Checkers<import("k6/http").RefinedResponse<any>>} expectedCase
- * @param {import("../types/config.d.ts").Config} config
+ * @param {import("../entity/config.d.ts").Config} config
  * @param {{[name: string]: string}} tags
  * @returns {import("../types/schema.d.ts").RequestAssertResponse<any>} - k6 http response.
  */
@@ -141,7 +141,7 @@ export function testPostJson(
  * @param {import("k6").JSONValue} body
  * @param {{[name: string]: string}} headersObj
  * @param {import("../types/k6.d.ts").Checkers<import("k6/http").RefinedResponse<any>>} expectedCase
- * @param {import("../types/config.d.ts").Config} config
+ * @param {import("../entity/config.d.ts").Config} config
  * @param {{[name: string]: string}} tags
  * @param {("noContentType"|"plainBody")[]} options - Additional options for the request.
  * @returns {import("../types/schema.d.ts").RequestAssertResponse<any>} - k6 http response.
@@ -208,7 +208,7 @@ export function testPatchJson(
  * @param {string | import("k6").JSONValue} body
  * @param {{[name: string]: string}} headersObj
  * @param {import("../types/k6.d.ts").Checkers<import("k6/http").RefinedResponse<any>>} expectedCase
- * @param {import("../types/config.d.ts").Config} config
+ * @param {import("../entity/config.d.ts").Config} config
  * @param {("noContentType"|"plainBody")[]} options - Additional options for the request.
  * @param {{[name: string]: string}} tags
  * @returns {import("../types/schema.d.ts").RequestAssertResponse<any>} - k6 http response.
@@ -268,7 +268,7 @@ export function testPutJson(route, body, headers, tags = {}, options = []) {
  * @param {string | import("k6").JSONValue} body
  * @param {{[name: string]: string}} headersObj
  * @param {import("../types/k6.d.ts").Checkers<import("k6/http").RefinedResponse<any>>} expectedCase
- * @param {import("../types/config.d.ts").Config} config
+ * @param {import("../entity/config.d.ts").Config} config
  * @param {{[name: string]: string}} tags
  * @param {("noContentType"|"plainBody")[]} options - Additional options for the request.
  * @returns {import("../types/schema.d.ts").RequestAssertResponse<any>} - k6 http response.
@@ -331,7 +331,7 @@ export function testDelete(route, params, headersObj, tags = {}) {
  * @param {import("k6").JSONValue} body
  * @param {{[name: string]: string}} headersObj
  * @param {import("../types/k6.d.ts").Checkers<import("k6/http").RefinedResponse<any>>} expectedCase
- * @param {import("../types/config.d.ts").Config} config
+ * @param {import("../entity/config.d.ts").Config} config
  * @param {{[name: string]: string}} tags
  * @returns {import("../types/schema.d.ts").RequestAssertResponse<any>} - k6 http response.
  */

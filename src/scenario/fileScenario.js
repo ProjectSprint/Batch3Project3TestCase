@@ -1,17 +1,17 @@
 import { file, get } from "k6/http";
-import { isExists } from "../helper/assertion.js";
-import { testPostMultipartAssert } from "../helper/request.js";
 import { getFile, isFile } from "../assertion/fileAssertion.js";
 import { check } from "k6";
+import { testPostMultipartAssert } from "../helper/testRequest.js";
+import { isExists } from "../helper/testAssertion.js";
 
 /**
- * @param {Types.User} user
+ * @param {import("src/entity/types.js").User} user
  * @param {{small: ArrayBuffer, smallName:string,medium: ArrayBuffer, mediumName:string,big: ArrayBuffer, bigName: string,invalid: ArrayBuffer,invalidName:string}} fileToTest
- * @param {import("../types/config.d.ts").Config} config
+ * @param {import("../entity/config.d.ts").Config} config
  * @param {{[name: string]: string}} tags
-  * @returns {Types.File | undefined} uri
+  * @returns {import("src/entity/types.js").UploadedFile | undefined} uri
  */
-export function UploadFileTest(user, fileToTest, config, tags) {
+export function UploadFileScenario(user, fileToTest, config, tags) {
   const featureName = "Upload File";
   const route = config.baseUrl + "/v1/file";
   const assertHandler = testPostMultipartAssert;

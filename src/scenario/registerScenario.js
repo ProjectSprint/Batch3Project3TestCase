@@ -1,19 +1,19 @@
+import { testPostJsonAssert } from "../helper/testRequest.js";
 import { getUser } from "../assertion/userAssertion.js";
-import { isEqual, isExists } from "../helper/assertion.js";
 import {
   generateRandomEmail,
   generateRandomPassword,
   generateRandomPhoneNumber,
   generateTestObjects,
 } from "../helper/generator.js";
-import { testPostJsonAssert } from "../helper/request.js";
+import { isExists } from "../helper/testAssertion.js";
 
 /**
- * @param {import("../types/config.d.ts").Config} config
+ * @param {import("../entity/config.d.ts").Config} config
  * @param {{[name: string]: string}} tags
- * @returns {Types.User | undefined}
+ * @returns {import("src/entity/types.js").User | undefined}
  */
-export function RegisterEmailTest(config, tags) {
+export function RegisterEmailScenario(config, tags) {
   const featureName = "Register Email";
   const route = config.baseUrl + "/v1/register/email";
   const assertHandler = testPostJsonAssert;
@@ -76,11 +76,11 @@ export function RegisterEmailTest(config, tags) {
 }
 
 /**
- * @param {import("../types/config.d.ts").Config} config
+ * @param {import("../entity/config.d.ts").Config} config
  * @param {{[name: string]: string}} tags
- * @returns {Types.User | undefined}
+ * @returns {import("src/entity/types.js").User | undefined}
  */
-export function RegisterPhoneTest(config, tags) {
+export function RegisterPhoneScenario(config, tags) {
   const featureName = "Register Phone";
   const route = config.baseUrl + "/v1/register/phone";
   const assertHandler = testPostJsonAssert;

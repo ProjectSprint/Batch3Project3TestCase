@@ -6,7 +6,7 @@ const isFileValidator = createValidator(fileSchema)
 
 /**
  * @param {import("k6").JSONValue} value
- * @returns {value is Types.File}
+ * @returns {value is import("src/entity/types.js").UploadedFile}
  */
 export function isFile(value) {
   // Basic checks for object and required fields
@@ -23,7 +23,7 @@ export function isFile(value) {
  * @param {import('src/types/schema.js').RequestAssertResponse<any>} res
  * @param {any} positivePayload
  * @param {string} featureName
- * @returns {Types.File | undefined}
+ * @returns {import("src/entity/types.js").UploadedFile | undefined}
  */
 export function getFile(res, positivePayload, featureName) {
   if (res.isSuccess) {

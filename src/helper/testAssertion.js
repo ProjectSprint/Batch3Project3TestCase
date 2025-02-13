@@ -8,7 +8,7 @@ import { check } from "k6";
  * @param {{[name: string]: string}} requestHeader
  * @param {string} featureName
  * @param {import("src/types/k6.js").Checkers<any>} conditions
- * @param {import("src/types/config.js").Config} config
+ * @param {import("src/entity/config.js").Config} config
  * @returns {Boolean}
  */
 export function assert(

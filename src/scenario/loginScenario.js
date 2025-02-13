@@ -1,20 +1,20 @@
+import { testPostJsonAssert } from "../helper/testRequest.js";
 import { getUser } from "../assertion/userAssertion.js";
-import { isEqual, isExists } from "../helper/assertion.js";
 import {
   combine,
   generateRandomEmail,
   generateRandomPhoneNumber,
   generateTestObjects,
 } from "../helper/generator.js";
-import { testPostJsonAssert } from "../helper/request.js";
+import { isEqual, isExists } from "../helper/testAssertion.js";
 
 /**
- * @param {import("../types/config.d.ts").Config} config
+ * @param {import("../entity/config.d.ts").Config} config
  * @param {{[name: string]: string}} tags
- * @param {Types.User} user
- * @returns {Types.User | undefined}
+ * @param {import("src/entity/types.js").User} user
+ * @returns {import("src/entity/types.js").User | undefined}
  */
-export function LoginEmailTest(user, config, tags) {
+export function LoginEmailScenario(user, config, tags) {
   const featureName = "Login Email";
   const route = config.baseUrl + "/v1/login/email";
   const assertHandler = testPostJsonAssert;
@@ -80,12 +80,12 @@ export function LoginEmailTest(user, config, tags) {
   return getUser(res, positivePayload, featureName)
 }
 /**
- * @param {import("../types/config.d.ts").Config} config
+ * @param {import("../entity/config.d.ts").Config} config
  * @param {{[name: string]: string}} tags
- * @param {Types.User} user
- * @returns {Types.User | undefined}
+ * @param {import("src/entity/types.js").User} user
+ * @returns {import("src/entity/types.js").User | undefined}
  */
-export function LoginPhoneTest(user, config, tags) {
+export function LoginPhoneScenario(user, config, tags) {
   const featureName = "Login Phone";
   const route = config.baseUrl + "/v1/login/phone";
   const assertHandler = testPostJsonAssert;

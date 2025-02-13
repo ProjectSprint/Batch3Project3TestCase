@@ -6,7 +6,7 @@ const isUserValidator = createValidator(userSchema)
 
 /**
  * @param {import("k6").JSONValue} value
- * @returns {value is Types.User}
+ * @returns {value is import('src/entity/types.js').User}
  */
 export function isUser(value) {
   // Basic checks for object and required fields
@@ -23,7 +23,7 @@ export function isUser(value) {
  * @param {import('src/types/schema.js').RequestAssertResponse<any>} res
  * @param {any} positivePayload
  * @param {string} featureName
- * @returns {Types.User | undefined}
+ * @returns {import('src/entity/types.js').User | undefined}
  */
 export function getUser(res, positivePayload, featureName) {
   if (res.isSuccess) {

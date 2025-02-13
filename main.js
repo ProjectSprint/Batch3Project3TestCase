@@ -1,10 +1,7 @@
-import { fail } from 'k6';
-import { generateRandomNumber } from "./src/helper/generator.js";
-import { DeleteActivityTest, GetActivityTest, PatchActivityTest, PostActivityTest } from "./src/tests/activityTest.js";
-import { UploadFileTest } from "./src/tests/fileTest.js";
-import { LoginTest } from "./src/tests/loginTest.js";
-import { GetProfileTest, PatchProfileTest } from "./src/tests/profileTest.js";
-import { RegisterTest } from "./src/tests/registerTest.js";
+import { mock } from "node:test";
+import { isUser } from "./src/assertion/userAssertion.js";
+import { LoginEmailScenario, LoginPhoneScenario } from "./src/scenario/loginScenario.js";
+import { RegisterEmailScenario, RegisterPhoneScenario } from "./src/scenario/registerScenario.js";
 
 export const options = {
   vus: 1,
@@ -15,63 +12,79 @@ const smallFile = open('./src/figure/image-50KB.jpg', 'b');
 const medFile = open('./src/figure/image-100KB.jpg', 'b');
 const bigFile = open('./src/figure/image-200KB.jpg', 'b');
 const invalidFile = open('./src/figure/sql-5KB.sql', 'b');
+/**
+ * @param {import("./src/entity/config.js").UnitTestConfig} mocks
+ * @param {import("./src/entity/config.js").Config} config 
+ * @param {{ [name: string]: string }} tags
+ * @returns {Error | TestScenarios}
+ */
+function unitTest(mocks, config, tags) {
+  const { mockUser } = mocks
+  if (!isUser(mockUser)) {
+    return new Error("User structure is not valid")
+  }
+  return {
+    RegisterEmailScenario: function() {
+      return RegisterEmailScenario(config, tags);
+    },
+    LoginEmailScenario: function() {
+      return LoginEmailScenario(mockUser, config, tags);
+    }
+  }
+}
 
 export default function() {
-  /** @type {import("./src/types/config.js").Config} */
+  /** @type {import("./src/entity/config.js").Config} */
   const config = {
     baseUrl: __ENV.BASE_URL ? __ENV.BASE_URL : "http://localhost:8080",
     debug: __ENV.DEBUG ? true : false,
     runNegativeCase: true,
-    verifyChanges: true
-  }
+    runUnitTest: __ENV.RUN_UNIT_TEST ? __ENV.RUN_UNIT_TEST == "true" : false,
+  };
+
   const tags = {
     env: "local"
+  };
+  console.log(`Running k6!`);
+
+  if (config.runUnitTest) {
+    console.log(`Run unit test received!`);
+    /** @type {keyof TestScenarios} */
+    const testName = /** @type {any} */ (__ENV.TEST_NAME);
+    const mockUser = JSON.parse(__ENV.MOCK_USER ? __ENV.MOCK_USER : "{}");
+    console.log(`Executing ${testName}`);
+    console.log(`Parsed user body`, mockUser);
+
+    const tests = unitTest({
+      mockUser: mockUser,
+      mockActivity: ""
+    }, config, tags);
+
+    // Type guard to check if tests is not an Error
+    if (!(tests instanceof Error)) {
+      const test = tests[testName];
+      if (test) {
+        test();
+        return;
+      }
+      console.log(`test ${testName} doesn't exist`);
+      return;
+    }
+
+    console.log(tests);
+    return;
   }
 
-  // ===== AUTH TEST =====
-  let users = []
-  for (let index = 0; index < 2; index++) {
-    const user = RegisterTest(config, tags)
-    if (!user)
-      fail("test stop on Register feature, please check the logs")
-    users.push(user)
-  }
-  const user = users[0]
-  LoginTest(user, config, tags)
+  // ===== REGISTER TEST =====
+  const userFromEmail = RegisterEmailScenario(config, tags)
+  LoginEmailScenario(userFromEmail, config, tags)
 
-  // ===== UPLOAD TEST =====
-  UploadFileTest(user, {
-    small: smallFile,
-    smallName: "small.jpg",
-    medium: medFile,
-    mediumName: "med.jpg",
-    big: bigFile,
-    bigName: "big.jpg",
-    invalid: invalidFile,
-    invalidName: "invalid.sql",
-  }, config, tags)
+  const userFromPhone = RegisterPhoneScenario(config, tags)
+  LoginPhoneScenario(userFromPhone, config, tags)
+
+
 
   // ===== PROFILE TEST =====
-  GetProfileTest(user, config, tags)
-  PatchProfileTest(user, config, tags)
-
   // ===== DEPARTMENT TEST =====
-  /** @type {Activity[]} */
-  let activities = []
-  for (let index = 0; index < 50; index++) {
-    let department = PostActivityTest(user, config, tags)
-    console.log(`Department Post test ${index} result:`, department);
-    if (!department)
-      fail(`test stop on Post Department feature loop ${index}, please check the logs`)
-    activities.push(department)
-  }
-  GetActivityTest(user, config, tags)
-  let pickedDepartmentIndex = generateRandomNumber(0, activities.length - 1)
-  const department = PatchActivityTest(user, activities[pickedDepartmentIndex], config, tags)
-  if (!department) {
-    fail("test stop on patch Department feature, please check the logs")
-  }
-  DeleteActivityTest(user, department, config, tags)
-  activities.splice(pickedDepartmentIndex, 1)
 }
 
