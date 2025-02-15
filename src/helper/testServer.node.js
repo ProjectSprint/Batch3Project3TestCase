@@ -14,7 +14,7 @@ import net from 'net';
  */
 
 /**
- * @typedef {'GET' | 'POST' | 'PUT' | 'DELETE'} HttpMethod
+ * @typedef {'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH'} HttpMethod
  */
 
 /**
@@ -30,6 +30,7 @@ import net from 'net';
 class TestServer {
   /** @type {http.Server|null} */
   #server = null;
+
   /** @type {RouteMap} */
   #routes = {
     GET: {},
@@ -38,6 +39,7 @@ class TestServer {
     DELETE: {},
     PATCH: {}
   };
+
   /** @type {Required<ServerConfig>} */
   #config = { cors: true, corsOrigin: '*' };
 
@@ -50,8 +52,19 @@ class TestServer {
   }
 
   /**
+   * Configure CORS headers
+   * @param {http.ServerResponse} res
+   */
+  #setCorsHeaders(res) {
+    if (this.#config.cors) {
+      res.setHeader('Access-Control-Allow-Origin', this.#config.corsOrigin);
+      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH');
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    }
+  }
+
+  /**
    * Parse JSON body from incoming request
-   * Utility method for route handlers to parse request bodies
    * @param {http.IncomingMessage} req
    * @returns {Promise<any>}
    */
@@ -81,15 +94,32 @@ class TestServer {
   }
 
   /**
-   * Configure CORS headers
-   * @param {http.ServerResponse} res
+   * Verify port connectivity by attempting to create a client connection
+   * @param {number} port
+   * @returns {Promise<boolean>}
    */
-  #setCorsHeaders(res) {
-    if (this.#config.cors) {
-      res.setHeader('Access-Control-Allow-Origin', this.#config.corsOrigin || '*');
-      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH');
-      res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-    }
+  async #verifyPortConnectivity(port) {
+    return new Promise(/** @param {(value: boolean) => void} resolve */(resolve) => {
+      const client = new net.Socket();
+      const timeout = setTimeout(() => {
+        client.destroy();
+        resolve(false);
+      }, 1000);
+
+      client.on('connect', () => {
+        clearTimeout(timeout);
+        client.destroy();
+        resolve(true);
+      });
+
+      client.on('error', () => {
+        clearTimeout(timeout);
+        client.destroy();
+        resolve(false);
+      });
+
+      client.connect(port, 'localhost');
+    });
   }
 
   /**
@@ -98,7 +128,8 @@ class TestServer {
    * @returns {Promise<boolean>}
    */
   async #isPortAvailable(port) {
-    return new Promise((resolve) => {
+    // First check if we can bind to the port
+    const canBind = await new Promise(/** @param {(value: boolean) => void} resolve */(resolve) => {
       const server = net.createServer();
       server.unref();
 
@@ -112,6 +143,14 @@ class TestServer {
         });
       });
     });
+
+    if (!canBind) {
+      return false;
+    }
+
+    // Double-check that nothing else grabbed the port
+    const isInUse = await this.#verifyPortConnectivity(port);
+    return !isInUse;
   }
 
   /**
@@ -122,10 +161,11 @@ class TestServer {
    */
   async #findAvailablePort(retries = 3, startPort = 3000) {
     for (let attempt = 0; attempt <= retries; attempt++) {
+      // TODO: Debug this, it causes indefinite loading
       try {
         // Try with port 0 first to get a random port
         const tempServer = net.createServer();
-        const port = await new Promise((resolve, reject) => {
+        const port = await new Promise(/** @param {(value: number) => void} resolve @param {(reason: Error) => void} reject */(resolve, reject) => {
           tempServer.unref();
           tempServer.on('error', reject);
           tempServer.listen(0, () => {
@@ -140,15 +180,42 @@ class TestServer {
 
         await new Promise((resolve) => tempServer.close(resolve));
 
-        // Verify the port is still available
+        // Enhanced verification of port availability
         if (await this.#isPortAvailable(port)) {
-          return port;
+          // Final connectivity check before returning
+          const server = net.createServer();
+          await new Promise(/** @param {(value: void) => void} resolve */(resolve) => {
+            server.listen(port, () => resolve());
+          });
+
+          // Wait a short time to ensure stability
+          await new Promise(resolve => setTimeout(resolve, 100));
+
+          const isStillAvailable = await this.#isPortAvailable(port);
+          await new Promise((resolve) => server.close(resolve));
+
+          if (isStillAvailable) {
+            return port;
+          }
         }
 
-        // If not available, try specific ports
+        // If random port didn't work, try sequential ports
         for (let p = startPort + attempt; p < startPort + 1000; p++) {
           if (await this.#isPortAvailable(p)) {
-            return p;
+            // Final verification for sequential port
+            const server = net.createServer();
+            await new Promise(/** @param {(value: void) => void} resolve */(resolve) => {
+              server.listen(p, () => resolve());
+            });
+
+            await new Promise(resolve => setTimeout(resolve, 100));
+
+            const isStillAvailable = await this.#isPortAvailable(p);
+            await new Promise((resolve) => server.close(resolve));
+
+            if (isStillAvailable) {
+              return p;
+            }
           }
         }
       } catch (error) {
@@ -177,7 +244,7 @@ class TestServer {
   }
 
   /**
-   * Start the server on a random available port
+   * Start the server
    * @returns {Promise<number>} The port number the server is listening on
    */
   async start() {
@@ -185,9 +252,11 @@ class TestServer {
       throw new Error('Server is already running');
     }
 
+    console.log('searching port...')
     const port = await this.#findAvailablePort();
 
-    return new Promise((resolve, reject) => {
+    console.log('available port :', port)
+    return new Promise(/** @param {(value: number) => void} resolve @param {(reason: Error) => void} reject */(resolve, reject) => {
       this.#server = http.createServer(async (req, res) => {
         this.#setCorsHeaders(res);
 
@@ -220,7 +289,16 @@ class TestServer {
         return;
       }
 
-      this.#server.listen(port, () => {
+      console.log('test server will listen to :', port)
+      this.#server.listen(port, async () => {
+        // Final verification after server is listening
+        const isConnectable = await this.#verifyPortConnectivity(port);
+        if (!isConnectable) {
+          console.log(port, 'is not connectable')
+          this.#server?.close();
+          reject(new Error(`Server started but port ${port} is not connectable`));
+          return;
+        }
         resolve(port);
       });
     });
@@ -231,7 +309,7 @@ class TestServer {
    * @returns {Promise<void>}
    */
   async stop() {
-    return new Promise((resolve, reject) => {
+    return new Promise(/** @param {(value: void) => void} resolve @param {(reason: Error) => void} reject */(resolve, reject) => {
       if (!this.#server) {
         resolve();
         return;

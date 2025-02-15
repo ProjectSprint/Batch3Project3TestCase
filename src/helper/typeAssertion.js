@@ -1,28 +1,19 @@
-/**
- * @typedef {Object} ValidationContext
- * @property {Object.<string, JSONSchemaDefinition>} definitions
- * @property {JSONSchemaDefinition} rootSchema
- */
 
 /**
- * @typedef {Object} JSONSchemaDefinition
- * @property {string | string[]} [type]
- * @property {boolean} [additionalProperties]
- * @property {Object.<string, JSONSchemaDefinition>} [properties]
- * @property {string[]} [required]
- * @property {JSONSchemaDefinition} [items]
- * @property {string[]} [enum]
- * @property {string} [$ref]
- * @property {Object.<string, JSONSchemaDefinition>} [definitions]
- * @property {string} [$schema]
+ * Creates a validator function based on a JSON schema string
+ * @param {string} schemaString - JSON schema as a string
+ * @returns {function(any): boolean} - Validation function
+ * @throws {Error} If the schema string is invalid JSON
  */
+export function createValidator(schemaString) {
+  let schema;
+  try {
+    schema = JSON.parse(schemaString);
+  } catch (error) {
+    throw new Error(`Invalid JSON schema string: ${error}`);
+  }
 
-/**
- * @param {JSONSchemaDefinition} schema
- * @returns {function(any): boolean}
- */
-export function createValidator(schema) {
-  /** @type {ValidationContext} */
+  /** @type {import('src/entity/json').ValidationContext} */
   const context = {
     definitions: schema.definitions ? { ...schema.definitions } : {},
     rootSchema: schema
@@ -35,9 +26,9 @@ export function createValidator(schema) {
 }
 
 /**
- * @param {JSONSchemaDefinition} schema 
- * @param {ValidationContext} context
- * @returns {JSONSchemaDefinition}
+ * @param {import('src/entity/json').JSONSchemaDefinition} schema 
+ * @param {import('src/entity/json').ValidationContext} context
+ * @returns {import('src/entity/json').JSONSchemaDefinition}
  */
 function resolveSchema(schema, context) {
   if (schema.$ref) {
@@ -45,7 +36,6 @@ function resolveSchema(schema, context) {
     /** @type {Record<string, any>} */
     let currentSchema = context.rootSchema;
 
-    // Skip the first element if it's # (common in OpenAPI)
     const startIndex = path[0] === '#' ? 1 : 0;
 
     for (let i = startIndex; i < path.length; i++) {
@@ -59,12 +49,11 @@ function resolveSchema(schema, context) {
       }
     }
 
-    // Handle nested references
     if (currentSchema.$ref) {
-      return resolveSchema(/** @type {JSONSchemaDefinition} */(currentSchema), context);
+      return resolveSchema(/** @type {import('src/entity/json').JSONSchemaDefinition} */(currentSchema), context);
     }
 
-    return /** @type {JSONSchemaDefinition} */ (currentSchema);
+    return /** @type {import('src/entity/json').JSONSchemaDefinition} */ (currentSchema);
   }
 
   return schema;
@@ -97,12 +86,11 @@ function validateType(value, type) {
 
 /**
  * @param {any} value
- * @param {JSONSchemaDefinition} schema
- * @param {ValidationContext} context
+ * @param {import('src/entity/json').JSONSchemaDefinition} schema
+ * @param {import('src/entity/json').ValidationContext} context
  * @returns {boolean}
  */
 function validateAgainstSchema(value, schema, context) {
-  // Handle null values with type arrays
   if (value === null) {
     if (Array.isArray(schema.type)) {
       return schema.type.includes('null');
@@ -110,12 +98,10 @@ function validateAgainstSchema(value, schema, context) {
     return schema.type === 'null';
   }
 
-  // Handle enums first
   if (schema.enum) {
     return schema.enum.includes(value);
   }
 
-  // Handle type validation
   const types = Array.isArray(schema.type) ? schema.type : [schema.type || 'any'];
 
   const matchesType = types.some(type => {
@@ -133,8 +119,8 @@ function validateAgainstSchema(value, schema, context) {
 
 /**
  * @param {any} value
- * @param {JSONSchemaDefinition} schema
- * @param {ValidationContext} context
+ * @param {import('src/entity/json').JSONSchemaDefinition} schema
+ * @param {import('src/entity/json').ValidationContext} context
  * @returns {boolean}
  */
 function validateObject(value, schema, context) {
@@ -142,7 +128,6 @@ function validateObject(value, schema, context) {
     return false;
   }
 
-  // Validate required properties
   if (schema.required) {
     for (const requiredProp of schema.required) {
       if (!(requiredProp in value)) {
@@ -151,7 +136,6 @@ function validateObject(value, schema, context) {
     }
   }
 
-  // Validate additional properties
   if (schema.additionalProperties === false) {
     const allowedProperties = Object.keys(schema.properties || {});
     const actualProperties = Object.keys(value);
@@ -160,7 +144,6 @@ function validateObject(value, schema, context) {
     }
   }
 
-  // Validate defined properties
   if (schema.properties) {
     for (const [prop, propValue] of Object.entries(value)) {
       const propSchema = schema.properties[prop];
@@ -175,8 +158,8 @@ function validateObject(value, schema, context) {
 
 /**
  * @param {any} value
- * @param {JSONSchemaDefinition} schema
- * @param {ValidationContext} context
+ * @param {import('src/entity/json').JSONSchemaDefinition} schema
+ * @param {import('src/entity/json').ValidationContext} context
  * @returns {boolean}
  */
 function validateArray(value, schema, context) {

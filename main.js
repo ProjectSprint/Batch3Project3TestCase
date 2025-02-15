@@ -1,4 +1,3 @@
-import { mock } from "node:test";
 import { isUser } from "./src/assertion/userAssertion.js";
 import { LoginEmailScenario, LoginPhoneScenario } from "./src/scenario/loginScenario.js";
 import { RegisterEmailScenario, RegisterPhoneScenario } from "./src/scenario/registerScenario.js";
@@ -45,14 +44,14 @@ export default function() {
   const tags = {
     env: "local"
   };
-  console.log(`Running k6!`);
+  console.log(`Running k6 to ${config.baseUrl}`);
 
   if (config.runUnitTest) {
     console.log(`Run unit test received!`);
     /** @type {keyof TestScenarios} */
     const testName = /** @type {any} */ (__ENV.TEST_NAME);
     const mockUser = JSON.parse(__ENV.MOCK_USER ? __ENV.MOCK_USER : "{}");
-    console.log(`Executing ${testName}`);
+    console.log(`Executing ${testName} test`);
     console.log(`Parsed user body`, mockUser);
 
     const tests = unitTest({
@@ -71,7 +70,7 @@ export default function() {
       return;
     }
 
-    console.log(tests);
+    console.log(`tests containing errors\n${tests}`);
     return;
   }
 

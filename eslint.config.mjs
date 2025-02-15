@@ -1,7 +1,18 @@
 /** @type {import('eslint').Linter.Config[]} */
 export default [
 	{
-		files: ["**/*.js", "!**/*.test.js"],
+		files: ["**/*.node.js"],
+		languageOptions: {
+			sourceType: "module"
+		},
+		// Rules specific to Node.js files or empty to use defaults
+		rules: {
+			// You can add any Node.js specific rules here
+		}
+	},
+	{
+		files: ["**/*.js"],
+		ignores: ["**/*.node.js", "**/*.test.js"],
 		languageOptions: {
 			sourceType: "module"
 		},
@@ -31,8 +42,7 @@ export default [
 			// Prevent other unsupported features
 			"no-async-promise-executor": "error",
 			"no-await-in-loop": "error",
-			"no-console": ["error", { allow: ["log", "warn", "error"] }], // k6 only supports basic console methods
-			// Prevent ES modules syntax since k6 uses its own module system
+			"no-console": ["error", { allow: ["log", "warn", "error"] }],
 			"no-import-assign": "error",
 
 			"no-restricted-imports": [
@@ -73,5 +83,5 @@ export default [
 				}
 			]
 		}
-	},
+	}
 ];

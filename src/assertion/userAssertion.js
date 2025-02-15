@@ -1,7 +1,7 @@
 import { combine } from '../helper/generator.js';
 import { createValidator } from '../helper/typeAssertion.js';
-import userSchema from '../schemas/user.schema.json'
 
+const userSchema = open("../schemas/user.schema.json")
 const isUserValidator = createValidator(userSchema)
 
 /**
