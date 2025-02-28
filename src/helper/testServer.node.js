@@ -2,6 +2,9 @@
 import http from 'http';
 import { URL } from 'url';
 import net from 'net';
+import getPort from 'get-port';
+import isReachable from 'is-reachable';
+import { time } from 'console';
 
 /**
  * @typedef {Object} RouteHandler
@@ -33,7 +36,13 @@ class TestServer {
 
   /** @type {RouteMap} */
   #routes = {
-    GET: {},
+    GET: {
+
+      '/':
+      /** @type {(req: http.IncomingMessage, res: http.ServerResponse) => undefined} */(_, res) => {
+          this.sendJsonResponse(res, 200, { "status": "ok" })
+        }
+    },
     POST: {},
     PUT: {},
     DELETE: {},
@@ -94,142 +103,6 @@ class TestServer {
   }
 
   /**
-   * Verify port connectivity by attempting to create a client connection
-   * @param {number} port
-   * @returns {Promise<boolean>}
-   */
-  async #verifyPortConnectivity(port) {
-    return new Promise(/** @param {(value: boolean) => void} resolve */(resolve) => {
-      const client = new net.Socket();
-      const timeout = setTimeout(() => {
-        client.destroy();
-        resolve(false);
-      }, 1000);
-
-      client.on('connect', () => {
-        clearTimeout(timeout);
-        client.destroy();
-        resolve(true);
-      });
-
-      client.on('error', () => {
-        clearTimeout(timeout);
-        client.destroy();
-        resolve(false);
-      });
-
-      client.connect(port, 'localhost');
-    });
-  }
-
-  /**
-   * Check if a specific port is available
-   * @param {number} port
-   * @returns {Promise<boolean>}
-   */
-  async #isPortAvailable(port) {
-    // First check if we can bind to the port
-    const canBind = await new Promise(/** @param {(value: boolean) => void} resolve */(resolve) => {
-      const server = net.createServer();
-      server.unref();
-
-      server.on('error', () => {
-        resolve(false);
-      });
-
-      server.listen(port, () => {
-        server.close(() => {
-          resolve(true);
-        });
-      });
-    });
-
-    if (!canBind) {
-      return false;
-    }
-
-    // Double-check that nothing else grabbed the port
-    const isInUse = await this.#verifyPortConnectivity(port);
-    return !isInUse;
-  }
-
-  /**
-   * Find an available port with retries
-   * @param {number} [retries=3] Number of retries
-   * @param {number} [startPort=3000] Starting port number
-   * @returns {Promise<number>}
-   */
-  async #findAvailablePort(retries = 3, startPort = 3000) {
-    for (let attempt = 0; attempt <= retries; attempt++) {
-      // TODO: Debug this, it causes indefinite loading
-      try {
-        // Try with port 0 first to get a random port
-        const tempServer = net.createServer();
-        const port = await new Promise(/** @param {(value: number) => void} resolve @param {(reason: Error) => void} reject */(resolve, reject) => {
-          tempServer.unref();
-          tempServer.on('error', reject);
-          tempServer.listen(0, () => {
-            const address = tempServer.address();
-            if (address && typeof address === 'object') {
-              resolve(address.port);
-            } else {
-              reject(new Error('Could not get server address'));
-            }
-          });
-        });
-
-        await new Promise((resolve) => tempServer.close(resolve));
-
-        // Enhanced verification of port availability
-        if (await this.#isPortAvailable(port)) {
-          // Final connectivity check before returning
-          const server = net.createServer();
-          await new Promise(/** @param {(value: void) => void} resolve */(resolve) => {
-            server.listen(port, () => resolve());
-          });
-
-          // Wait a short time to ensure stability
-          await new Promise(resolve => setTimeout(resolve, 100));
-
-          const isStillAvailable = await this.#isPortAvailable(port);
-          await new Promise((resolve) => server.close(resolve));
-
-          if (isStillAvailable) {
-            return port;
-          }
-        }
-
-        // If random port didn't work, try sequential ports
-        for (let p = startPort + attempt; p < startPort + 1000; p++) {
-          if (await this.#isPortAvailable(p)) {
-            // Final verification for sequential port
-            const server = net.createServer();
-            await new Promise(/** @param {(value: void) => void} resolve */(resolve) => {
-              server.listen(p, () => resolve());
-            });
-
-            await new Promise(resolve => setTimeout(resolve, 100));
-
-            const isStillAvailable = await this.#isPortAvailable(p);
-            await new Promise((resolve) => server.close(resolve));
-
-            if (isStillAvailable) {
-              return p;
-            }
-          }
-        }
-      } catch (error) {
-        if (attempt === retries) {
-          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-          throw new Error(`Failed to find available port after ${retries} retries: ${errorMessage}`);
-        }
-      }
-    }
-
-    throw new Error('Could not find available port');
-  }
-
-  /**
    * Add a route handler
    * @param {HttpMethod} method HTTP method
    * @param {string} path Route path
@@ -252,14 +125,11 @@ class TestServer {
       throw new Error('Server is already running');
     }
 
-    console.log('searching port...')
-    const port = await this.#findAvailablePort();
-
-    console.log('available port :', port)
+    const port = await getPort()
     return new Promise(/** @param {(value: number) => void} resolve @param {(reason: Error) => void} reject */(resolve, reject) => {
       this.#server = http.createServer(async (req, res) => {
         this.#setCorsHeaders(res);
-
+        console.log(`${req.method} ${req.url} request received!`)
         if (req.method === 'OPTIONS') {
           res.writeHead(204);
           res.end();
@@ -283,24 +153,37 @@ class TestServer {
           this.sendJsonResponse(res, 500, { error: 'Internal Server Error' });
         }
       });
+      const timeout = setTimeout(() => {
+        reject(new Error("Server initializing timeout"));
+      }, 2000)
+
+      this.#server.on('error', (err) => {
+        console.error('Server error during startup:', err);
+        clearTimeout(timeout)
+        reject(err);
+      });
+
+      this.#server.on('listening', async () => {
+        const isConnectable = await isReachable(`http://127.0.0.1:${port}`);
+        if (!isConnectable) {
+          console.log(port, 'is not connectable')
+          this.#server?.close();
+
+          clearTimeout(timeout)
+          reject(new Error(`Server started but port ${port} is not connectable`));
+          return;
+        }
+        clearTimeout(timeout)
+        resolve(port);
+      });
 
       if (!this.#server) {
+        clearTimeout(timeout)
         reject(new Error('Failed to create server'));
         return;
       }
 
-      console.log('test server will listen to :', port)
-      this.#server.listen(port, async () => {
-        // Final verification after server is listening
-        const isConnectable = await this.#verifyPortConnectivity(port);
-        if (!isConnectable) {
-          console.log(port, 'is not connectable')
-          this.#server?.close();
-          reject(new Error(`Server started but port ${port} is not connectable`));
-          return;
-        }
-        resolve(port);
-      });
+      this.#server.listen(port);
     });
   }
 

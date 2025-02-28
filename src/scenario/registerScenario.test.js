@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { after, before, describe, it } from 'node:test';
 import TestServer from '../helper/testServer.node.js';
 import { exec } from 'node:child_process';
+import isReachable from 'is-reachable';
 
 const s = new TestServer({})
 s.addRoute('POST', '/v1/register/email', async (req, res) => {
@@ -24,17 +25,21 @@ describe('Register Scenario', () => {
   after(async () => {
     await s.stop();
   });
-  it('valid body should return 200', () => {
+  it('valid body should return 200', async () => {
     const user = {
       email: "",
       phone: "",
       token: "",
       password: "",
     }
-    exec(`${commandEnv} BASE_URL=http://localhost:${serverPort} MOCK_USER='${JSON.stringify(user)}' k6 run main.js`, (err, stdout, stderr) => {
-      console.log('stdout:\n', stdout)
-      console.log('stderr:\n', stderr)
-      console.log('error:\n', err)
-    })
+    console.log(`${commandEnv} BASE_URL=http://127.0.0.1:${serverPort} MOCK_USER='${JSON.stringify(user)}' k6 run main.js`)
+
+    // TODO: use spawn
+    //exec(`${commandEnv} BASE_URL=http://127.0.0.1:${serverPort} MOCK_USER='${JSON.stringify(user)}' k6 run main.js`, (err, stdout, stderr) => {
+    //  console.log('stdout:\n', stdout)
+    //  console.log('stderr:\n', stderr)
+    //  console.log('error:\n', err)
+    //})
+    await new Promise(resolve => setTimeout(resolve, 1000000));
   });
 });
