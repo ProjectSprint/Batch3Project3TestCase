@@ -4,7 +4,6 @@ import { URL } from 'url';
 import net from 'net';
 import getPort from 'get-port';
 import isReachable from 'is-reachable';
-import { time } from 'console';
 
 /**
  * @typedef {Object} RouteHandler
@@ -129,7 +128,6 @@ class TestServer {
     return new Promise(/** @param {(value: number) => void} resolve @param {(reason: Error) => void} reject */(resolve, reject) => {
       this.#server = http.createServer(async (req, res) => {
         this.#setCorsHeaders(res);
-        console.log(`${req.method} ${req.url} request received!`)
         if (req.method === 'OPTIONS') {
           res.writeHead(204);
           res.end();
@@ -149,7 +147,7 @@ class TestServer {
             this.sendJsonResponse(res, 404, { error: 'Not Found' });
           }
         } catch (error) {
-          console.error('Server error:', error);
+          console.error('test server | ','response error:', error);
           this.sendJsonResponse(res, 500, { error: 'Internal Server Error' });
         }
       });
@@ -158,7 +156,7 @@ class TestServer {
       }, 2000)
 
       this.#server.on('error', (err) => {
-        console.error('Server error during startup:', err);
+        console.error('test server | ','startup error :', err);
         clearTimeout(timeout)
         reject(err);
       });
@@ -166,7 +164,7 @@ class TestServer {
       this.#server.on('listening', async () => {
         const isConnectable = await isReachable(`http://127.0.0.1:${port}`);
         if (!isConnectable) {
-          console.log(port, 'is not connectable')
+          console.log('test server | ',port, 'is not connectable')
           this.#server?.close();
 
           clearTimeout(timeout)
