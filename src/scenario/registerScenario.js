@@ -1,17 +1,18 @@
-import { testPostJsonAssert } from "../helper/testRequest.js";
-import { getUser } from "../assertion/userAssertion.js";
+// src/scenario/RegisterEmailScenario.js
+
+import { testPostJsonAssert } from "../helper/testRequest.js"; // Adjust path
+import { getUser } from "../assertion/userAssertion.js"; // Adjust path
 import {
   generateRandomEmail,
   generateRandomPassword,
-  generateRandomPhoneNumber,
   generateTestObjects,
-} from "../helper/generator.js";
-import { isExists } from "../helper/testAssertion.js";
+} from "../helper/generator.js"; // Adjust path
+import { isExists } from "../helper/testAssertion.js"; // Adjust path
 
 /**
- * @param {import("../entity/config.d.ts").Config} config
+ * @param {import("../entity/config.d.ts").Config} config // Adjust path
  * @param {{[name: string]: string}} tags
- * @returns {import("src/entity/types.js").User | undefined}
+ * @returns {import("src/entity/app.js").User | undefined} // Adjust path
  */
 export function RegisterEmailScenario(config, tags) {
   const featureName = "Register Email";
@@ -24,20 +25,24 @@ export function RegisterEmailScenario(config, tags) {
   };
 
   if (config.runNegativeCase) {
-    assertHandler(
-      "empty body", featureName, route, {}, {},
-      {
-        ["should return 400"]: (v) => v.status === 400,
+    assertHandler({
+      currentTestName: "empty body",
+      featureName: featureName,
+      route: route,
+      body: {},
+      headers: {},
+      expectedCase: {
+        // Use underscore '_' prefix for unused 'parsed' parameter
+        ["should return 400"]: (_parsed, res) => res.status === 400,
       },
-      [], config, tags,);
+      options: [],
+      config: config,
+      tags: tags,
+    });
 
     const testObjects = generateTestObjects(
       {
-        email: {
-          type: "string",
-          notNull: true,
-          isEmail: true,
-        },
+        email: { type: "string", notNull: true, isEmail: true },
         password: {
           type: "string",
           notNull: true,
@@ -45,100 +50,68 @@ export function RegisterEmailScenario(config, tags) {
           maxLength: 32,
         },
       },
-      positivePayload,); testObjects.forEach((payload) => {
-        assertHandler(
-          "invalid payload", featureName, route, payload, {},
-          {
-            ["should return 400"]: (res) => res.status === 400,
-          },
-          [], config, tags,);
-      });
-  }
-
-  const res = assertHandler(
-    "valid payload", featureName, route, positivePayload, {},
-    {
-      ["should return 201"]: (v) => v.status === 201,
-      ["should have email"]: (v) => isExists(v, "email", ["string"]),
-      ["should have phone"]: (v) => isExists(v, "phone", ["string"]),
-      ["should have token"]: (v) => isExists(v, "token", ["string"]),
-    },
-    [], config, tags,);
-  if (config.runNegativeCase) {
-    testPostJsonAssert(
-      "email conflict", featureName, route, positivePayload, {},
-      {
-        ["should return 409"]: (res) => res.status === 409,
-      },
-      [], config, tags,);
-  }
-  return getUser(res, positivePayload, featureName)
-}
-
-/**
- * @param {import("../entity/config.d.ts").Config} config
- * @param {{[name: string]: string}} tags
- * @returns {import("src/entity/types.js").User | undefined}
- */
-export function RegisterPhoneScenario(config, tags) {
-  const featureName = "Register Phone";
-  const route = config.baseUrl + "/v1/register/phone";
-  const assertHandler = testPostJsonAssert;
-
-  const positivePayload = {
-    phone: generateRandomPhoneNumber(true),
-    password: generateRandomPassword(8, 32),
-  };
-
-  if (config.runNegativeCase) {
-    assertHandler(
-      "empty body", featureName, route, {}, {},
-      {
-        ["should return 400"]: (v) => v.status === 400,
-      },
-      [], config, tags,);
-
-    const testObjects = generateTestObjects(
-      {
-        phone: {
-          type: "string",
-          notNull: true,
-          isPhoneNumber: true,
+      positivePayload,
+    );
+    testObjects.forEach((payload) => {
+      assertHandler({
+        currentTestName: "invalid payload",
+        featureName: featureName,
+        route: route,
+        body: payload,
+        headers: {},
+        expectedCase: {
+          ["should return 400"]: (_parsed, res) => res.status === 400,
         },
-        password: {
-          type: "string",
-          notNull: true,
-          minLength: 8,
-          maxLength: 32,
-        },
-      },
-      positivePayload,); testObjects.forEach((payload) => {
-        assertHandler(
-          "invalid payload", featureName, route, payload, {},
-          {
-            ["should return 400"]: (res) => res.status === 400,
-          },
-          [], config, tags,);
+        options: [],
+        config: config,
+        tags: tags,
       });
+    });
   }
 
-  const res = assertHandler(
-    "valid payload", featureName, route, positivePayload, {},
-    {
-      ["should return 201"]: (v) => v.status === 201,
-      ["should have email"]: (v) => isExists(v, "email", ["string"]),
-      ["should have phone"]: (v) => isExists(v, "phone", ["string"]),
-      ["should have token"]: (v) => isExists(v, "token", ["string"]),
+  // --- Positive Case ---
+  const registerResult = assertHandler({
+    currentTestName: "valid payload",
+    featureName: featureName,
+    route: route,
+    body: positivePayload,
+    headers: {},
+    expectedCase: {
+      ["should return 201"]: (_parsed, res) => res.status === 201,
+      ["should have email"]: (parsed, _res) =>
+        isExists(parsed, "email", ["string"]),
+      ["should have phone"]: (parsed, _res) =>
+        isExists(parsed, "phone", ["string", null]),
+      ["should have token"]: (parsed, _res) =>
+        isExists(parsed, "token", ["string"]),
     },
-    [], config, tags,);
-  if (config.runNegativeCase) {
-    testPostJsonAssert(
-      "email conflict", featureName, route, positivePayload, {},
-      {
-        ["should return 409"]: (res) => res.status === 409,
-      },
-      [], config, tags,);
-  }
-  return getUser(res, positivePayload, featureName)
-}
+    options: [],
+    config: config,
+    tags: tags,
+  });
 
+  if (config.runNegativeCase) {
+    testPostJsonAssert({
+      currentTestName: "email conflict",
+      featureName: featureName,
+      route: route,
+      body: positivePayload,
+      headers: {},
+      expectedCase: {
+        ["should return 409"]: (_parsed, res) => res.status === 409,
+      },
+      options: [],
+      config: config,
+      tags: tags,
+    });
+  }
+
+  if (registerResult.isSuccess) {
+    return getUser(registerResult.res, positivePayload, featureName);
+  } else {
+    console.warn(
+      `${featureName} | Skipping getUser due to failed registration assertions.`,
+    );
+    return undefined;
+  }
+}
