@@ -23,11 +23,12 @@
     "@types/node": "^22.13.1",
     "eslint": "^9.18.0",
     "globals": "^15.14.0",
+    "is-reachable": "^5.2.1",
     "typescript-eslint": "^8.19.1",
-    "typescript-to-json-schema": "^0.6.1"
+    "typescript-to-json-schema": "^0.6.1",
+    "zod": "^3.24.3"
   },
   "dependencies": {
-    "get-port": "^7.1.0",
-    "is-reachable": "^5.2.1"
+    "get-port": "^7.1.0"
   }
 }

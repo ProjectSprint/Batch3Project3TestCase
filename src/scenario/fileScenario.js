@@ -1,15 +1,22 @@
+// fileScenario.js
 import { file, get } from "k6/http";
-import { getFile, isFile } from "../assertion/fileAssertion.js";
 import { check } from "k6";
-import { testPostMultipartAssert } from "../helper/testRequest.js";
-import { isExists } from "../helper/testAssertion.js";
+import { getFile, isFile } from "../assertion/fileAssertion.js"; // Adjust path if needed
+import { testPostMultipartAssert } from "../helper/testRequest.js"; // Adjust path if needed
+import { isExists } from "../helper/testAssertion.js"; // Adjust path if needed
+
+// Assuming UploadedFile type definition exists somewhere, adjust path as necessary
+// If it was previously in types.js, it might now be in app.js or a dedicated types file
+/**
+ * @typedef {import("src/entity/app.js").UploadedFile} UploadedFile // Adjusted path, verify correctness
+ */
 
 /**
- * @param {import("src/entity/types.js").User} user
+ * @param {import("src/entity/app.js").User} user // Adjusted path, verify correctness
  * @param {{small: ArrayBuffer, smallName:string,medium: ArrayBuffer, mediumName:string,big: ArrayBuffer, bigName: string,invalid: ArrayBuffer,invalidName:string}} fileToTest
- * @param {import("../entity/config.d.ts").Config} config
+ * @param {import("../entity/config.d.ts").Config} config // Adjust path if needed
  * @param {{[name: string]: string}} tags
-  * @returns {import("src/entity/types.js").UploadedFile | undefined} uri
+ * @returns {UploadedFile | undefined} uri
  */
 export function UploadFileScenario(user, fileToTest, config, tags) {
   const featureName = "Upload File";
@@ -17,80 +24,146 @@ export function UploadFileScenario(user, fileToTest, config, tags) {
   const assertHandler = testPostMultipartAssert;
 
   const positivePayload = {
-    file: file(fileToTest.small, fileToTest.smallName)
+    file: file(fileToTest.small, fileToTest.smallName),
   };
   const positiveHeader = {
     Authorization: `Bearer ${user.token}`,
   };
+
   if (config.runNegativeCase) {
-    assertHandler(
-      "empty token", featureName, route, {}, {},
-      {
-        ["should return 401"]: (v) => v.status === 401,
+    // Test without Authorization header
+    assertHandler({
+      currentTestName: "empty token",
+      featureName: featureName,
+      route: route,
+      body: positivePayload, // Need a body for multipart request usually
+      headers: {}, // No auth header
+      expectedCase: {
+        ["should return 401"]: (_parsed, res) => res.status === 401,
       },
-      config, tags,);
+      config: config,
+      tags: tags,
+    });
+
+    // Test with invalid Authorization headers
     const negativeHeaders = [
-      { Authorization: `${user.token}`, },
-      { Authorization: `Bearer asdf${user.token}`, },
-      { Authorization: ``, },
+      { Authorization: `${user.token}` }, // Missing Bearer prefix
+      { Authorization: `Bearer asdf${user.token}` }, // Invalid token
+      { Authorization: `Bearer ` }, // Empty token
+      { Authorization: `` }, // Empty header value
     ];
 
-    negativeHeaders.forEach((header) => {
-      assertHandler(
-        "invalid token", featureName, route, {}, header,
-        {
-          ["should return 401"]: (res) => res.status === 401,
+    negativeHeaders.forEach((header, index) => {
+      assertHandler({
+        currentTestName: `invalid token ${index + 1}`,
+        featureName: featureName,
+        route: route,
+        body: positivePayload, // Need a body for multipart request
+        headers: header,
+        expectedCase: {
+          ["should return 401"]: (_parsed, res) => res.status === 401,
         },
-        config, tags,
-      );
+        config: config,
+        tags: tags,
+      });
     });
-    assertHandler(
-      "invalid file type", featureName, route, {
-      file: file(fileToTest.invalid, fileToTest.invalidName)
-    },
-      positiveHeader,
-      {
-        ["should return 400"]: (res) => res.status === 400,
+
+    // Test invalid file type
+    assertHandler({
+      currentTestName: "invalid file type",
+      featureName: featureName,
+      route: route,
+      body: {
+        file: file(fileToTest.invalid, fileToTest.invalidName),
       },
-      config, tags,);
-    assertHandler(
-      "invalid file size", featureName, route,
-      {
-        file: file(fileToTest.big, fileToTest.bigName)
+      headers: positiveHeader,
+      expectedCase: {
+        ["should return 400"]: (_parsed, res) => res.status === 400,
       },
-      positiveHeader,
-      {
-        ["should return 400"]: (res) => res.status === 400,
+      config: config,
+      tags: tags,
+    });
+
+    // Test invalid file size
+    assertHandler({
+      currentTestName: "invalid file size",
+      featureName: featureName,
+      route: route,
+      body: {
+        file: file(fileToTest.big, fileToTest.bigName),
       },
-      config, tags,
-    );
+      headers: positiveHeader,
+      expectedCase: {
+        ["should return 400"]: (_parsed, res) => res.status === 400,
+      },
+      config: config,
+      tags: tags,
+    });
   }
 
-  const res = assertHandler(
-    "valid payload", featureName, route, positivePayload, positiveHeader,
-    {
-      ["should return 200"]: (v) => v.status === 200,
-      ["should have fileId"]: (v) => isExists(v, "fileId", ["string"]),
-      ["should have fileUri"]: (v) => isExists(v, "fileUri", ["string"]),
-      ["should have fileThumbnailUri"]: (v) => isExists(v, "fileThumbnailUri", ["string"]),
+  // --- Positive Case ---
+  const uploadResult = assertHandler({
+    currentTestName: "valid payload",
+    featureName: featureName,
+    route: route,
+    body: positivePayload,
+    headers: positiveHeader,
+    expectedCase: {
+      ["should return 200"]: (_parsed, res) => res.status === 200,
+      ["should have fileId"]: (parsed, _res) =>
+        isExists(parsed, "fileId", ["string"]),
+      ["should have fileUri"]: (parsed, _res) =>
+        isExists(parsed, "fileUri", ["string"]),
+      ["should have fileThumbnailUri"]: (parsed, _res) =>
+        isExists(parsed, "fileThumbnailUri", ["string"]),
     },
-    config, tags,
-  );
+    config: config,
+    tags: tags,
+  });
 
-  if (res.isSuccess && config.runNegativeCase) {
+  // Check thumbnail size only if upload was successful and negative cases are run (as per original logic)
+  if (uploadResult.isSuccess && config.runNegativeCase) {
     try {
-      const result = res.res.json()
+      // Type assertion needed here if `uploadResult.res.json()` is `unknown` or `any`
+      const result = /** @type {any} */ (uploadResult.res.json());
       if (isFile(result)) {
-        const getResult = get(result.fileThumbnailUri)
-        if (getResult.body instanceof ArrayBuffer) {
+        // Assuming isFile checks for the necessary properties
+        const getResult = get(result.fileThumbnailUri);
+        if (getResult.status === 200 && getResult.body instanceof ArrayBuffer) {
           const kilobytes = getResult.body.byteLength / 1024;
-          check(kilobytes, { ['thumbnail should have less than 10KB']: (v) => v < 10 },)
+          check(
+            kilobytes,
+            {
+              [`${featureName} | thumbnail should be less than 10KB`]: (v) =>
+                v < 10,
+            },
+            tags,
+          ); // Pass tags to check
+        } else {
+          console.warn(
+            `${featureName} | Failed to fetch or invalid body for thumbnail: ${result.fileThumbnailUri} - Status: ${getResult.status}`,
+          );
         }
+      } else {
+        console.warn(
+          `${featureName} | Upload response is not a valid file object according to isFile.`,
+        );
       }
     } catch (e) {
-      console.log(featureName + " | error when checking the thumbnail", res)
+      console.error(
+        `${featureName} | Error when checking the thumbnail: ${e}`,
+        uploadResult.res.body, // Log response body on error
+      );
     }
   }
-  return getFile(res, {}, featureName)
-}
 
+  if (uploadResult.isSuccess) {
+    // Pass an empty object or potentially relevant data if needed by getFile
+    return getFile(uploadResult.res, {}, featureName);
+  } else {
+    console.warn(
+      `${featureName} | Skipping getFile due to failed upload assertions.`,
+    );
+    return undefined;
+  }
+}

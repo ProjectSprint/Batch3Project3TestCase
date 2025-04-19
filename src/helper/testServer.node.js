@@ -1,9 +1,9 @@
 // @ts-check
-import http from 'http';
-import { URL } from 'url';
-import net from 'net';
-import getPort from 'get-port';
-import isReachable from 'is-reachable';
+import http from "http";
+import { URL } from "url";
+import net from "net";
+import getPort from "get-port";
+import isReachable from "is-reachable";
 
 /**
  * @typedef {Object} RouteHandler
@@ -36,20 +36,21 @@ class TestServer {
   /** @type {RouteMap} */
   #routes = {
     GET: {
-
-      '/':
-      /** @type {(req: http.IncomingMessage, res: http.ServerResponse) => undefined} */(_, res) => {
-          this.sendJsonResponse(res, 200, { "status": "ok" })
-        }
+      "/": /** @type {(req: http.IncomingMessage, res: http.ServerResponse) => undefined} */ (
+        _,
+        res,
+      ) => {
+        this.sendJsonResponse(res, 200, { status: "ok" });
+      },
     },
     POST: {},
     PUT: {},
     DELETE: {},
-    PATCH: {}
+    PATCH: {},
   };
 
   /** @type {Required<ServerConfig>} */
-  #config = { cors: true, corsOrigin: '*' };
+  #config = { cors: true, corsOrigin: "*" };
 
   /**
    * Initialize the test server
@@ -65,9 +66,12 @@ class TestServer {
    */
   #setCorsHeaders(res) {
     if (this.#config.cors) {
-      res.setHeader('Access-Control-Allow-Origin', this.#config.corsOrigin);
-      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH');
-      res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+      res.setHeader("Access-Control-Allow-Origin", this.#config.corsOrigin);
+      res.setHeader(
+        "Access-Control-Allow-Methods",
+        "GET, POST, PUT, DELETE, PATCH",
+      );
+      res.setHeader("Access-Control-Allow-Headers", "Content-Type");
     }
   }
 
@@ -97,7 +101,7 @@ class TestServer {
    * @param {Object} data
    */
   sendJsonResponse(res, statusCode, data) {
-    res.writeHead(statusCode, { 'Content-Type': 'application/json' });
+    res.writeHead(statusCode, { "Content-Type": "application/json" });
     res.end(JSON.stringify(data));
   }
 
@@ -121,68 +125,75 @@ class TestServer {
    */
   async start() {
     if (this.#server) {
-      throw new Error('Server is already running');
+      throw new Error("Server is already running");
     }
 
-    const port = await getPort()
-    return new Promise(/** @param {(value: number) => void} resolve @param {(reason: Error) => void} reject */(resolve, reject) => {
-      this.#server = http.createServer(async (req, res) => {
-        this.#setCorsHeaders(res);
-        if (req.method === 'OPTIONS') {
-          res.writeHead(204);
-          res.end();
-          return;
-        }
-
-        try {
-          const url = req.url || '/';
-          const host = req.headers.host || 'localhost';
-          const parsedUrl = new URL(url, `http://${host}`);
-          const pathname = parsedUrl.pathname;
-          const method = req.method || 'GET';
-
-          if (this.#routes[method] && this.#routes[method][pathname]) {
-            await this.#routes[method][pathname](req, res);
-          } else {
-            this.sendJsonResponse(res, 404, { error: 'Not Found' });
+    const port = await getPort();
+    return new Promise(
+      /** @param {(value: number) => void} resolve @param {(reason: Error) => void} reject */ (
+        resolve,
+        reject,
+      ) => {
+        this.#server = http.createServer(async (req, res) => {
+          this.#setCorsHeaders(res);
+          if (req.method === "OPTIONS") {
+            res.writeHead(204);
+            res.end();
+            return;
           }
-        } catch (error) {
-          console.error('test server | ','response error:', error);
-          this.sendJsonResponse(res, 500, { error: 'Internal Server Error' });
-        }
-      });
-      const timeout = setTimeout(() => {
-        reject(new Error("Server initializing timeout"));
-      }, 2000)
 
-      this.#server.on('error', (err) => {
-        console.error('test server | ','startup error :', err);
-        clearTimeout(timeout)
-        reject(err);
-      });
+          try {
+            const url = req.url || "/";
+            const host = req.headers.host || "localhost";
+            const parsedUrl = new URL(url, `http://${host}`);
+            const pathname = parsedUrl.pathname;
+            const method = req.method || "GET";
 
-      this.#server.on('listening', async () => {
-        const isConnectable = await isReachable(`http://127.0.0.1:${port}`);
-        if (!isConnectable) {
-          console.log('test server | ',port, 'is not connectable')
-          this.#server?.close();
+            if (this.#routes[method] && this.#routes[method][pathname]) {
+              await this.#routes[method][pathname](req, res);
+            } else {
+              this.sendJsonResponse(res, 404, { error: "Not Found" });
+            }
+          } catch (error) {
+            console.error("test server | ", "response error:", error);
+            this.sendJsonResponse(res, 500, { error: "Internal Server Error" });
+          }
+        });
+        const timeout = setTimeout(() => {
+          reject(new Error("Server initializing timeout"));
+        }, 2000);
 
-          clearTimeout(timeout)
-          reject(new Error(`Server started but port ${port} is not connectable`));
+        this.#server.on("error", (err) => {
+          console.error("test server | ", "startup error :", err);
+          clearTimeout(timeout);
+          reject(err);
+        });
+
+        this.#server.on("listening", async () => {
+          const isConnectable = await isReachable(`http://127.0.0.1:${port}`);
+          if (!isConnectable) {
+            console.log("test server | ", port, "is not connectable");
+            this.#server?.close();
+
+            clearTimeout(timeout);
+            reject(
+              new Error(`Server started but port ${port} is not connectable`),
+            );
+            return;
+          }
+          clearTimeout(timeout);
+          resolve(port);
+        });
+
+        if (!this.#server) {
+          clearTimeout(timeout);
+          reject(new Error("Failed to create server"));
           return;
         }
-        clearTimeout(timeout)
-        resolve(port);
-      });
 
-      if (!this.#server) {
-        clearTimeout(timeout)
-        reject(new Error('Failed to create server'));
-        return;
-      }
-
-      this.#server.listen(port);
-    });
+        this.#server.listen(port);
+      },
+    );
   }
 
   /**
@@ -190,21 +201,26 @@ class TestServer {
    * @returns {Promise<void>}
    */
   async stop() {
-    return new Promise(/** @param {(value: void) => void} resolve @param {(reason: Error) => void} reject */(resolve, reject) => {
-      if (!this.#server) {
-        resolve();
-        return;
-      }
-
-      this.#server.close((err) => {
-        if (err) {
-          reject(err);
-        } else {
-          this.#server = null;
+    return new Promise(
+      /** @param {(value: void) => void} resolve @param {(reason: Error) => void} reject */ (
+        resolve,
+        reject,
+      ) => {
+        if (!this.#server) {
           resolve();
+          return;
         }
-      });
-    });
+
+        this.#server.close((err) => {
+          if (err) {
+            reject(err);
+          } else {
+            this.#server = null;
+            resolve();
+          }
+        });
+      },
+    );
   }
 }
 

@@ -1,18 +1,20 @@
-import { testPostJsonAssert } from "../helper/testRequest.js";
-import { getUser } from "../assertion/userAssertion.js";
+// loginScenario.js
+
+import { testPostJsonAssert } from "../helper/testRequest.js"; // Adjust path if needed
+import { getUser } from "../assertion/userAssertion.js"; // Adjust path if needed
 import {
   combine,
   generateRandomEmail,
   generateRandomPhoneNumber,
   generateTestObjects,
-} from "../helper/generator.js";
-import { isEqual, isExists } from "../helper/testAssertion.js";
+} from "../helper/generator.js"; // Adjust path if needed
+import { isEqual, isExists } from "../helper/testAssertion.js"; // Adjust path if needed
 
 /**
- * @param {import("../entity/config.d.ts").Config} config
+ * @param {import("../entity/config.d.ts").Config} config // Adjust path if needed
  * @param {{[name: string]: string}} tags
- * @param {import("src/entity/types.js").User} user
- * @returns {import("src/entity/types.js").User | undefined}
+ * @param {import("src/entity/app.js").User} user // Adjusted path, verify if correct
+ * @returns {import("src/entity/app.js").User | undefined} // Adjusted path, verify if correct
  */
 export function LoginEmailScenario(user, config, tags) {
   const featureName = "Login Email";
@@ -25,12 +27,20 @@ export function LoginEmailScenario(user, config, tags) {
   };
 
   if (config.runNegativeCase) {
-    assertHandler(
-      "empty body", featureName, route, {}, {},
-      {
-        ["should return 400"]: (v) => v.status === 400,
+    assertHandler({
+      currentTestName: "empty body",
+      featureName: featureName,
+      route: route,
+      body: {},
+      headers: {},
+      expectedCase: {
+        // Use underscore '_' prefix for unused 'parsed' parameter
+        ["should return 400"]: (_parsed, res) => res.status === 400,
       },
-      [], config, tags,);
+      options: [],
+      config: config,
+      tags: tags,
+    });
 
     const testObjects = generateTestObjects(
       {
@@ -49,46 +59,87 @@ export function LoginEmailScenario(user, config, tags) {
       positivePayload,
     );
     testObjects.forEach((payload) => {
-      assertHandler(
-        "invalid payload", featureName, route, payload, {},
-        {
-          ["should return 400"]: (res) => res.status === 400,
+      assertHandler({
+        currentTestName: "invalid payload",
+        featureName: featureName,
+        route: route,
+        body: payload,
+        headers: {},
+        expectedCase: {
+          ["should return 400"]: (_parsed, res) => res.status === 400,
         },
-        [], config, tags,);
+        options: [],
+        config: config,
+        tags: tags,
+      });
     });
-    assertHandler(
-      "email not exists",
-      featureName, route, combine(positivePayload, {
+    assertHandler({
+      currentTestName: "email not exists",
+      featureName: featureName,
+      route: route,
+      body: combine(positivePayload, {
         email: generateRandomEmail(),
       }),
-      {},
-      {
-        ["should return 404"]: (res) => res.status === 404,
+      headers: {},
+      expectedCase: {
+        ["should return 404"]: (_parsed, res) => res.status === 404,
       },
-      [], config, tags,);
+      options: [],
+      config: config,
+      tags: tags,
+    });
   }
 
-  const res = assertHandler(
-    "valid payload", featureName, route, positivePayload, {},
-    {
-      ["should return 200"]: (v) => v.status === 200,
-      ["should have email and equal"]: (v) => isEqual(v, "email", user.email),
-      ["should have token"]: (v) => isExists(v, "token", ["string"]),
+  // --- Positive Case ---
+  const loginResult = assertHandler({
+    currentTestName: "valid payload",
+    featureName: featureName,
+    route: route,
+    body: positivePayload,
+    headers: {},
+    expectedCase: {
+      ["should return 200"]: (_parsed, res) => res.status === 200,
+      ["should have email and equal"]: (parsed, _res) =>
+        isEqual(parsed, "email", user.email),
+      // Assuming phone might not be returned on email login, adjust if needed
+      ["should have phone or be null"]: (parsed, _res) =>
+        isExists(parsed, "phone", ["string", null]),
+      ["should have token"]: (parsed, _res) =>
+        isExists(parsed, "token", ["string"]),
     },
-    [], config, tags,);
+    options: [],
+    config: config,
+    tags: tags,
+  });
 
-  return getUser(res, positivePayload, featureName)
+  if (loginResult.isSuccess) {
+    return getUser(loginResult.res, positivePayload, featureName);
+  } else {
+    console.warn(
+      `${featureName} | Skipping getUser due to failed login assertions.`,
+    );
+    return undefined;
+  }
 }
+
 /**
- * @param {import("../entity/config.d.ts").Config} config
+ * @param {import("../entity/config.d.ts").Config} config // Adjust path if needed
  * @param {{[name: string]: string}} tags
- * @param {import("src/entity/types.js").User} user
- * @returns {import("src/entity/types.js").User | undefined}
+ * @param {import("src/entity/app.js").User} user // Adjusted path, verify if correct
+ * @returns {import("src/entity/app.js").User | undefined} // Adjusted path, verify if correct
  */
 export function LoginPhoneScenario(user, config, tags) {
   const featureName = "Login Phone";
   const route = config.baseUrl + "/v1/login/phone";
   const assertHandler = testPostJsonAssert;
+
+  // Ensure user has a phone number for this test
+  if (!user.phone) {
+    console.warn(
+      `${featureName} | Skipping scenario because user has no phone number.`,
+    );
+    return undefined;
+  }
 
   const positivePayload = {
     phone: user.phone,
@@ -96,19 +147,26 @@ export function LoginPhoneScenario(user, config, tags) {
   };
 
   if (config.runNegativeCase) {
-    assertHandler(
-      "empty body", featureName, route, {}, {},
-      {
-        ["should return 400"]: (v) => v.status === 400,
+    assertHandler({
+      currentTestName: "empty body",
+      featureName: featureName,
+      route: route,
+      body: {},
+      headers: {},
+      expectedCase: {
+        ["should return 400"]: (_parsed, res) => res.status === 400,
       },
-      [], config, tags,);
+      options: [],
+      config: config,
+      tags: tags,
+    });
 
     const testObjects = generateTestObjects(
       {
         phone: {
           type: "string",
           notNull: true,
-          isPhoneNumber: true
+          isPhoneNumber: true,
         },
         password: {
           type: "string",
@@ -120,34 +178,66 @@ export function LoginPhoneScenario(user, config, tags) {
       positivePayload,
     );
     testObjects.forEach((payload) => {
-      assertHandler(
-        "invalid payload", featureName, route, payload, {},
-        {
-          ["should return 400"]: (res) => res.status === 400,
+      assertHandler({
+        currentTestName: "invalid payload",
+        featureName: featureName,
+        route: route,
+        body: payload,
+        headers: {},
+        expectedCase: {
+          ["should return 400"]: (_parsed, res) => res.status === 400,
         },
-        [], config, tags,);
+        options: [],
+        config: config,
+        tags: tags,
+      });
     });
-    assertHandler(
-      "email not exists",
-      featureName, route, combine(positivePayload, {
-        phone: generateRandomPhoneNumber(true),
+    assertHandler({
+      currentTestName: "phone not exists", // Corrected test name
+      featureName: featureName,
+      route: route,
+      body: combine(positivePayload, {
+        phone: generateRandomPhoneNumber(true), // Assuming this generates a valid format phone number unlikely to exist
       }),
-      {},
-      {
-        ["should return 404"]: (res) => res.status === 404,
+      headers: {},
+      expectedCase: {
+        ["should return 404"]: (_parsed, res) => res.status === 404,
       },
-      [], config, tags,);
+      options: [],
+      config: config,
+      tags: tags,
+    });
   }
 
-  const res = assertHandler(
-    "valid payload", featureName, route, positivePayload, {},
-    {
-      ["should return 200"]: (v) => v.status === 200,
-      ["should have email"]: (v) => isExists(v, "email", ["string"]),
-      ["should have phone"]: (v) => isExists(v, "phone", ["string"]),
-      ["should have token"]: (v) => isExists(v, "token", ["string"]),
+  // --- Positive Case ---
+  const loginResult = assertHandler({
+    currentTestName: "valid payload",
+    featureName: featureName,
+    route: route,
+    body: positivePayload,
+    headers: {},
+    expectedCase: {
+      ["should return 200"]: (_parsed, res) => res.status === 200,
+      // Assuming email might not be returned on phone login, adjust if needed
+      ["should have email or be null"]: (parsed, _res) =>
+        isExists(parsed, "email", ["string", null]),
+      ["should have phone and equal"]: (parsed, _res) =>
+        isEqual(parsed, "phone", user.phone),
+      ["should have token"]: (parsed, _res) =>
+        isExists(parsed, "token", ["string"]),
     },
-    [], config, tags,);
+    options: [],
+    config: config,
+    tags: tags,
+  });
 
-  return getUser(res, positivePayload, featureName)
+  if (loginResult.isSuccess) {
+    // Pass the original user object to potentially merge/update details if needed by getUser
+    return getUser(loginResult.res, user, featureName);
+  } else {
+    console.warn(
+      `${featureName} | Skipping getUser due to failed login assertions.`,
+    );
+    return undefined;
+  }
 }

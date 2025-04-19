@@ -37,6 +37,7 @@ function unitTest(mocks, config, tags) {
     },
   };
 }
+
 // TODO: add fail for unit test
 export default function () {
   /** @type {import("./src/entity/config.js").Config} */
@@ -50,7 +51,7 @@ export default function () {
   const tags = {
     env: "local",
   };
-  console.log(`Running k6 to ${config.baseUrl}`);
+  console.log(`Firing k6 to ${config.baseUrl}`);
 
   if (config.runUnitTest) {
     console.log(`Run unit test received!`);
@@ -58,7 +59,7 @@ export default function () {
     const testName = /** @type {any} */ (__ENV.TEST_NAME);
     const mockUser = JSON.parse(__ENV.MOCK_USER ? __ENV.MOCK_USER : "{}");
     console.log(`Executing ${testName} test`);
-    console.log(`Parsed user body`, mockUser);
+    console.log(`Mocked user:`, mockUser);
 
     const tests = unitTest(
       {

@@ -2,17 +2,62 @@ import assert from "node:assert/strict";
 import { after, before, describe, it } from "node:test";
 import TestServer from "../helper/testServer.node.js";
 import { exec, spawn } from "node:child_process";
-import isReachable from "is-reachable";
+import { z } from "zod";
+
+// Password schema used across multiple requests
+const passwordSchema = z
+  .string()
+  .min(8, { message: "Password must be at least 8 characters long" })
+  .max(32, { message: "Password must be no more than 32 characters long" });
+
+const phoneSchema = z.string().regex(/^\+\d+$/, {
+  message: "Phone number must start with '+' followed by digits",
+});
+
+const LoginEmailRequestSchema = z.object({
+  email: z.string().email({ message: "Invalid email format" }),
+  password: passwordSchema,
+});
+
+const LoginPhoneRequestSchema = z.object({
+  phone: phoneSchema,
+  password: passwordSchema,
+});
+
+const RegisterEmailRequestSchema = z.object({
+  email: z.string().email({ message: "Invalid email format" }),
+  password: passwordSchema,
+});
+
+const RegisterPhoneRequestSchema = z.object({
+  phone: phoneSchema,
+  password: passwordSchema,
+});
 
 const s = new TestServer({});
+s.addRoute("POST", "/v1/register/phone", async (req, res) => {
+  try {
+    const body = await s.getRequestBody(req);
+    const validate = RegisterPhoneRequestSchema.safeParse(body);
+    if (!validate.success) {
+      s.sendJsonResponse(res, 400, { status: "failed" });
+      return;
+    }
+    s.sendJsonResponse(res, 201, { status: "failed" });
+  } catch (error) {
+    s.sendJsonResponse(res, 500, { status: "failed" });
+  }
+});
 s.addRoute("POST", "/v1/register/email", async (req, res) => {
   try {
-    // todo create request validation
     const body = await s.getRequestBody(req);
-    console.log("body received", body);
-    s.sendJsonResponse(res, 200, { status: "ok" });
+    const validate = RegisterEmailRequestSchema.safeParse(body);
+    if (!validate.success) {
+      s.sendJsonResponse(res, 400, { status: "failed" });
+      return;
+    }
+    s.sendJsonResponse(res, 201, { status: "ok" });
   } catch (error) {
-    console.log("error happened", error);
     s.sendJsonResponse(res, 500, { status: "failed" });
   }
 });
