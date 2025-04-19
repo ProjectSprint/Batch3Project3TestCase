@@ -38,7 +38,6 @@ function unitTest(mocks, config, tags) {
   };
 }
 
-// TODO: add fail for unit test
 export default function () {
   /** @type {import("./src/entity/config.js").Config} */
   const config = {
@@ -51,15 +50,15 @@ export default function () {
   const tags = {
     env: "local",
   };
-  console.log(`Firing k6 to ${config.baseUrl}`);
+  console.log(`k6 | Firing to ${config.baseUrl}`);
 
   if (config.runUnitTest) {
-    console.log(`Run unit test received!`);
+    console.log(`k6 | Run unit test received!`);
     /** @type {keyof TestScenarios} */
     const testName = /** @type {any} */ (__ENV.TEST_NAME);
     const mockUser = JSON.parse(__ENV.MOCK_USER ? __ENV.MOCK_USER : "{}");
-    console.log(`Executing ${testName} test`);
-    console.log(`Mocked user:`, mockUser);
+    console.log(`k6 | Executing ${testName} test`);
+    console.log(`k6 | Mocked user:`, mockUser);
 
     const tests = unitTest(
       {
@@ -70,18 +69,17 @@ export default function () {
       tags,
     );
 
-    // Type guard to check if tests is not an Error
     if (!(tests instanceof Error)) {
       const test = tests[testName];
       if (test) {
         test();
         return;
       }
-      console.log(`test ${testName} doesn't exist`);
+      console.log(`k6 | test ${testName} doesn't exist`);
       return;
     }
 
-    console.log(`tests containing errors\n${tests}`);
+    console.log(`k6 | tests containing errors\n${tests}`);
     return;
   }
 

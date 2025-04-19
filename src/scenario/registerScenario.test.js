@@ -1,7 +1,6 @@
-import assert from "node:assert/strict";
 import { after, before, describe, it } from "node:test";
 import TestServer from "../helper/testServer.node.js";
-import { exec, spawn } from "node:child_process";
+import { spawn } from "node:child_process";
 import { z } from "zod";
 
 // Password schema used across multiple requests
@@ -35,6 +34,8 @@ const RegisterPhoneRequestSchema = z.object({
 });
 
 const s = new TestServer({});
+/** @type {string[]} */
+const registerdPhone = [];
 s.addRoute("POST", "/v1/register/phone", async (req, res) => {
   try {
     const body = await s.getRequestBody(req);
@@ -43,11 +44,23 @@ s.addRoute("POST", "/v1/register/phone", async (req, res) => {
       s.sendJsonResponse(res, 400, { status: "failed" });
       return;
     }
-    s.sendJsonResponse(res, 201, { status: "failed" });
+    if (registerdPhone.includes(validate.data.phone)) {
+      s.sendJsonResponse(res, 409, { status: "failed" });
+      return;
+    }
+    registerdPhone.push(validate.data.phone);
+    s.sendJsonResponse(res, 201, {
+      email: null,
+      phone: validate.data.phone,
+      token: "token",
+    });
+    return;
   } catch (error) {
     s.sendJsonResponse(res, 500, { status: "failed" });
   }
 });
+/** @type {string[]} */
+const registerdEmail = [];
 s.addRoute("POST", "/v1/register/email", async (req, res) => {
   try {
     const body = await s.getRequestBody(req);
@@ -56,7 +69,17 @@ s.addRoute("POST", "/v1/register/email", async (req, res) => {
       s.sendJsonResponse(res, 400, { status: "failed" });
       return;
     }
-    s.sendJsonResponse(res, 201, { status: "ok" });
+    if (registerdEmail.includes(validate.data.email)) {
+      s.sendJsonResponse(res, 409, { status: "failed" });
+      return;
+    }
+    registerdEmail.push(validate.data.email);
+    s.sendJsonResponse(res, 201, {
+      email: validate.data.email,
+      phone: null,
+      token: "token",
+    });
+    return;
   } catch (error) {
     s.sendJsonResponse(res, 500, { status: "failed" });
   }
@@ -97,6 +120,5 @@ describe("Register Scenario", () => {
     ls.on("close", (code) => {
       console.log(`spawn child process exited with code ${code}`);
     });
-    await new Promise((resolve) => setTimeout(resolve, 1000000));
   });
 });

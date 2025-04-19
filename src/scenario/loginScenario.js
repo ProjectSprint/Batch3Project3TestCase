@@ -34,7 +34,6 @@ export function LoginEmailScenario(user, config, tags) {
       body: {},
       headers: {},
       expectedCase: {
-        // Use underscore '_' prefix for unused 'parsed' parameter
         ["should return 400"]: (_parsed, res) => res.status === 400,
       },
       options: [],

@@ -1,7 +1,19 @@
 import { RefinedResponse, StructuredRequestBody, JSONValue, ResponseType } from 'k6/http';
 import { Config } from '../entity/config';
 import { Params, RequestAssertResponse as BaseRequestAssertResponse } from './schema';
-import { Checkers } from './assertions.js';
+
+/**
+ * Type definition for a single checker function.
+ * It receives the pre-parsed JSON body (or null if parsing failed)
+ * and the original k6 response object.
+ * @returns {boolean} True if the check passes, false otherwise.
+ */
+export type Checker = (parsedJson: JSONValue | null, response: RefinedResponse<ResponseType>) => boolean;
+
+/**
+ * Type definition for the collection of checks passed to the assert function.
+ */
+export type Checkers = Record<string, Checker>;
 
 // Define RequestAssertResponse using ResponseType
 export type RequestAssertResponse<T = ResponseType> = BaseRequestAssertResponse<T>;
