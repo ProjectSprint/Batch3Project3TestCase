@@ -1,25 +1,25 @@
-// loginScenario.js
-
-import { testPostJsonAssert } from "../helper/testRequest.js"; // Adjust path if needed
-import { getUser } from "../assertion/userAssertion.js"; // Adjust path if needed
+import { testPostJsonAssert } from "../helper/testRequest.js";
+import { getUser, isUser } from "../assertion/userAssertion.js";
 import {
   combine,
   generateRandomEmail,
   generateRandomPhoneNumber,
   generateTestObjects,
-} from "../helper/generator.js"; // Adjust path if needed
-import { isEqual, isExists } from "../helper/testAssertion.js"; // Adjust path if needed
+} from "../helper/generator.js";
+import { isEqual, isExists } from "../helper/testAssertion.js";
 
 /**
- * @param {import("../entity/config.d.ts").Config} config // Adjust path if needed
- * @param {{[name: string]: string}} tags
- * @param {import("src/entity/app.js").User} user // Adjusted path, verify if correct
- * @returns {import("src/entity/app.js").User | undefined} // Adjusted path, verify if correct
+ * @type {import("src/types/scenario.js").Scenario<import("src/entity/app.js").User | undefined>}
  */
-export function LoginEmailScenario(user, config, tags) {
+export function LoginEmailScenario(config, tags, user) {
   const featureName = "Login Email";
   const route = config.baseUrl + "/v1/login/email";
   const assertHandler = testPostJsonAssert;
+
+  if (!isUser(user)) {
+    console.warn(`${featureName} needs a valid user`);
+    return undefined;
+  }
 
   const positivePayload = {
     email: user.email,
@@ -122,15 +122,17 @@ export function LoginEmailScenario(user, config, tags) {
 }
 
 /**
- * @param {import("../entity/config.d.ts").Config} config // Adjust path if needed
- * @param {{[name: string]: string}} tags
- * @param {import("src/entity/app.js").User} user // Adjusted path, verify if correct
- * @returns {import("src/entity/app.js").User | undefined} // Adjusted path, verify if correct
+ * @type {import("src/types/scenario.js").Scenario<import("src/entity/app.js").User | undefined>}
  */
-export function LoginPhoneScenario(user, config, tags) {
+export function LoginPhoneScenario(config, tags, user) {
   const featureName = "Login Phone";
   const route = config.baseUrl + "/v1/login/phone";
   const assertHandler = testPostJsonAssert;
+
+  if (!isUser(user)) {
+    console.warn(`${featureName} needs a valid user`);
+    return undefined;
+  }
 
   // Ensure user has a phone number for this test
   if (!user.phone) {

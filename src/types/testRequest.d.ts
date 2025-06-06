@@ -1,7 +1,7 @@
 import { RefinedResponse, StructuredRequestBody, JSONValue, ResponseType } from 'k6/http';
 import { Config } from '../entity/config';
-import { Params, RequestAssertResponse as BaseRequestAssertResponse } from './schema';
 
+export type Params = Record<string, string | number | boolean>;
 /**
  * Type definition for a single checker function.
  * It receives the pre-parsed JSON body (or null if parsing failed)
@@ -43,24 +43,24 @@ export interface PostMultipartTestAssertArgs extends BaseTestAssertArgs {
 }
 
 // Type for options used in JSON requests
-export type RequestBodyOption = "noContentType" | "plainBody";
+export type RequestBodyOptions = "noContentType" | "plainBody";
 
 // Specific arguments for POST JSON requests
 export interface PostJsonTestAssertArgs extends BaseTestAssertArgs {
   body: string | JSONValue;
-  options?: RequestBodyOption[];
+  options?: RequestBodyOptions[];
 }
 
 // Specific arguments for PATCH JSON requests
 export interface PatchJsonTestAssertArgs extends BaseTestAssertArgs {
   body: string | JSONValue;
-  options?: RequestBodyOption[];
+  options?: RequestBodyOptions[];
 }
 
 // Specific arguments for PUT JSON requests
 export interface PutJsonTestAssertArgs extends BaseTestAssertArgs {
   body: string | JSONValue;
-  options?: RequestBodyOption[];
+  options?: RequestBodyOptions[];
 }
 
 // Specific arguments for DELETE requests

@@ -1,13 +1,9 @@
-import { RefinedResponse, ResponseType, StructuredRequestBody } from "./k6-http"; // Adjust path if needed
+import { RefinedResponse, ResponseType, StructuredRequestBody } from "./k6-http";
 import { Checkers } from "./k6";
 import { Config } from "../entity/config";
 import { JSONValue } from "k6";
 
-export type RequestAssertResponse<T> = {
-  res: RefinedResponse<T>;
-  isSuccess: boolean;
-};
-export type SchemaRule = {
+export type TestObjectSchema = {
   notNull?: boolean;
   isUrl?: boolean;
   isEmail?: boolean;
@@ -19,10 +15,10 @@ export type SchemaRule = {
   min?: number;
   max?: number;
   enum?: readonly string[];
-  items?: SchemaRule;
-  properties?: Record<string, SchemaRule>;
+  items?: TestObjectSchema;
+  properties?: Record<string, TestObjectSchema>;
 };
 
-export type Schema = Record<string, SchemaRule>;
+export type GenerateTestObjectSchema = Record<string, TestObjectSchema>;
 
-export type Params = Record<string, string | number | boolean>;
+export type GenerateUrlParamFromObjSchema = Record<string, string | number | boolean>;

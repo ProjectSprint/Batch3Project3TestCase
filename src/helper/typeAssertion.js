@@ -12,7 +12,7 @@ export function createValidator(schemaString) {
     throw new Error(`Invalid JSON schema string: ${error}`);
   }
 
-  /** @type {import('src/entity/jsonSchema.js').ValidationContext} */
+  /** @type {import('src/types/typeAssertion.d.ts').ValidationContext} */
   const context = {
     definitions: schema.definitions ? { ...schema.definitions } : {},
     rootSchema: schema,
@@ -25,9 +25,9 @@ export function createValidator(schemaString) {
 }
 
 /**
- * @param {import('src/entity/jsonSchema.js').JSONSchemaDefinition} schema
- * @param {import('src/entity/jsonSchema.js').ValidationContext} context
- * @returns {import('src/entity/jsonSchema.js').JSONSchemaDefinition}
+ * @param {import('src/types/typeAssertion.js').JSONSchemaDefinition} schema
+ * @param {import('src/types/typeAssertion.d.ts').ValidationContext} context
+ * @returns {import('src/types/typeAssertion.d.ts').JSONSchemaDefinition}
  */
 function resolveSchema(schema, context) {
   if (schema.$ref) {
@@ -50,14 +50,14 @@ function resolveSchema(schema, context) {
 
     if (currentSchema.$ref) {
       return resolveSchema(
-        /** @type {import('src/entity/jsonSchema.js').JSONSchemaDefinition} */ (
+        /** @type {import('src/types/typeAssertion.d.ts').JSONSchemaDefinition} */ (
           currentSchema
         ),
         context,
       );
     }
 
-    return /** @type {import('src/entity/jsonSchema.js').JSONSchemaDefinition} */ (
+    return /** @type {import('src/types/typeAssertion.d.ts').JSONSchemaDefinition} */ (
       currentSchema
     );
   }
@@ -97,8 +97,8 @@ function validateType(value, type) {
 
 /**
  * @param {any} value
- * @param {import('src/entity/jsonSchema.js').JSONSchemaDefinition} schema
- * @param {import('src/entity/jsonSchema.js').ValidationContext} context
+ * @param {import('src/types/typeAssertion.d.ts').JSONSchemaDefinition} schema
+ * @param {import('src/types/typeAssertion.d.ts').ValidationContext} context
  * @returns {boolean}
  */
 function validateAgainstSchema(value, schema, context) {
@@ -135,8 +135,8 @@ function validateAgainstSchema(value, schema, context) {
 
 /**
  * @param {any} value
- * @param {import('src/entity/jsonSchema.js').JSONSchemaDefinition} schema
- * @param {import('src/entity/jsonSchema.js').ValidationContext} context
+ * @param {import('src/types/typeAssertion.d.ts').JSONSchemaDefinition} schema
+ * @param {import('src/types/typeAssertion.d.ts').ValidationContext} context
  * @returns {boolean}
  */
 function validateObject(value, schema, context) {
@@ -181,8 +181,8 @@ function validateObject(value, schema, context) {
 
 /**
  * @param {any} value
- * @param {import('src/entity/jsonSchema.js').JSONSchemaDefinition} schema
- * @param {import('src/entity/jsonSchema.js').ValidationContext} context
+ * @param {import('src/types/typeAssertion.d.ts').JSONSchemaDefinition} schema
+ * @param {import('src/types/typeAssertion.d.ts').ValidationContext} context
  * @returns {boolean}
  */
 function validateArray(value, schema, context) {

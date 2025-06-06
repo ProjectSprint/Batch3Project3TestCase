@@ -1,5 +1,3 @@
-// src/types/assertions.d.ts
-
 // Using specific types from k6 where possible
 import { JSONValue } from 'k6';
 import { RefinedResponse, ResponseType } from './k6-http.js';

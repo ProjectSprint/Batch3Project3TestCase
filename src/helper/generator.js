@@ -511,10 +511,10 @@ export function generateRandomNumber(min, max) {
 }
 
 /**
- * @param {import('../types/generator.d.ts').Params} params
+ * @param {import('../types/generator.d.ts').GenerateUrlParamFromObjSchema} params
  * @returns {string}
  */
-export function generateParamFromObj(params) {
+export function generateUrlParamFromObj(params) {
   return Object.entries(params)
     .map(
       ([key, value]) =>
@@ -551,7 +551,7 @@ export function generateBoolFromPercentage(percentage) {
 }
 
 /**
- * @param {import('../types/generator.d.ts').Schema} schema
+ * @param {import('../types/generator.d.ts').GenerateTestObjectSchema} schema
  * @param {import("k6").JSONValue} validTemplate
  * @returns {import("k6").JSONValue[]}
  */
@@ -670,7 +670,7 @@ export function generateTestObjects(schema, validTemplate) {
    * Generates test objects based on a given schema and a valid template.
    * The function creates a list of violations, which are test cases that violate the rules defined in the schema.
    * @param {string} propPath
-   * @param {import('../types/generator.d.ts').SchemaRule} propRules
+   * @param {import('../types/generator.d.ts').TestObjectSchema} propRules
    * @param {unknown} parentValue
    */
   function generateViolationsForProp(propPath, propRules, parentValue) {

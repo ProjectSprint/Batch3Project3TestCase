@@ -1,5 +1,3 @@
-// src/helper/testAssertion.js
-import { check } from "k6";
 /**
  * Asserts the response of a k6 request. Parses JSON once.
  * @param {import("k6/http").RefinedResponse<import("k6/http").ResponseType>} k6response The k6 HTTP response.
@@ -9,9 +7,9 @@ import { check } from "k6";
  * @param {string} featureName The name of the feature/scenario part.
  * @param {import("../types/assertions.d.ts").Checkers} conditions The checks to perform. Adjust path if needed.
  * @param {import("../entity/config.js").Config} config The configuration object. Adjust path if needed.
- * @returns {boolean} True if all checks passed, false otherwise.
+ * @returns {Record<string, import("k6").Checker<import("k6/http").RefinedResponse<import("k6/http").ResponseType>>>} Checkes that can be inputted in k6 check()
  */
-export function assert(
+export function getAssertChecks(
   k6response,
   httpMethod,
   requestPayload,
@@ -108,7 +106,7 @@ export function assert(
     }
   }
 
-  return check(k6response, checks);
+  return checks;
 }
 
 /**

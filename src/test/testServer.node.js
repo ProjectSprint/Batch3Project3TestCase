@@ -1,7 +1,6 @@
 // @ts-check
 import http from "http";
 import { URL } from "url";
-import net from "net";
 import getPort from "get-port";
 import isReachable from "is-reachable";
 

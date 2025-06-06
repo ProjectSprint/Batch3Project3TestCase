@@ -1,21 +1,20 @@
-// testRequest.js
 import http from "k6/http";
-import { assert } from "./testAssertion.js"; // Adjust path if needed
-import { generateParamFromObj } from "./generator.js"; // Adjust path if needed
+import { getAssertChecks } from "./testAssertion.js"; // Adjust path if needed
+import { generateUrlParamFromObj } from "./generator.js"; // Adjust path if needed
+import { check } from "k6";
 
 /**
  * Sends a Get request with JSON data to the specified route.
  * @param {string} route - The route to send the request to.
- * @param {import('../types/schema.d.ts').Params} params - The params that will be parsed into the URL.
+ * @param {import('../types/testRequest.d.ts').Params} params - The params that will be parsed into the URL.
  * @param {{[name: string]: string}} headersObj - Request headers.
  * @param {{[name: string]: string}} tags - Request tags.
  * @returns {import("../types/k6-http.d.ts").RefinedResponse<any>} - k6 http response.
  */
 export function testGet(route, params, headersObj = {}, tags = {}) {
-  const queryParams = generateParamFromObj(params);
+  const queryParams = generateUrlParamFromObj(params);
   const modifiedRoute = route + "?" + queryParams;
 
-  // Ensure object shorthand rule is followed for params if k6 API requires it
   const requestParams = { headers: headersObj, tags: tags };
   return http.get(modifiedRoute, requestParams);
 }
@@ -29,7 +28,6 @@ export function testGet(route, params, headersObj = {}, tags = {}) {
  * @returns {import("../types/k6-http.d.ts").RefinedResponse<any>} - k6 http response.
  */
 export function testPostMultipart(route, body, headers = {}, tags = {}) {
-  // Ensure object shorthand rule is followed for params if k6 API requires it
   const requestParams = { headers: headers, tags: tags };
   return http.post(route, body, requestParams);
 }
@@ -40,7 +38,7 @@ export function testPostMultipart(route, body, headers = {}, tags = {}) {
  * @param {string | import("k6").JSONValue} body - The request body data
  * @param {{ [name: string]: string }} headers - Request headers.
  * @param {{ [name: string]: string }} tags - Tags for the request
- * @param {import('../types/testRequest.d.ts').RequestBodyOption[]} options - Additional options for the request.
+ * @param {import('../types/testRequest.d.ts').RequestBodyOptions[]} options - Additional options for the request.
  * @returns {import("../types/k6-http.d.ts").RefinedResponse<any>} - k6 http response.
  */
 export function testPostJson(
@@ -55,7 +53,6 @@ export function testPostJson(
       ? body
       : JSON.stringify(body);
 
-  // Ensure object shorthand rule is followed for params if k6 API requires it
   const requestParams = { headers: headers, tags: tags };
   return http.post(route, parsedBody, requestParams);
 }
@@ -66,7 +63,7 @@ export function testPostJson(
  * @param {string | import("k6").JSONValue} body - The JSON data to send in the request body.
  * @param {{[name: string]: string}} headers - Request headers.
  * @param {{[name: string]: string}} tags - Request tags.
- * @param {import('../types/testRequest.d.ts').RequestBodyOption[]} options - Additional options for the request.
+ * @param {import('../types/testRequest.d.ts').RequestBodyOptions[]} options - Additional options for the request.
  * @returns {import("../types/k6-http.d.ts").RefinedResponse<any>} - k6 http response.
  */
 export function testPatchJson(
@@ -81,7 +78,6 @@ export function testPatchJson(
       ? body
       : JSON.stringify(body);
 
-  // Ensure object shorthand rule is followed for params if k6 API requires it
   const requestParams = { headers: headers, tags: tags };
   return http.patch(route, parsedBody, requestParams);
 }
@@ -92,7 +88,7 @@ export function testPatchJson(
  * @param {string | import("k6").JSONValue} body - The JSON data to send in the request body.
  * @param {{[name: string]: string}} headers - Request headers.
  * @param {{[name: string]: string}} tags - Request tags.
- * @param {import('../types/testRequest.d.ts').RequestBodyOption[]} options - Additional options for the request.
+ * @param {import('../types/testRequest.d.ts').RequestBodyOptions[]} options - Additional options for the request.
  * @returns {import("../types/k6-http.d.ts").RefinedResponse<any>} - k6 http response.
  */
 export function testPutJson(
@@ -107,7 +103,6 @@ export function testPutJson(
       ? body
       : JSON.stringify(body);
 
-  // Ensure object shorthand rule is followed for params if k6 API requires it
   const requestParams = { headers: headers, tags: tags };
   return http.put(route, parsedBody, requestParams);
 }
@@ -115,17 +110,16 @@ export function testPutJson(
 /**
  * Sends a DELETE request to the specified route.
  * @param {string} route - The route to send the request to.
- * @param {import('../types/schema.d.ts').Params} params - The params that will be parsed into the URL.
+ * @param {import('../types/testRequest.d.ts').Params} params - The params that will be parsed into the URL.
  * @param {{[name: string]: string}} headersObj - Request headers.
  * @param {{[name: string]: string}} tags - Request tags.
  * @returns {import("../types/k6-http.d.ts").RefinedResponse<any>} - k6 http response.
  */
 export function testDelete(route, params, headersObj = {}, tags = {}) {
-  const queryParams = generateParamFromObj(params);
+  const queryParams = generateUrlParamFromObj(params);
   const modifiedRoute = route + "?" + queryParams;
   const headers = Object.assign({}, headersObj); // Keep explicit assignment for clarity / eslint rule
 
-  // Ensure object shorthand rule is followed for params if k6 API requires it
   const requestParams = { headers: headers, tags: tags };
   return http.del(modifiedRoute, null, requestParams); // Body is null for DELETE
 }
@@ -133,10 +127,9 @@ export function testDelete(route, params, headersObj = {}, tags = {}) {
 /**
  * Sends a Get request and asserts the response using object parameters.
  * @param {import("../types/testRequest.d.ts").GetTestAssertArgs} args - Arguments for the GET request and assertion.
- * @returns {import("../types/schema.d.ts").RequestAssertResponse<any>} - Assertion result and k6 http response.
+ * @returns {import("../types/testRequest.d.ts").RequestAssertResponse<any>} - Assertion result and k6 http response.
  */
 export function testGetAssert(args) {
-  // Destructure arguments
   const {
     currentTestName,
     featureName,
@@ -149,15 +142,18 @@ export function testGetAssert(args) {
   } = args;
 
   const res = testGet(route, params, headers, tags);
-  const requestPayloadString = generateParamFromObj(params); // As per original assert usage
-  const isSuccess = assert(
+  const requestPayloadString = generateUrlParamFromObj(params); // As per original assert usage
+  const isSuccess = check(
     res,
-    "GET",
-    requestPayloadString, // Pass stringified params to assert
-    headers,
-    `${featureName} | ${currentTestName}`,
-    expectedCase,
-    config,
+    getAssertChecks(
+      res,
+      "GET",
+      requestPayloadString,
+      headers,
+      `${featureName} | ${currentTestName}`,
+      expectedCase,
+      config,
+    ),
   );
   return {
     isSuccess: isSuccess,
@@ -168,30 +164,32 @@ export function testGetAssert(args) {
 /**
  * Sends a POST Multipart request and asserts the response using object parameters.
  * @param {import("../types/testRequest.d.ts").PostMultipartTestAssertArgs} args - Arguments for the POST Multipart request and assertion.
- * @returns {import("../types/schema.d.ts").RequestAssertResponse<any>} - Assertion result and k6 http response.
+ * @returns {import("../types/testRequest.d.ts").RequestAssertResponse<any>} - Assertion result and k6 http response.
  */
 export function testPostMultipartAssert(args) {
-  // Destructure arguments
   const {
     currentTestName,
     featureName,
     route,
     body,
-    headers = {}, // Default optional args
+    headers = {},
     expectedCase,
     config,
-    tags = {}, // Default optional args
+    tags = {},
   } = args;
 
   const res = testPostMultipart(route, body, headers, tags);
-  const isSuccess = assert(
+  const isSuccess = check(
     res,
-    "POST",
-    body, // Pass the original body to assert
-    headers,
-    `${featureName} | ${currentTestName}`,
-    expectedCase,
-    config,
+    getAssertChecks(
+      res,
+      "POST",
+      body,
+      headers,
+      `${featureName} | ${currentTestName}`,
+      expectedCase,
+      config,
+    ),
   );
   return {
     isSuccess: isSuccess,
@@ -202,7 +200,7 @@ export function testPostMultipartAssert(args) {
 /**
  * Sends a POST JSON request and asserts the response using object parameters.
  * @param {import("../types/testRequest.d.ts").PostJsonTestAssertArgs} args - Arguments for the POST JSON request and assertion.
- * @returns {import("../types/schema.d.ts").RequestAssertResponse<any>} - Assertion result and k6 http response.
+ * @returns {import("../types/testRequest.d.ts").RequestAssertResponse<any>} - Assertion result and k6 http response.
  */
 export function testPostJsonAssert(args) {
   // Destructure arguments
@@ -211,27 +209,29 @@ export function testPostJsonAssert(args) {
     featureName,
     route,
     body,
-    headers: headersObj = {}, // Default optional args
+    headers: headersObj = {},
     expectedCase,
-    options = [], // Default optional args
+    options = [],
     config,
-    tags = {}, // Default optional args
+    tags = {},
   } = args;
 
-  // Handle Content-Type header based on options
   const headers = options.includes("noContentType")
     ? Object.assign({}, headersObj)
     : Object.assign({ "Content-Type": "application/json" }, headersObj);
 
   const res = testPostJson(route, body, headers, tags, options);
-  const isSuccess = assert(
+  const isSuccess = check(
     res,
-    "POST",
-    body, // Pass the original body to assert
-    headers, // Pass potentially modified headers
-    `${featureName} | ${currentTestName}`,
-    expectedCase,
-    config,
+    getAssertChecks(
+      res,
+      "POST",
+      body,
+      headers,
+      `${featureName} | ${currentTestName}`,
+      expectedCase,
+      config,
+    ),
   );
   return {
     isSuccess: isSuccess,
@@ -242,36 +242,37 @@ export function testPostJsonAssert(args) {
 /**
  * Sends a PATCH JSON request and asserts the response using object parameters.
  * @param {import("../types/testRequest.d.ts").PatchJsonTestAssertArgs} args - Arguments for the PATCH JSON request and assertion.
- * @returns {import("../types/schema.d.ts").RequestAssertResponse<any>} - Assertion result and k6 http response.
+ * @returns {import("../types/testRequest.d.ts").RequestAssertResponse<any>} - Assertion result and k6 http response.
  */
 export function testPatchJsonAssert(args) {
-  // Destructure arguments
   const {
     currentTestName,
     featureName,
     route,
     body,
-    headers: headersObj = {}, // Default optional args
+    headers: headersObj = {},
     expectedCase,
-    options = [], // Default optional args
+    options = [],
     config,
-    tags = {}, // Default optional args
+    tags = {},
   } = args;
 
-  // Handle Content-Type header based on options
   const headers = options.includes("noContentType")
     ? Object.assign({}, headersObj)
     : Object.assign({ "Content-Type": "application/json" }, headersObj);
 
   const res = testPatchJson(route, body, headers, tags, options);
-  const isSuccess = assert(
+  const isSuccess = check(
     res,
-    "PATCH",
-    body, // Pass the original body to assert
-    headers, // Pass potentially modified headers
-    `${featureName} | ${currentTestName}`,
-    expectedCase,
-    config,
+    getAssertChecks(
+      res,
+      "PATCH",
+      body,
+      headers,
+      `${featureName} | ${currentTestName}`,
+      expectedCase,
+      config,
+    ),
   );
   return {
     isSuccess: isSuccess,
@@ -282,36 +283,37 @@ export function testPatchJsonAssert(args) {
 /**
  * Sends a PUT JSON request and asserts the response using object parameters.
  * @param {import("../types/testRequest.d.ts").PutJsonTestAssertArgs} args - Arguments for the PUT JSON request and assertion.
- * @returns {import("../types/schema.d.ts").RequestAssertResponse<any>} - Assertion result and k6 http response.
+ * @returns {import("../types/testRequest.d.ts").RequestAssertResponse<any>} - Assertion result and k6 http response.
  */
 export function testPutJsonAssert(args) {
-  // Destructure arguments
   const {
     currentTestName,
     featureName,
     route,
     body,
-    headers: headersObj = {}, // Default optional args
+    headers: headersObj = {},
     expectedCase,
-    options = [], // Default optional args
+    options = [],
     config,
-    tags = {}, // Default optional args
+    tags = {},
   } = args;
 
-  // Handle Content-Type header based on options
   const headers = options.includes("noContentType")
     ? Object.assign({}, headersObj)
     : Object.assign({ "Content-Type": "application/json" }, headersObj);
 
   const res = testPutJson(route, body, headers, tags, options);
-  const isSuccess = assert(
+  const isSuccess = check(
     res,
-    "PUT",
-    body, // Pass the original body to assert
-    headers, // Pass potentially modified headers
-    `${featureName} | ${currentTestName}`,
-    expectedCase,
-    config,
+    getAssertChecks(
+      res,
+      "PUT",
+      body,
+      headers,
+      `${featureName} | ${currentTestName}`,
+      expectedCase,
+      config,
+    ),
   );
   return {
     isSuccess: isSuccess,
@@ -322,33 +324,35 @@ export function testPutJsonAssert(args) {
 /**
  * Sends a DELETE request and asserts the response using object parameters.
  * @param {import("../types/testRequest.d.ts").DeleteTestAssertArgs} args - Arguments for the DELETE request and assertion.
- * @returns {import("../types/schema.d.ts").RequestAssertResponse<any>} - Assertion result and k6 http response.
+ * @returns {import("../types/testRequest.d.ts").RequestAssertResponse<any>} - Assertion result and k6 http response.
  */
 export function testDeleteAssert(args) {
-  // Destructure arguments
   const {
     currentTestName,
     featureName,
     route,
     params,
-    body, // Optional body for assertion/logging purposes
-    headers = {}, // Default optional args
+    body,
+    headers = {},
     expectedCase,
     config,
-    tags = {}, // Default optional args
+    tags = {},
   } = args;
 
   const res = testDelete(route, params, headers, tags);
-  const requestPayloadString = generateParamFromObj(params); // As per original assert usage
-  const isSuccess = assert(
+  const isSuccess = check(
     res,
-    "DELETE",
-    body, // Use the body passed in args for assertion, even if not sent in DEL request itself
-    headers,
-    `${featureName} | ${currentTestName}`,
-    expectedCase,
-    config,
+    getAssertChecks(
+      res,
+      "DELETE",
+      body,
+      headers,
+      `${featureName} | ${currentTestName}`,
+      expectedCase,
+      config,
+    ),
   );
+
   return {
     isSuccess: isSuccess,
     res: res,

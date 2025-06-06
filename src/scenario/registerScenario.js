@@ -1,21 +1,17 @@
-// src/scenario/RegisterEmailScenario.js
-
-import { testPostJsonAssert } from "../helper/testRequest.js"; // Adjust path
-import { getUser } from "../assertion/userAssertion.js"; // Adjust path
+import { testPostJsonAssert } from "../helper/testRequest.js";
+import { getUser } from "../assertion/userAssertion.js";
 import {
   generateRandomEmail,
   generateRandomPassword,
   generateRandomPhoneNumber,
   generateTestObjects,
-} from "../helper/generator.js"; // Adjust path
-import { isExists } from "../helper/testAssertion.js"; // Adjust path
+} from "../helper/generator.js";
+import { isExists } from "../helper/testAssertion.js";
 
 /**
- * @param {import("../entity/config.d.ts").Config} config // Adjust path
- * @param {{[name: string]: string}} tags
- * @returns {import("src/entity/app.js").User | undefined} // Adjust path
+ * @type {import("src/types/scenario.js").Scenario<import("src/entity/app.js").User | undefined>}
  */
-export function RegisterEmailScenario(config, tags) {
+export function RegisterEmailScenario(config, tags, info) {
   const featureName = "Register Email";
   const route = config.baseUrl + "/v1/register/email";
   const assertHandler = testPostJsonAssert;
@@ -116,18 +112,17 @@ export function RegisterEmailScenario(config, tags) {
     return undefined;
   }
 }
+
 /**
- * @param {import("../entity/config.d.ts").Config} config // Adjust path
- * @param {{[name: string]: string}} tags
- * @returns {import("src/entity/app.js").User | undefined} // Adjust path, verify correctness
+ * @type {import("src/types/scenario.js").Scenario<import("src/entity/app.js").User | undefined>}
  */
-export function RegisterPhoneScenario(config, tags) {
+export function RegisterPhoneScenario(config, tags, info) {
   const featureName = "Register Phone";
-  const route = config.baseUrl + "/v1/register/phone"; // <-- Updated route
+  const route = config.baseUrl + "/v1/register/phone";
   const assertHandler = testPostJsonAssert;
 
   const positivePayload = {
-    phone: generateRandomPhoneNumber(true), // <-- Use phone generator (assuming 'true' gives valid format)
+    phone: generateRandomPhoneNumber(true),
     password: generateRandomPassword(8, 32),
   };
 

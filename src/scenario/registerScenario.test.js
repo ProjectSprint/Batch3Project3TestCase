@@ -34,6 +34,7 @@ const RegisterPhoneRequestSchema = z.object({
 });
 
 const s = new TestServer({});
+
 /** @type {string[]} */
 const registerdPhone = [];
 s.addRoute("POST", "/v1/register/phone", async (req, res) => {
@@ -59,6 +60,7 @@ s.addRoute("POST", "/v1/register/phone", async (req, res) => {
     s.sendJsonResponse(res, 500, { status: "failed" });
   }
 });
+
 /** @type {string[]} */
 const registerdEmail = [];
 s.addRoute("POST", "/v1/register/email", async (req, res) => {
@@ -103,12 +105,14 @@ describe("Register Scenario", () => {
     const ls = spawn(`k6 run`, ["main.js"], {
       env: {
         BASE_URL: `http://127.0.0.1:${serverPort}`,
-        MOCK_USER: `${JSON.stringify(user)}`,
+        MOCK_INFO: `${JSON.stringify(user)}`,
         RUN_UNIT_TEST: "true",
-        TEST_NAME: "RegisterEmailScenario",
+        SCENARIO_NAME: "RegisterEmailScenario",
       },
       shell: true,
     });
+
+    // TODO: Make it fail on exit 1
     ls.stdout.on("data", (data) => {
       console.log(`spawn stdout: ${data}`);
     });
