@@ -1,7 +1,8 @@
-import { after, before, describe, it } from "node:test";
-import TestServer from "../helper/testServer.node.js";
-import { spawn } from "node:child_process";
+import { after, before, describe, it, suite } from "node:test";
+import { exec, spawn } from "node:child_process";
 import { z } from "zod";
+import TestServer from "../test/testServer.node.js";
+import assert from "node:assert";
 
 // Password schema used across multiple requests
 const passwordSchema = z
@@ -92,8 +93,8 @@ describe("Register Scenario", () => {
   before(async () => {
     serverPort = await s.start();
   });
-  after(async () => {
-    await s.stop();
+  after(() => {
+    s.stop();
   });
   it("valid body should return 200", async () => {
     const user = {
@@ -102,27 +103,21 @@ describe("Register Scenario", () => {
       token: "",
       password: "",
     };
-    const ls = spawn(`k6 run`, ["main.js"], {
-      env: {
-        BASE_URL: `http://127.0.0.1:${serverPort}`,
-        MOCK_INFO: `${JSON.stringify(user)}`,
-        RUN_UNIT_TEST: "true",
-        SCENARIO_NAME: "RegisterEmailScenario",
+    exec(
+      `${process.env.K6_PATH} run src/main.js 2>&1`,
+      {
+        env: {
+          BASE_URL: `http://127.0.0.1:${serverPort}`,
+          MOCK_INFO: `${JSON.stringify(user)}`,
+          RUN_UNIT_TEST: "true",
+          SCENARIO_NAME: "RegisterEmailScenario",
+        },
       },
-      shell: true,
-    });
-
-    // TODO: Make it fail on exit 1
-    ls.stdout.on("data", (data) => {
-      console.log(`spawn stdout: ${data}`);
-    });
-
-    ls.stderr.on("data", (data) => {
-      console.error(`spawn stderr: ${data}`);
-    });
-
-    ls.on("close", (code) => {
-      console.log(`spawn child process exited with code ${code}`);
-    });
+      (err, stdout) => {
+        console.log(stdout);
+        console.log("Error:", err);
+        assert.ifError(err);
+      },
+    );
   });
 });

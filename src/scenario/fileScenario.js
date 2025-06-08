@@ -1,9 +1,8 @@
-// fileScenario.js
 import { file, get } from "k6/http";
 import { check } from "k6";
-import { getFile, isFile } from "../assertion/fileAssertion.js"; // Adjust path if needed
-import { testPostMultipartAssert } from "../helper/testRequest.js"; // Adjust path if needed
-import { isExists } from "../helper/testAssertion.js"; // Adjust path if needed
+import { getFile, isFile } from "../assertion/fileAssertion.js";
+import { testPostMultipartAssert } from "../helper/testRequest.js";
+import { isExists } from "../helper/assertion.js";
 
 // Assuming UploadedFile type definition exists somewhere, adjust path as necessary
 // If it was previously in types.js, it might now be in app.js or a dedicated types file
@@ -14,7 +13,7 @@ import { isExists } from "../helper/testAssertion.js"; // Adjust path if needed
 /**
  * @param {import("src/entity/app.js").User} user // Adjusted path, verify correctness
  * @param {{small: ArrayBuffer, smallName:string,medium: ArrayBuffer, mediumName:string,big: ArrayBuffer, bigName: string,invalid: ArrayBuffer,invalidName:string}} fileToTest
- * @param {import("../entity/config.d.ts").Config} config // Adjust path if needed
+ * @param {import("src/types/config.js").Config} config
  * @param {{[name: string]: string}} tags
  * @returns {UploadedFile | undefined} uri
  */

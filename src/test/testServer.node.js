@@ -158,6 +158,7 @@ class TestServer {
             this.sendJsonResponse(res, 500, { error: "Internal Server Error" });
           }
         });
+
         const timeout = setTimeout(() => {
           reject(new Error("Server initializing timeout"));
         }, 2000);

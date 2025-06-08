@@ -1,3 +1,4 @@
+import exec from "k6/execution";
 import {
   LoginEmailScenario,
   LoginPhoneScenario,
@@ -12,10 +13,10 @@ export const options = {
   iterations: 1,
 };
 
-const smallFile = open("./src/figure/image-50KB.jpg", "b");
-const medFile = open("./src/figure/image-100KB.jpg", "b");
-const bigFile = open("./src/figure/image-200KB.jpg", "b");
-const invalidFile = open("./src/figure/sql-5KB.sql", "b");
+const smallFile = open("./figure/image-50KB.jpg", "b");
+const medFile = open("./figure/image-100KB.jpg", "b");
+const bigFile = open("./figure/image-200KB.jpg", "b");
+const invalidFile = open("./figure/sql-5KB.sql", "b");
 
 /**
  * @type {import("./types/scenario.js").Scenarios}
@@ -50,7 +51,10 @@ export default function () {
 
     const test = scenarios[scenarioName];
     if (test) {
-      test(config, tags, mockInfo);
+      const testResult = test(config, tags, mockInfo);
+      if (!testResult) {
+        return exec.test.abort(`${scenarioName} scenario failed`);
+      }
       return;
     }
     console.log(`k6 | test ${scenarioName} doesn't exist`);

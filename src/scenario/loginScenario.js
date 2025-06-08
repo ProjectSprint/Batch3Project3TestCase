@@ -6,7 +6,7 @@ import {
   generateRandomPhoneNumber,
   generateTestObjects,
 } from "../helper/generator.js";
-import { isEqual, isExists } from "../helper/testAssertion.js";
+import { isEqual, isExists } from "../helper/assertion.js";
 
 /**
  * @type {import("src/types/scenario.js").Scenario<import("src/entity/app.js").User | undefined>}
@@ -100,7 +100,7 @@ export function LoginEmailScenario(config, tags, user) {
       ["should return 200"]: (_parsed, res) => res.status === 200,
       ["should have email and equal"]: (parsed, _res) =>
         isEqual(parsed, "email", user.email),
-      // Assuming phone might not be returned on email login, adjust if needed
+      // Assuming phone might not be returned on email login
       ["should have phone or be null"]: (parsed, _res) =>
         isExists(parsed, "phone", ["string", null]),
       ["should have token"]: (parsed, _res) =>

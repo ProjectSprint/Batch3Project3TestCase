@@ -6,7 +6,7 @@ import {
   generateRandomPhoneNumber,
   generateTestObjects,
 } from "../helper/generator.js";
-import { isExists } from "../helper/testAssertion.js";
+import { isExists } from "../helper/assertion.js";
 
 /**
  * @type {import("src/types/scenario.js").Scenario<import("src/entity/app.js").User | undefined>}

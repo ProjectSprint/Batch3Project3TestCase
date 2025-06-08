@@ -40,6 +40,9 @@
 			"k6/http": [
 				"./src/types/k6-http.d.ts"
 			],
+			"k6/execution": [
+				"./src/types/k6-execution.d.ts"
+			]
 			"k6": [
 				"./src/types/k6.d.ts"
 			]

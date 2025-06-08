@@ -1,5 +1,5 @@
 import http from "k6/http";
-import { getAssertChecks } from "./testAssertion.js"; // Adjust path if needed
+import { getAssertChecks } from "./assertion.js"; // Adjust path if needed
 import { generateUrlParamFromObj } from "./generator.js"; // Adjust path if needed
 import { check } from "k6";
 
