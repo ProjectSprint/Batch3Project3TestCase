@@ -1,40 +1,49 @@
 import { combine } from "../helper/generator.js";
 import { createValidator } from "../helper/typeAssertion.js";
-import fileSchema from '../schemas/File.schema.json'
 
-const isFileValidator = createValidator(fileSchema)
+const fileSchema = open("../schemas/File.schema.json");
+const isValid = createValidator(fileSchema);
 
 /**
- * @param {import("k6").JSONValue} value
- * @returns {value is import("src/entity/types.js").UploadedFile}
+ * Asserts that a value is a valid User object
+ * @param {any} value - The value to assert
+ * @returns {value is import("src/entity/app.js").UploadedFile}
+ * @throws {import("src/types/typeAssertion.js").ValidationError[]}
  */
 export function isFile(value) {
-  // Basic checks for object and required fields
-  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
-    return false;
+  const res = isValid(value);
+  if (res.valid) {
+    return true;
   }
-
-  /** @type {import("k6").JSONObject} */
-  const obj = value;
-  return isFileValidator(obj)
+  throw res.errors;
 }
 
 /**
- * @param {import('src/types/schema.js').RequestAssertResponse<any>} res
+ * @param {import("k6/http").RefinedResponse<any>} res
  * @param {any} positivePayload
  * @param {string} featureName
- * @returns {import("src/entity/types.js").UploadedFile | undefined}
+ * @returns {import('src/entity/app.js').UploadedFile | undefined}
  */
 export function getFile(res, positivePayload, featureName) {
-  if (res.isSuccess) {
-    try {
-      const jsonResult = res.res.json();
-      if (jsonResult && isFile(jsonResult)) {
-        return combine(jsonResult, positivePayload)
+  try {
+    const jsonResult = res.json();
+    if (jsonResult && typeof jsonResult == "object") {
+      const obj = combine(jsonResult, positivePayload);
+      if (isFile(obj)) {
+        return obj;
       }
-      console.log(featureName + " | assert returns true but assertion failed, please check schema", jsonResult)
-    } catch (e) {
-      console.log(featureName + " | assert returns true but failed to parse json", e)
+      console.log(featureName + " | object is not matching schema", obj);
+      return;
     }
+    console.log(featureName + " | json is not object", jsonResult);
+    return;
+  } catch (e) {
+    console.log(
+      featureName + " | json or validation error:",
+      e,
+      "body:",
+      res.body,
+    );
+    return;
   }
 }

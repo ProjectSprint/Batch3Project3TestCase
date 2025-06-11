@@ -1,8 +1,12 @@
-import { after, before, describe, it, suite } from "node:test";
-import { exec, spawn } from "node:child_process";
+import test from "node:test";
 import { z } from "zod";
 import TestServer from "../test/testServer.node.js";
+import { log } from "node:console";
+
+import { promisify } from "node:util";
+import child_process from "node:child_process";
 import assert from "node:assert";
+const exec = promisify(child_process.exec);
 
 // Password schema used across multiple requests
 const passwordSchema = z
@@ -88,36 +92,31 @@ s.addRoute("POST", "/v1/register/email", async (req, res) => {
   }
 });
 
-describe("Register Scenario", () => {
+test("Register Scenario", async (go) => {
   let serverPort = 0;
-  before(async () => {
-    serverPort = await s.start();
+  go.before(async () => {
+    // serverPort = await s.start();
   });
-  after(() => {
-    s.stop();
+  go.after(() => {
+    // s.stop();
   });
-  it("valid body should return 200", async () => {
+  go.test("valid body should return 200", async () => {
     const user = {
       email: "",
       phone: "",
       token: "",
       password: "",
     };
-    exec(
-      `${process.env.K6_PATH} run src/main.js 2>&1`,
-      {
+    assert.doesNotReject(
+      exec(`${process.env.K6_PATH} run src/main.js 2>&1`, {
         env: {
           BASE_URL: `http://127.0.0.1:${serverPort}`,
           MOCK_INFO: `${JSON.stringify(user)}`,
           RUN_UNIT_TEST: "true",
           SCENARIO_NAME: "RegisterEmailScenario",
         },
-      },
-      (err, stdout) => {
-        console.log(stdout);
-        console.log("Error:", err);
-        assert.ifError(err);
-      },
+      }),
+      console.error,
     );
   });
 });

@@ -15,7 +15,10 @@
           "type": "string"
         },
         "email": {
-          "type": "string"
+          "type": [
+            "string",
+            "null"
+          ]
         },
         "fileId": {
           "type": "string"
@@ -30,7 +33,10 @@
           "type": "string"
         },
         "phone": {
-          "type": "string"
+          "type": [
+            "string",
+            "null"
+          ]
         },
         "token": {
           "type": "string"

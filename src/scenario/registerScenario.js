@@ -102,9 +102,10 @@ export function RegisterEmailScenario(config, tags, info) {
       tags: tags,
     });
   }
-
   if (registerResult.isSuccess) {
-    return getUser(registerResult.res, positivePayload, featureName);
+    const usr = getUser(registerResult.res, positivePayload, featureName);
+    console.log("usr: ", usr);
+    return usr;
   } else {
     console.warn(
       `${featureName} | Skipping getUser due to failed registration assertions.`,
@@ -198,13 +199,11 @@ export function RegisterPhoneScenario(config, tags, info) {
 
   // --- Negative Case: Conflict Check ---
   if (config.runNegativeCase && registerResult.isSuccess) {
-    // Added isSuccess check
-    // Test conflict only if initial registration succeeded
     testPostJsonAssert({
-      currentTestName: "phone conflict", // <-- Updated test name
+      currentTestName: "phone conflict",
       featureName: featureName,
       route: route,
-      body: positivePayload, // <-- Use the same payload that just succeeded
+      body: positivePayload,
       headers: {},
       expectedCase: {
         ["should return 409"]: (_parsed, res) => res.status === 409, // <-- Expect conflict
@@ -218,7 +217,8 @@ export function RegisterPhoneScenario(config, tags, info) {
   // --- Return User ---
   if (registerResult.isSuccess) {
     // Pass the successful response and original payload to getUser
-    return getUser(registerResult.res, positivePayload, featureName);
+    const usr = getUser(registerResult.res, positivePayload, featureName);
+    return usr;
   } else {
     console.warn(
       `${featureName} | Skipping getUser due to failed registration assertions.`,

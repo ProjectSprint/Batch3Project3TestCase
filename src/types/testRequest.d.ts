@@ -15,8 +15,13 @@ export type Checker = (parsedJson: JSONValue | null, response: RefinedResponse<R
  */
 export type Checkers = Record<string, Checker>;
 
+export type BaseRequestAssertResponse = {
+  isSuccess: boolean;
+  res: RefinedResponse<any>;
+}
+
 // Define RequestAssertResponse using ResponseType
-export type RequestAssertResponse<T = ResponseType> = BaseRequestAssertResponse<T>;
+export type RequestAssertResponse = BaseRequestAssertResponse;
 
 
 // Base interface for common arguments

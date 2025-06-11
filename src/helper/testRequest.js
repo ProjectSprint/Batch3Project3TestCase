@@ -9,7 +9,7 @@ import { check } from "k6";
  * @param {import('../types/testRequest.d.ts').Params} params - The params that will be parsed into the URL.
  * @param {{[name: string]: string}} headersObj - Request headers.
  * @param {{[name: string]: string}} tags - Request tags.
- * @returns {import("../types/k6-http.d.ts").RefinedResponse<any>} - k6 http response.
+ * @returns {import("k6/http").RefinedResponse<any>} - k6 http response.
  */
 export function testGet(route, params, headersObj = {}, tags = {}) {
   const queryParams = generateUrlParamFromObj(params);
@@ -25,7 +25,7 @@ export function testGet(route, params, headersObj = {}, tags = {}) {
  * @param {import("k6/http").StructuredRequestBody} body - The request body data
  * @param {{ [name: string]: string }} headers - External headers other than `Content-Type`
  * @param {{ [name: string]: string }} tags - Tags for the request
- * @returns {import("../types/k6-http.d.ts").RefinedResponse<any>} - k6 http response.
+ * @returns {import("k6/http").RefinedResponse<any>} - k6 http response.
  */
 export function testPostMultipart(route, body, headers = {}, tags = {}) {
   const requestParams = { headers: headers, tags: tags };
@@ -39,7 +39,7 @@ export function testPostMultipart(route, body, headers = {}, tags = {}) {
  * @param {{ [name: string]: string }} headers - Request headers.
  * @param {{ [name: string]: string }} tags - Tags for the request
  * @param {import('../types/testRequest.d.ts').RequestBodyOptions[]} options - Additional options for the request.
- * @returns {import("../types/k6-http.d.ts").RefinedResponse<any>} - k6 http response.
+ * @returns {import("k6/http").RefinedResponse<any>} - k6 http response.
  */
 export function testPostJson(
   route,
@@ -64,7 +64,7 @@ export function testPostJson(
  * @param {{[name: string]: string}} headers - Request headers.
  * @param {{[name: string]: string}} tags - Request tags.
  * @param {import('../types/testRequest.d.ts').RequestBodyOptions[]} options - Additional options for the request.
- * @returns {import("../types/k6-http.d.ts").RefinedResponse<any>} - k6 http response.
+ * @returns {import("k6/http").RefinedResponse<any>} - k6 http response.
  */
 export function testPatchJson(
   route,
@@ -89,7 +89,7 @@ export function testPatchJson(
  * @param {{[name: string]: string}} headers - Request headers.
  * @param {{[name: string]: string}} tags - Request tags.
  * @param {import('../types/testRequest.d.ts').RequestBodyOptions[]} options - Additional options for the request.
- * @returns {import("../types/k6-http.d.ts").RefinedResponse<any>} - k6 http response.
+ * @returns {import("k6/http").RefinedResponse<any>} - k6 http response.
  */
 export function testPutJson(
   route,
@@ -113,7 +113,7 @@ export function testPutJson(
  * @param {import('../types/testRequest.d.ts').Params} params - The params that will be parsed into the URL.
  * @param {{[name: string]: string}} headersObj - Request headers.
  * @param {{[name: string]: string}} tags - Request tags.
- * @returns {import("../types/k6-http.d.ts").RefinedResponse<any>} - k6 http response.
+ * @returns {import("k6/http").RefinedResponse<any>} - k6 http response.
  */
 export function testDelete(route, params, headersObj = {}, tags = {}) {
   const queryParams = generateUrlParamFromObj(params);
@@ -127,7 +127,7 @@ export function testDelete(route, params, headersObj = {}, tags = {}) {
 /**
  * Sends a Get request and asserts the response using object parameters.
  * @param {import("../types/testRequest.d.ts").GetTestAssertArgs} args - Arguments for the GET request and assertion.
- * @returns {import("../types/testRequest.d.ts").RequestAssertResponse<any>} - Assertion result and k6 http response.
+ * @returns {import("../types/testRequest.d.ts").RequestAssertResponse} - Assertion result and k6 http response.
  */
 export function testGetAssert(args) {
   const {
@@ -164,7 +164,7 @@ export function testGetAssert(args) {
 /**
  * Sends a POST Multipart request and asserts the response using object parameters.
  * @param {import("../types/testRequest.d.ts").PostMultipartTestAssertArgs} args - Arguments for the POST Multipart request and assertion.
- * @returns {import("../types/testRequest.d.ts").RequestAssertResponse<any>} - Assertion result and k6 http response.
+ * @returns {import("../types/testRequest.d.ts").RequestAssertResponse} - Assertion result and k6 http response.
  */
 export function testPostMultipartAssert(args) {
   const {
@@ -200,7 +200,7 @@ export function testPostMultipartAssert(args) {
 /**
  * Sends a POST JSON request and asserts the response using object parameters.
  * @param {import("../types/testRequest.d.ts").PostJsonTestAssertArgs} args - Arguments for the POST JSON request and assertion.
- * @returns {import("../types/testRequest.d.ts").RequestAssertResponse<any>} - Assertion result and k6 http response.
+ * @returns {import("../types/testRequest.d.ts").RequestAssertResponse} - Assertion result and k6 http response.
  */
 export function testPostJsonAssert(args) {
   // Destructure arguments
@@ -242,7 +242,7 @@ export function testPostJsonAssert(args) {
 /**
  * Sends a PATCH JSON request and asserts the response using object parameters.
  * @param {import("../types/testRequest.d.ts").PatchJsonTestAssertArgs} args - Arguments for the PATCH JSON request and assertion.
- * @returns {import("../types/testRequest.d.ts").RequestAssertResponse<any>} - Assertion result and k6 http response.
+ * @returns {import("../types/testRequest.d.ts").RequestAssertResponse} - Assertion result and k6 http response.
  */
 export function testPatchJsonAssert(args) {
   const {
@@ -283,7 +283,7 @@ export function testPatchJsonAssert(args) {
 /**
  * Sends a PUT JSON request and asserts the response using object parameters.
  * @param {import("../types/testRequest.d.ts").PutJsonTestAssertArgs} args - Arguments for the PUT JSON request and assertion.
- * @returns {import("../types/testRequest.d.ts").RequestAssertResponse<any>} - Assertion result and k6 http response.
+ * @returns {import("../types/testRequest.d.ts").RequestAssertResponse} - Assertion result and k6 http response.
  */
 export function testPutJsonAssert(args) {
   const {
@@ -324,7 +324,7 @@ export function testPutJsonAssert(args) {
 /**
  * Sends a DELETE request and asserts the response using object parameters.
  * @param {import("../types/testRequest.d.ts").DeleteTestAssertArgs} args - Arguments for the DELETE request and assertion.
- * @returns {import("../types/testRequest.d.ts").RequestAssertResponse<any>} - Assertion result and k6 http response.
+ * @returns {import("../types/testRequest.d.ts").RequestAssertResponse} - Assertion result and k6 http response.
  */
 export function testDeleteAssert(args) {
   const {
