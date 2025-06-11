@@ -100,7 +100,7 @@ test("Register Scenario", async (go) => {
   go.after(() => {
     // s.stop();
   });
-  go.test("valid body should return 200", async () => {
+  go.test("should return 0 exit code", async () => {
     const user = {
       email: "",
       phone: "",
@@ -108,7 +108,7 @@ test("Register Scenario", async (go) => {
       password: "",
     };
     assert.doesNotReject(
-      exec(`${process.env.K6_PATH} run src/main.js 2>&1`, {
+      exec(`${process.env.K6_PATH} run src/main.js`, {
         env: {
           BASE_URL: `http://127.0.0.1:${serverPort}`,
           MOCK_INFO: `${JSON.stringify(user)}`,
