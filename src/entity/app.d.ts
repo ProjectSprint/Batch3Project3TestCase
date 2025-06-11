@@ -22,6 +22,17 @@ export type UploadedFile = {
   fileThumbnailUri: string;
 }
 
+export type Profile = {
+  email: string;
+  phone: string;
+  fileId: string;
+  fileUri: string;
+  fileThumbnailUri: string;
+  bankAccontName: string;
+  bankAccontHolder: string;
+  bankAccontNumber: string;
+}
+
 export type Product = {
   productId: string;
   name: string;
