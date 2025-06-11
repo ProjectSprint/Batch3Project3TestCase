@@ -1,7 +1,6 @@
 import test from "node:test";
 import { z } from "zod";
 import TestServer from "../test/testServer.node.js";
-import { log } from "node:console";
 
 import { promisify } from "node:util";
 import child_process from "node:child_process";
@@ -28,71 +27,61 @@ const LoginPhoneRequestSchema = z.object({
   password: passwordSchema,
 });
 
-const RegisterEmailRequestSchema = z.object({
-  email: z.string().email({ message: "Invalid email format" }),
-  password: passwordSchema,
-});
-
-const RegisterPhoneRequestSchema = z.object({
-  phone: phoneSchema,
-  password: passwordSchema,
-});
-
 const s = new TestServer({});
 
-/** @type {string[]} */
-const registerdPhone = [];
-s.addRoute("POST", "/v1/register/phone", async (req, res) => {
+const validPhone = "+628123123123";
+s.addRoute("POST", "/v1/login/phone", async (req, res) => {
   try {
     const body = await s.getRequestBody(req);
-    const validate = RegisterPhoneRequestSchema.safeParse(body);
-    if (!validate.success) {
+    const validate = LoginPhoneRequestSchema.safeParse(body);
+    if (validate.success) {
+      if (validate.data.phone === validPhone) {
+        s.sendJsonResponse(res, 201, {
+          email: null,
+          phone: validate.data.phone,
+          token: "token",
+        });
+      } else {
+        s.sendJsonResponse(res, 404, { status: "failed" });
+        return;
+      }
+    } else {
       s.sendJsonResponse(res, 400, { status: "failed" });
       return;
     }
-    if (registerdPhone.includes(validate.data.phone)) {
-      s.sendJsonResponse(res, 409, { status: "failed" });
-      return;
-    }
-    registerdPhone.push(validate.data.phone);
-    s.sendJsonResponse(res, 201, {
-      email: null,
-      phone: validate.data.phone,
-      token: "token",
-    });
     return;
   } catch (error) {
     s.sendJsonResponse(res, 500, { status: "failed" });
   }
 });
 
-/** @type {string[]} */
-const registerdEmail = [];
-s.addRoute("POST", "/v1/register/email", async (req, res) => {
+const validEmail = "test@email.com";
+s.addRoute("POST", "/v1/login/email", async (req, res) => {
   try {
     const body = await s.getRequestBody(req);
-    const validate = RegisterEmailRequestSchema.safeParse(body);
-    if (!validate.success) {
+    const validate = LoginEmailRequestSchema.safeParse(body);
+    if (validate.success) {
+      if (validate.data.email === validEmail) {
+        s.sendJsonResponse(res, 201, {
+          email: validate.data.email,
+          phone: null,
+          token: "token",
+        });
+      } else {
+        s.sendJsonResponse(res, 404, { status: "failed" });
+        return;
+      }
+    } else {
       s.sendJsonResponse(res, 400, { status: "failed" });
       return;
     }
-    if (registerdEmail.includes(validate.data.email)) {
-      s.sendJsonResponse(res, 409, { status: "failed" });
-      return;
-    }
-    registerdEmail.push(validate.data.email);
-    s.sendJsonResponse(res, 201, {
-      email: validate.data.email,
-      phone: null,
-      token: "token",
-    });
     return;
   } catch (error) {
     s.sendJsonResponse(res, 500, { status: "failed" });
   }
 });
 
-test("Register Scenario", async (go) => {
+test("Login Scenario", async (go) => {
   let serverPort = 0;
   go.before(async () => {
     serverPort = await s.start();
@@ -100,28 +89,28 @@ test("Register Scenario", async (go) => {
   go.after(() => {
     s.stop();
   });
-  go.test("RegisterEmailScenario should return 0 exit code", async () => {
+  go.test("LoginEmailScenario should return 0 exit code", async () => {
     await assert.doesNotReject(
       exec(`${process.env.K6_PATH} run src/main.js`, {
         env: {
           BASE_URL: `http://127.0.0.1:${serverPort}`,
           MOCK_INFO: ``,
           RUN_UNIT_TEST: "true",
-          SCENARIO_NAME: "RegisterEmailScenario",
+          SCENARIO_NAME: "LoginEmailScenario",
         },
       }),
       console.error,
     );
   });
 
-  go.test("RegisterPhoneScenario should return 0 exit code", async () => {
+  go.test("LoginPhoneScenario should return 0 exit code", async () => {
     await assert.doesNotReject(
       exec(`${process.env.K6_PATH} run src/main.js`, {
         env: {
           BASE_URL: `http://127.0.0.1:${serverPort}`,
           MOCK_INFO: ``,
           RUN_UNIT_TEST: "true",
-          SCENARIO_NAME: "RegisterPhoneScenario",
+          SCENARIO_NAME: "LoginPhoneScenario",
         },
       }),
       console.error,
