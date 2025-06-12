@@ -6,6 +6,7 @@ import {
 import { getUser, isUser } from "../assertion/userAssertion.js";
 import {
   combine,
+  generateRandomEmail,
   generateRandomNumber,
   generateRandomPhoneNumber,
   generateRandomUsername,
@@ -100,9 +101,9 @@ export function GetProfileScenario(config, tags, info) {
 /**
  * @type {import("src/types/scenario.js").Scenario<import("src/entity/app.js").Profile | undefined>}
  */
-export function PatchProfileScenario(config, tags, info) {
-  const featureName = "Patch Profile";
-  const route = config.baseUrl + "/v1/profile";
+export function PutProfileScenario(config, tags, info) {
+  const featureName = "Put Profile";
+  const route = config.baseUrl + "/v1/user";
   const assertHandler = testPatchJsonAssert;
 
   const user = info.user;
@@ -151,7 +152,7 @@ export function PatchProfileScenario(config, tags, info) {
       {
         fileId: {
           type: "string",
-          notNull: true,
+          notNull: false,
         },
         bankAccountName: {
           type: "string",
@@ -200,19 +201,292 @@ export function PatchProfileScenario(config, tags, info) {
     headers: { Authorization: user.token },
     expectedCase: {
       ["should return 200"]: (_parsed, res) => res.status === 200,
-      ["should return phone"]: (parsed, _res) =>
-        isExists(parsed, "phone", ["string"]),
-      ["should return fileId"]: (parsed, _res) =>
+      ["email should be string"]: (parsed, _res) =>
+        isEqualWith(parsed, "email", (val) => {
+          if (typeof val[0] === "string") {
+            if (val[0].length === 0) return true;
+
+            const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            return regex.test(val[0]);
+          }
+          return false;
+        }),
+      ["phone should be string"]: (parsed, _res) =>
+        isEqualWith(parsed, "phone", (val) => {
+          if (typeof val[0] === "string") {
+            if (val[0].length === 0) return true;
+            if (val[0][0] === "+") return true;
+          }
+          return false;
+        }),
+      ["fileId should be string"]: (parsed, _res) =>
         isExists(parsed, "fileId", ["string"]),
-      ["should return fileUri"]: (parsed, _res) =>
+      ["fileUri should be string"]: (parsed, _res) =>
         isExists(parsed, "fileUri", ["string"]),
-      ["should return fileThumbnailUri"]: (parsed, _res) =>
+      ["fileThumbnailUri should be string"]: (parsed, _res) =>
         isExists(parsed, "fileThumbnailUri", ["string"]),
-      ["should return bankAccountName"]: (parsed, _res) =>
+      ["bankAccountName should be string"]: (parsed, _res) =>
         isExists(parsed, "bankAccountName", ["string"]),
-      ["should return bankAccountHolder"]: (parsed, _res) =>
+      ["bankAccountHolder should be string"]: (parsed, _res) =>
         isExists(parsed, "bankAccountHolder", ["string"]),
-      ["should return bankAccountNumber"]: (parsed, _res) =>
+      ["bankAccountNumber should be string"]: (parsed, _res) =>
+        isExists(parsed, "bankAccountNumber", ["string"]),
+    },
+    options: [],
+    config: config,
+    tags: tags,
+  });
+
+  if (positiveResult.isSuccess) {
+    return getProfile(positiveResult.res, {}, featureName);
+  } else {
+    console.warn(
+      `${featureName} | Skipping getUser due to failed login assertions.`,
+    );
+    return undefined;
+  }
+}
+
+/**
+ * @type {import("src/types/scenario.js").Scenario<import("src/entity/app.js").Profile | undefined>}
+ */
+export function PostProfilePhoneScenario(config, tags, info) {
+  const featureName = "Post Profile's Phone";
+  const route = config.baseUrl + "/v1/user/link/phone";
+  const assertHandler = testPatchJsonAssert;
+
+  const user = info.user;
+  if (!isUser(user)) {
+    console.warn(`${featureName} needs a valid user or file`);
+    return undefined;
+  }
+
+  const positivePayload = {
+    phone: generateRandomPhoneNumber(true)
+  };
+
+  if (config.runNegativeCase) {
+    assertHandler({
+      currentTestName: "no token",
+      featureName: featureName,
+      route: route,
+      body: {},
+      headers: {},
+      expectedCase: {
+        ["should return 401"]: (_parsed, res) => res.status === 401,
+      },
+      options: [],
+      config: config,
+      tags: tags,
+    });
+    assertHandler({
+      currentTestName: "empty body",
+      featureName: featureName,
+      route: route,
+      body: {},
+      headers: { Authorization: user.token },
+      expectedCase: {
+        ["should return 400"]: (_parsed, res) => res.status === 400,
+      },
+      options: [],
+      config: config,
+      tags: tags,
+    });
+
+    const testObjects = generateTestObjects(
+      {
+        phone: {
+          type: "string",
+          notNull: false,
+        },
+      },
+      positivePayload,
+    );
+    testObjects.forEach((payload) => {
+      assertHandler({
+        currentTestName: "invalid payload",
+        featureName: featureName,
+        route: route,
+        body: payload,
+        headers: { Authorization: user.token },
+        expectedCase: {
+          ["should return 400"]: (_parsed, res) => res.status === 400,
+          ["should return 409"]: (_parsed, res) => res.status === 409, // phone is taken
+        },
+        options: [],
+        config: config,
+        tags: tags,
+      });
+    });
+  }
+
+  // --- Positive Case ---
+  const positiveResult = assertHandler({
+    currentTestName: "valid payload",
+    featureName: featureName,
+    route: route,
+    body: positivePayload,
+    headers: { Authorization: user.token },
+    expectedCase: {
+      ["should return 200"]: (_parsed, res) => res.status === 200,
+      ["email should be string"]: (parsed, _res) =>
+        isEqualWith(parsed, "email", (val) => {
+          if (typeof val[0] === "string") {
+            if (val[0].length === 0) return true;
+
+            const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            return regex.test(val[0]);
+          }
+          return false;
+        }),
+      ["phone should be string"]: (parsed, _res) =>
+        isEqualWith(parsed, "phone", (val) => {
+          if (typeof val[0] === "string") {
+            if (val[0].length === 0) return true;
+            if (val[0][0] === "+") return true;
+          }
+          return false;
+        }),
+      ["fileId should be string"]: (parsed, _res) =>
+        isExists(parsed, "fileId", ["string"]),
+      ["fileUri should be string"]: (parsed, _res) =>
+        isExists(parsed, "fileUri", ["string"]),
+      ["fileThumbnailUri should be string"]: (parsed, _res) =>
+        isExists(parsed, "fileThumbnailUri", ["string"]),
+      ["bankAccountName should be string"]: (parsed, _res) =>
+        isExists(parsed, "bankAccountName", ["string"]),
+      ["bankAccountHolder should be string"]: (parsed, _res) =>
+        isExists(parsed, "bankAccountHolder", ["string"]),
+      ["bankAccountNumber should be string"]: (parsed, _res) =>
+        isExists(parsed, "bankAccountNumber", ["string"]),
+    },
+    options: [],
+    config: config,
+    tags: tags,
+  });
+
+  if (positiveResult.isSuccess) {
+    return getProfile(positiveResult.res, {}, featureName);
+  } else {
+    console.warn(
+      `${featureName} | Skipping getUser due to failed login assertions.`,
+    );
+    return undefined;
+  }
+}
+
+/**
+ * @type {import("src/types/scenario.js").Scenario<import("src/entity/app.js").Profile | undefined>}
+ */
+export function PostProfileEmailScenario(config, tags, info) {
+  const featureName = "Post Profile's Email";
+  const route = config.baseUrl + "/v1/user/link/email";
+  const assertHandler = testPatchJsonAssert;
+
+  const user = info.user;
+  if (!isUser(user)) {
+    console.warn(`${featureName} needs a valid user or file`);
+    return undefined;
+  }
+
+  const positivePayload = {
+    email: generateRandomEmail()
+  };
+
+  if (config.runNegativeCase) {
+    assertHandler({
+      currentTestName: "no token",
+      featureName: featureName,
+      route: route,
+      body: {},
+      headers: {},
+      expectedCase: {
+        ["should return 401"]: (_parsed, res) => res.status === 401,
+      },
+      options: [],
+      config: config,
+      tags: tags,
+    });
+    assertHandler({
+      currentTestName: "empty body",
+      featureName: featureName,
+      route: route,
+      body: {},
+      headers: { Authorization: user.token },
+      expectedCase: {
+        ["should return 400"]: (_parsed, res) => res.status === 400,
+      },
+      options: [],
+      config: config,
+      tags: tags,
+    });
+
+    const testObjects = generateTestObjects(
+      {
+        email: {
+          type: "string",
+          notNull: false,
+        },
+      },
+      positivePayload,
+    );
+
+    testObjects.forEach((payload) => {
+      assertHandler({
+        currentTestName: "invalid payload",
+        featureName: featureName,
+        route: route,
+        body: payload,
+        headers: { Authorization: user.token },
+        expectedCase: {
+          ["should return 400"]: (_parsed, res) => res.status === 400,
+          ["should return 409"]: (_parsed, res) => res.status === 409, // email is taken
+        },
+        options: [],
+        config: config,
+        tags: tags,
+      });
+    });
+  }
+
+  // --- Positive Case ---
+  const positiveResult = assertHandler({
+    currentTestName: "valid payload",
+    featureName: featureName,
+    route: route,
+    body: positivePayload,
+    headers: { Authorization: user.token },
+    expectedCase: {
+      ["should return 200"]: (_parsed, res) => res.status === 200,
+      ["email should be string"]: (parsed, _res) =>
+        isEqualWith(parsed, "email", (val) => {
+          if (typeof val[0] === "string") {
+            if (val[0].length === 0) return true;
+
+            const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            return regex.test(val[0]);
+          }
+          return false;
+        }),
+      ["phone should be string"]: (parsed, _res) =>
+        isEqualWith(parsed, "phone", (val) => {
+          if (typeof val[0] === "string") {
+            if (val[0].length === 0) return true;
+            if (val[0][0] === "+") return true;
+          }
+          return false;
+        }),
+      ["fileId should be string"]: (parsed, _res) =>
+        isExists(parsed, "fileId", ["string"]),
+      ["fileUri should be string"]: (parsed, _res) =>
+        isExists(parsed, "fileUri", ["string"]),
+      ["fileThumbnailUri should be string"]: (parsed, _res) =>
+        isExists(parsed, "fileThumbnailUri", ["string"]),
+      ["bankAccountName should be string"]: (parsed, _res) =>
+        isExists(parsed, "bankAccountName", ["string"]),
+      ["bankAccountHolder should be string"]: (parsed, _res) =>
+        isExists(parsed, "bankAccountHolder", ["string"]),
+      ["bankAccountNumber should be string"]: (parsed, _res) =>
         isExists(parsed, "bankAccountNumber", ["string"]),
     },
     options: [],
