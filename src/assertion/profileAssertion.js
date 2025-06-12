@@ -1,5 +1,4 @@
-import { combine } from "../helper/generator.js";
-import { createValidator } from "../helper/typeAssertion.js";
+import { combine, createValidator } from "ps-k6-helper";
 
 const profleSchema = open("../schemas/profile.schema.json");
 const isValid = createValidator(profleSchema);

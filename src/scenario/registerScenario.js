@@ -1,15 +1,15 @@
-import { testPostJsonAssert } from "../helper/testRequest.js";
 import { getUser } from "../assertion/userAssertion.js";
 import {
   generateRandomEmail,
   generateRandomPassword,
   generateRandomPhoneNumber,
   generateTestObjects,
-} from "../helper/generator.js";
-import { isExists } from "../helper/assertion.js";
+  testPostJsonAssert,
+  isExists,
+} from "https://github.com/ProjectSprint/k6helper/blob/main/dist/index.js";
 
 /**
- * @type {import("src/types/scenario.js").Scenario<import("src/entity/app.js").User | undefined>}
+ * @type {import("src/entity/scenario.js").Scenario<import("src/entity/app.js").User | undefined>}
  */
 export function RegisterEmailScenario(config, tags, info) {
   const featureName = "Register Email";
@@ -115,7 +115,7 @@ export function RegisterEmailScenario(config, tags, info) {
 }
 
 /**
- * @type {import("src/types/scenario.js").Scenario<import("src/entity/app.js").User | undefined>}
+ * @type {import("src/entity/scenario.js").Scenario<import("src/entity/app.js").User | undefined>}
  */
 export function RegisterPhoneScenario(config, tags, info) {
   const featureName = "Register Phone";

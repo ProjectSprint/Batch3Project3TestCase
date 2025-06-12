@@ -1,6 +1,6 @@
 import test from "node:test";
 import { z } from "zod";
-import TestServer from "../test/testServer.node.js";
+import { TestServer } from "ps-k6-helper";
 
 import { promisify } from "node:util";
 import child_process from "node:child_process";
@@ -72,7 +72,6 @@ test("Profile Scenario", async (go) => {
           SCENARIO_NAME: "GetProfileScenario",
         },
       }),
-      console.error,
     );
   });
 });

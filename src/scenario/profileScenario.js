@@ -1,22 +1,18 @@
+import { isUser } from "../assertion/userAssertion.js";
 import {
-  testGetAssert,
-  testPatchJsonAssert,
-  testPostJsonAssert,
-} from "../helper/testRequest.js";
-import { getUser, isUser } from "../assertion/userAssertion.js";
-import {
-  combine,
   generateRandomNumber,
-  generateRandomPhoneNumber,
   generateRandomUsername,
   generateTestObjects,
-} from "../helper/generator.js";
-import { isEqual, isEqualWith, isExists } from "../helper/assertion.js";
+  isEqualWith,
+  isExists,
+  testGetAssert,
+  testPatchJsonAssert,
+} from "https://github.com/ProjectSprint/k6helper/blob/main/dist/index.js";
 import { getProfile, isProfile } from "../assertion/profileAssertion.js";
 import { isFile } from "../assertion/fileAssertion.js";
 
 /**
- * @type {import("src/types/scenario.js").Scenario<import("src/entity/app.js").Profile | undefined>}
+ * @type {import("src/entity/scenario.js").Scenario<import("src/entity/app.js").Profile | undefined>}
  */
 export function GetProfileScenario(config, tags, info) {
   const featureName = "Get Profile";
@@ -98,7 +94,7 @@ export function GetProfileScenario(config, tags, info) {
 }
 
 /**
- * @type {import("src/types/scenario.js").Scenario<import("src/entity/app.js").Profile | undefined>}
+ * @type {import("src/entity/scenario.js").Scenario<import("src/entity/app.js").Profile | undefined>}
  */
 export function PatchProfileScenario(config, tags, info) {
   const featureName = "Patch Profile";

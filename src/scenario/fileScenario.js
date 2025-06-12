@@ -1,8 +1,10 @@
 import { file, get } from "k6/http";
 import { check } from "k6";
 import { getFile, isFile } from "../assertion/fileAssertion.js";
-import { testPostMultipartAssert } from "../helper/testRequest.js";
-import { isExists } from "../helper/assertion.js";
+import {
+  isExists,
+  testPostMultipartAssert,
+} from "https://github.com/ProjectSprint/k6helper/blob/main/dist/index.js";
 
 /**
  * @param {import("src/entity/app.js").User} user // Adjusted path, verify correctness

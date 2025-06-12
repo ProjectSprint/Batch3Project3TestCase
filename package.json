@@ -6,6 +6,7 @@
   "main": "main.js",
   "scripts": {
     "lint:fix": "eslint --fix",
+    "test": "node --test",
     "generateSchema": "typescript-to-json-schema --path ./src/entity/**/*.ts"
   },
   "repository": {
@@ -29,6 +30,7 @@
     "zod": "^3.24.3"
   },
   "dependencies": {
-    "get-port": "^7.1.0"
+    "get-port": "^7.1.0",
+    "ps-k6-helper": "github:ProjectSprint/k6helper"
   }
 }

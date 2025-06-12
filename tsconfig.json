@@ -42,10 +42,13 @@
 			],
 			"k6/execution": [
 				"./src/types/k6-execution.d.ts"
-			]
+			],
 			"k6": [
 				"./src/types/k6.d.ts"
-			]
+			],
+			"https://github.com/ProjectSprint/k6helper/blob/main/dist/index.js": [
+				"./node_modules/ps-k6-helper/dist/index.d.ts"
+			],
 		}
 	},
 	"include": [
