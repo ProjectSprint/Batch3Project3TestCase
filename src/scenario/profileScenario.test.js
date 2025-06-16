@@ -174,7 +174,6 @@ test("Profile Scenario", async (go) => {
       }),
       console.error,
     );
-    console.log("assert")
   });
 
   go.test("PutProfileScenario should return 0 exit code", async () => {
