@@ -64,80 +64,87 @@ s.addRoute("GET", "/v1/user", async (req, res) => {
 /** @type {string[]} */
 s.addRoute("PUT", "/v1/user", async (req, res) => {
   try {
-    const body = await s.getRequestBody(req);
-    const validate = profilePutSchema.safeParse(body);
-    if (validate.success) {
-      s.sendJsonResponse(res, 200, {
-        email: "name@name.com",
-        phone: "",
-        fileId: "",
-        fileUri: "",
-        fileThumbnailUri: "",
-        bankAccountName: "",
-        bankAccountHolder: "",
-        bankAccountNumber: "",
-      });
+    if (
+      req.headers.authorization &&
+      req.headers.authorization.startsWith("Bearer")
+    ) {
+      const body = await s.getRequestBody(req);
+      const validate = profilePutSchema.safeParse(body);
+      if (validate.success) {
+        s.sendJsonResponse(res, 200, {
+          email: "name@name.com",
+          phone: "",
+          fileId: "",
+          fileUri: "",
+          fileThumbnailUri: "",
+          bankAccountName: "",
+          bankAccountHolder: "",
+          bankAccountNumber: "",
+        });
+      } else {
+        s.sendJsonResponse(res, 400, { status: "failed" });
+      }
     } else {
-      s.sendJsonResponse(res, 400, { status: "failed" });
-      return;
+      s.sendJsonResponse(res, 401, { status: "failed" });
     }
+    
     return;
   } catch (error) {
     s.sendJsonResponse(res, 500, { status: "failed" });
   }
 });
 
-/** @type {string[]} */
-s.addRoute("POST", "/v1/user/link/phone", async (req, res) => {
-  try {
-    const body = await s.getRequestBody(req);
-    const validate = phoneSchema.safeParse(body);
-    if (validate.success) {
-      s.sendJsonResponse(res, 200, {
-        email: "name@name.com",
-        phone: "",
-        fileId: "",
-        fileUri: "",
-        fileThumbnailUri: "",
-        bankAccountName: "",
-        bankAccountHolder: "",
-        bankAccountNumber: "",
-      });
-    } else {
-      s.sendJsonResponse(res, 400, { status: "failed" });
-      return;
-    }
-    return;
-  } catch (error) {
-    s.sendJsonResponse(res, 500, { status: "failed" });
-  }
-});
+// /** @type {string[]} */
+// s.addRoute("POST", "/v1/user/link/phone", async (req, res) => {
+//   try {
+//     const body = await s.getRequestBody(req);
+//     const validate = phoneSchema.safeParse(body);
+//     if (validate.success) {
+//       s.sendJsonResponse(res, 200, {
+//         email: "name@name.com",
+//         phone: "",
+//         fileId: "",
+//         fileUri: "",
+//         fileThumbnailUri: "",
+//         bankAccountName: "",
+//         bankAccountHolder: "",
+//         bankAccountNumber: "",
+//       });
+//     } else {
+//       s.sendJsonResponse(res, 400, { status: "failed" });
+//       return;
+//     }
+//     return;
+//   } catch (error) {
+//     s.sendJsonResponse(res, 500, { status: "failed" });
+//   }
+// });
 
-/** @type {string[]} */
-s.addRoute("POST", "/v1/user/link/email", async (req, res) => {
-  try {
-    const body = await s.getRequestBody(req);
-    const validate = emailSchema.safeParse(body);
-    if (validate.success) {
-      s.sendJsonResponse(res, 200, {
-        email: "name@name.com",
-        phone: "",
-        fileId: "",
-        fileUri: "",
-        fileThumbnailUri: "",
-        bankAccountName: "",
-        bankAccountHolder: "",
-        bankAccountNumber: "",
-      });
-    } else {
-      s.sendJsonResponse(res, 400, { status: "failed" });
-      return;
-    }
-    return;
-  } catch (error) {
-    s.sendJsonResponse(res, 500, { status: "failed" });
-  }
-});
+// /** @type {string[]} */
+// s.addRoute("POST", "/v1/user/link/email", async (req, res) => {
+//   try {
+//     const body = await s.getRequestBody(req);
+//     const validate = emailSchema.safeParse(body);
+//     if (validate.success) {
+//       s.sendJsonResponse(res, 200, {
+//         email: "name@name.com",
+//         phone: "",
+//         fileId: "",
+//         fileUri: "",
+//         fileThumbnailUri: "",
+//         bankAccountName: "",
+//         bankAccountHolder: "",
+//         bankAccountNumber: "",
+//       });
+//     } else {
+//       s.sendJsonResponse(res, 400, { status: "failed" });
+//       return;
+//     }
+//     return;
+//   } catch (error) {
+//     s.sendJsonResponse(res, 500, { status: "failed" });
+//   }
+// });
 
 test("Profile Scenario", async (go) => {
   let serverPort = 0;
@@ -167,6 +174,7 @@ test("Profile Scenario", async (go) => {
       }),
       console.error,
     );
+    console.log("assert")
   });
 
   go.test("PutProfileScenario should return 0 exit code", async () => {
