@@ -23,7 +23,7 @@
 		// Enable strict type checking
 		"strict": true,
 		// Allow importing .js files with type information
-		"moduleResolution": "NodeNext",
+		"moduleResolution": "node",
 		// Base directory to resolve non-relative module names
 		"baseUrl": "./",
 		// Output directory for compiled files
