@@ -182,78 +182,77 @@ s.addRoute("POST", "/v1/user/link/email", async (req, res) => {
 
 test("Profile Scenario", async (go) => {
   let serverPort = 0;
-  console.log("Profile Scenario Start", `http://127.0.0.1:${serverPort}`)
   go.before(async () => {
     serverPort = await s.start();
   });
   go.after(() => {
     s.stop();
   });
-  // go.test("GetProfileScenario should return 0 exit code", async () => {
-  //   const info = {
-  //     user: {
-  //       email: "asdf@adf.com",
-  //       phone: "+45646464",
-  //       password: "asdfasdf",
-  //       token: "Bearer asdfasdf",
-  //     },
-  //   };
-  //   await assert.doesNotReject(
-  //     exec(`${process.env.K6_PATH} run src/main.js`, {
-  //       env: {
-  //         BASE_URL: `http://127.0.0.1:${serverPort}`,
-  //         MOCK_INFO: `${JSON.stringify(info)}`,
-  //         RUN_UNIT_TEST: "true",
-  //         SCENARIO_NAME: "GetProfileScenario",
-  //       },
-  //     }),
-  //     console.error,
-  //   );
-  // });
+  go.test("GetProfileScenario should return 0 exit code", async () => {
+    const info = {
+      user: {
+        email: "asdf@adf.com",
+        phone: "+45646464",
+        password: "asdfasdf",
+        token: "Bearer asdfasdf",
+      },
+    };
+    await assert.doesNotReject(
+      exec(`${process.env.K6_PATH} run src/main.js`, {
+        env: {
+          BASE_URL: `http://127.0.0.1:${serverPort}`,
+          MOCK_INFO: `${JSON.stringify(info)}`,
+          RUN_UNIT_TEST: "true",
+          SCENARIO_NAME: "GetProfileScenario",
+        },
+      }),
+      console.error,
+    );
+  });
 
-  // go.test("PutProfileScenario should return 0 exit code", async () => {
-  //   const info = {
-  //     user: {
-  //       email: "asdf@adf.com",
-  //       phone: "+45646464",
-  //       password: "asdfasdf",
-  //       token: "Bearer asdfasdf",
-  //     }
-  //   };
-  //   await assert.doesNotReject(
-  //     exec(`${process.env.K6_PATH} run src/main.js`, {
-  //       env: {
-  //         BASE_URL: `http://127.0.0.1:${serverPort}`,
-  //         MOCK_INFO: `${JSON.stringify(info)}`,
-  //         RUN_UNIT_TEST: "true",
-  //         SCENARIO_NAME: "PutProfileScenario",
-  //       },
-  //     }),
-  //     console.error,
-  //   );
-  // });
+  go.test("PutProfileScenario should return 0 exit code", async () => {
+    const info = {
+      user: {
+        email: "asdf@adf.com",
+        phone: "+45646464",
+        password: "asdfasdf",
+        token: "Bearer asdfasdf",
+      }
+    };
+    await assert.doesNotReject(
+      exec(`${process.env.K6_PATH} run src/main.js`, {
+        env: {
+          BASE_URL: `http://127.0.0.1:${serverPort}`,
+          MOCK_INFO: `${JSON.stringify(info)}`,
+          RUN_UNIT_TEST: "true",
+          SCENARIO_NAME: "PutProfileScenario",
+        },
+      }),
+      console.error,
+    );
+  });
 
-  // go.test("PostProfilePhoneScenario should return 0 exit code", async () => {
-  //   const info = {
-  //     user: {
-  //       email: "asdf@adf.com",
-  //       phone: "+45646464",
-  //       password: "asdfasdf",
-  //       token: "Bearer asdfasdf",
-  //     }
-  //   };
-  //   await assert.doesNotReject(
-  //     exec(`${process.env.K6_PATH} run src/main.js`, {
-  //       env: {
-  //         BASE_URL: `http://127.0.0.1:${serverPort}`,
-  //         MOCK_INFO: `${JSON.stringify(info)}`,
-  //         RUN_UNIT_TEST: "true",
-  //         SCENARIO_NAME: "PostProfilePhoneScenario",
-  //       },
-  //     }),
-  //     console.error,
-  //   );
-  // });
+  go.test("PostProfilePhoneScenario should return 0 exit code", async () => {
+    const info = {
+      user: {
+        email: "asdf@adf.com",
+        phone: "+45646464",
+        password: "asdfasdf",
+        token: "Bearer asdfasdf",
+      }
+    };
+    await assert.doesNotReject(
+      exec(`${process.env.K6_PATH} run src/main.js`, {
+        env: {
+          BASE_URL: `http://127.0.0.1:${serverPort}`,
+          MOCK_INFO: `${JSON.stringify(info)}`,
+          RUN_UNIT_TEST: "true",
+          SCENARIO_NAME: "PostProfilePhoneScenario",
+        },
+      }),
+      console.error,
+    );
+  });
 
   go.test("PostProfileEmailScenario should return 0 exit code", async () => {
     const info = {
