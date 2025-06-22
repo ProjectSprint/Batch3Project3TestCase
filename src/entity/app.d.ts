@@ -60,10 +60,10 @@ export type PurchaseRequest = {
 export type PurchaseResponse = {
   purchasedItems: Array<Product>;
   totalPrice: number;
-  paymentDetails: {
+  paymentDetails: Array<{
     bankAccountName: string;
     bankAccountHolder: string;
     bankAccountNumber: string;
     totalPrice: number;
-  }
+  }>
 }

@@ -13,6 +13,10 @@ import {
   PostProfilePhoneScenario, 
   PutProfileScenario
 } from "./scenario/profileScenario.js";
+import { 
+  PostPurchaseScenario,
+  PostPurchaseIdScenario
+} from "./scenario/pruchaseScenario.js";
 
 export const options = {
   vus: 1,
@@ -36,6 +40,8 @@ const scenarios = {
   PutProfileScenario: PutProfileScenario,
   PostProfilePhoneScenario: PostProfilePhoneScenario,
   PostProfileEmailScenario: PostProfileEmailScenario,
+  PostPurchaseScenario: PostPurchaseScenario,
+  PostPurchaseIdScenario: PostPurchaseIdScenario
 };
 
 export default function () {
