@@ -7,7 +7,12 @@ import {
   RegisterEmailScenario,
   RegisterPhoneScenario,
 } from "./scenario/registerScenario.js";
-import { GetProfileScenario, PutProfileScenario } from "./scenario/profileScenario.js";
+import { 
+  GetProfileScenario, 
+  PostProfileEmailScenario, 
+  PostProfilePhoneScenario, 
+  PutProfileScenario
+} from "./scenario/profileScenario.js";
 
 export const options = {
   vus: 1,
@@ -28,7 +33,9 @@ const scenarios = {
   LoginEmailScenario: LoginEmailScenario,
   LoginPhoneScenario: LoginPhoneScenario,
   GetProfileScenario: GetProfileScenario,
-  PutProfileScenario: PutProfileScenario
+  PutProfileScenario: PutProfileScenario,
+  PostProfilePhoneScenario: PostProfilePhoneScenario,
+  PostProfileEmailScenario: PostProfileEmailScenario,
 };
 
 export default function () {

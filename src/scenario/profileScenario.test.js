@@ -33,6 +33,14 @@ const profilePutSchema = z.object({
   bankAccountNumber: z.string().min(4, { message: "bankAccountNumber must be at least 4 characters long" }).max(32, { message: "bankAccountNumber  must be no more than 32 characters long" }),
 });
 
+const profilePhonePutSchema = z.object({
+  phone: phoneSchema
+})
+
+const profileEmailPutSchema = z.object({
+  email: emailSchema
+})
+
 const s = new TestServer({});
 
 /** @type {string[]} */
@@ -94,57 +102,83 @@ s.addRoute("PUT", "/v1/user", async (req, res) => {
   }
 });
 
-// /** @type {string[]} */
-// s.addRoute("POST", "/v1/user/link/phone", async (req, res) => {
-//   try {
-//     const body = await s.getRequestBody(req);
-//     const validate = phoneSchema.safeParse(body);
-//     if (validate.success) {
-//       s.sendJsonResponse(res, 200, {
-//         email: "name@name.com",
-//         phone: "",
-//         fileId: "",
-//         fileUri: "",
-//         fileThumbnailUri: "",
-//         bankAccountName: "",
-//         bankAccountHolder: "",
-//         bankAccountNumber: "",
-//       });
-//     } else {
-//       s.sendJsonResponse(res, 400, { status: "failed" });
-//       return;
-//     }
-//     return;
-//   } catch (error) {
-//     s.sendJsonResponse(res, 500, { status: "failed" });
-//   }
-// });
+/** @type {string[]} */
+const registerdPhone = [];
+s.addRoute("POST", "/v1/user/link/phone", async (req, res) => {
+  try {
+    if (
+      req.headers.authorization &&
+      req.headers.authorization.startsWith("Bearer")
+    ) {
+      const body = await s.getRequestBody(req);
+      const validate = profilePhonePutSchema.safeParse(body);
+      
+      if (validate.success) {
 
-// /** @type {string[]} */
-// s.addRoute("POST", "/v1/user/link/email", async (req, res) => {
-//   try {
-//     const body = await s.getRequestBody(req);
-//     const validate = emailSchema.safeParse(body);
-//     if (validate.success) {
-//       s.sendJsonResponse(res, 200, {
-//         email: "name@name.com",
-//         phone: "",
-//         fileId: "",
-//         fileUri: "",
-//         fileThumbnailUri: "",
-//         bankAccountName: "",
-//         bankAccountHolder: "",
-//         bankAccountNumber: "",
-//       });
-//     } else {
-//       s.sendJsonResponse(res, 400, { status: "failed" });
-//       return;
-//     }
-//     return;
-//   } catch (error) {
-//     s.sendJsonResponse(res, 500, { status: "failed" });
-//   }
-// });
+        if (registerdPhone.includes(validate.data.phone)) {
+          s.sendJsonResponse(res, 409, { status: "failed" });
+          return;
+        }
+
+        registerdPhone.push(validate.data.phone);
+
+        s.sendJsonResponse(res, 200, {
+          email: "name@name.com",
+          phone: "",
+          fileId: "",
+          fileUri: "",
+          fileThumbnailUri: "",
+          bankAccountName: "",
+          bankAccountHolder: "",
+          bankAccountNumber: "",
+        });
+      } else {
+        s.sendJsonResponse(res, 400, { status: "failed" });
+      }
+    } else {
+      s.sendJsonResponse(res, 401, { status: "failed" });
+    }
+    
+    return;
+  } catch (error) {
+    s.sendJsonResponse(res, 500, { status: "failed" });
+  }
+});
+
+/** @type {string[]} */
+const registerdEmail = [];
+s.addRoute("POST", "/v1/user/link/email", async (req, res) => {
+  try {
+    const body = await s.getRequestBody(req);
+    const validate = profileEmailPutSchema.safeParse(body);
+
+    if (validate.success) {
+      if (registerdEmail.includes(validate.data.email)) {
+        s.sendJsonResponse(res, 409, { status: "failed" });
+        return;
+      }
+
+      registerdEmail.push(validate.data.email);
+
+      s.sendJsonResponse(res, 200, {
+        email: validate.data.email,
+        phone: "",
+        fileId: "",
+        fileUri: "",
+        fileThumbnailUri: "",
+        bankAccountName: "",
+        bankAccountHolder: "",
+        bankAccountNumber: "",
+      });
+    } else {
+      s.sendJsonResponse(res, 400, { status: "failed" });
+      return;
+    }
+    return;
+  } catch (error) {
+    s.sendJsonResponse(res, 500, { status: "failed" });
+  }
+});
 
 test("Profile Scenario", async (go) => {
   let serverPort = 0;
@@ -179,11 +213,11 @@ test("Profile Scenario", async (go) => {
   go.test("PutProfileScenario should return 0 exit code", async () => {
     const info = {
       user: {
-        fileid: "abcdef123456",
-        phone: "+62012380681",
-        password: "nalokololo",
-        token: "Bearer nalokolo",
-      },
+        email: "asdf@adf.com",
+        phone: "+45646464",
+        password: "asdfasdf",
+        token: "Bearer asdfasdf",
+      }
     };
     await assert.doesNotReject(
       exec(`${process.env.K6_PATH} run src/main.js`, {
@@ -192,6 +226,50 @@ test("Profile Scenario", async (go) => {
           MOCK_INFO: `${JSON.stringify(info)}`,
           RUN_UNIT_TEST: "true",
           SCENARIO_NAME: "PutProfileScenario",
+        },
+      }),
+      console.error,
+    );
+  });
+
+  go.test("PostProfilePhoneScenario should return 0 exit code", async () => {
+    const info = {
+      user: {
+        email: "asdf@adf.com",
+        phone: "+45646464",
+        password: "asdfasdf",
+        token: "Bearer asdfasdf",
+      }
+    };
+    await assert.doesNotReject(
+      exec(`${process.env.K6_PATH} run src/main.js`, {
+        env: {
+          BASE_URL: `http://127.0.0.1:${serverPort}`,
+          MOCK_INFO: `${JSON.stringify(info)}`,
+          RUN_UNIT_TEST: "true",
+          SCENARIO_NAME: "PostProfilePhoneScenario",
+        },
+      }),
+      console.error,
+    );
+  });
+
+  go.test("PostProfileEmailScenario should return 0 exit code", async () => {
+    const info = {
+      user: {
+        email: "asdf@adf.com",
+        phone: "+45646464",
+        password: "asdfasdf",
+        token: "Bearer asdfasdf",
+      }
+    };
+    await assert.doesNotReject(
+      exec(`${process.env.K6_PATH} run src/main.js`, {
+        env: {
+          BASE_URL: `http://127.0.0.1:${serverPort}`,
+          MOCK_INFO: `${JSON.stringify(info)}`,
+          RUN_UNIT_TEST: "true",
+          SCENARIO_NAME: "PostProfileEmailScenario",
         },
       }),
       console.error,
