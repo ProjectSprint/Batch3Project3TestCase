@@ -65,5 +65,5 @@ export type PurchaseResponse = {
     bankAccountHolder: string;
     bankAccountNumber: string;
     totalPrice: number;
-  }>
+  }>;
 }
