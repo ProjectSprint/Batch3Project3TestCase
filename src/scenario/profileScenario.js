@@ -2,11 +2,13 @@ import {
   testGetAssert,
   testPatchJsonAssert,
   testPostJsonAssert,
+  testPutJsonAssert,
 } from "../helper/testRequest.js";
 import { getUser, isUser } from "../assertion/userAssertion.js";
 import {
   combine,
   generateRandomEmail,
+  generateRandomImageUrl,
   generateRandomNumber,
   generateRandomPhoneNumber,
   generateRandomUsername,
@@ -89,7 +91,6 @@ export function GetProfileScenario(config, tags, info) {
     tags: {},
   });
 
-  console.log("res:", positiveResult.res.status, positiveResult.res.body);
   if (positiveResult.isSuccess) {
     return getProfile(positiveResult.res, {}, featureName);
   } else {
@@ -104,22 +105,23 @@ export function GetProfileScenario(config, tags, info) {
 export function PutProfileScenario(config, tags, info) {
   const featureName = "Put Profile";
   const route = config.baseUrl + "/v1/user";
-  const assertHandler = testPatchJsonAssert;
-
+  const assertHandler = testPutJsonAssert;
+  
   const user = info.user;
-  const file = info.file;
-  if (!isUser(user) || !isFile(file)) {
-    console.warn(`${featureName} needs a valid user or file`);
+  
+  if (!isUser(user)) {
+    console.warn(`${featureName} needs a valid user`);
     return undefined;
   }
 
+  
   const positivePayload = {
-    fileId: file.fileId,
+    fileId: "123abc",
     bankAccountName: generateRandomUsername(),
     bankAccountHolder: generateRandomUsername(),
     bankAccountNumber: `${generateRandomNumber(9999, 999999999999)}`,
   };
-
+  
   if (config.runNegativeCase) {
     assertHandler({
       currentTestName: "no token",
@@ -132,7 +134,7 @@ export function PutProfileScenario(config, tags, info) {
       },
       options: [],
       config: config,
-      tags: tags,
+      tags: {},
     });
     assertHandler({
       currentTestName: "empty body",
@@ -145,7 +147,7 @@ export function PutProfileScenario(config, tags, info) {
       },
       options: [],
       config: config,
-      tags: tags,
+      tags: {},
     });
 
     const testObjects = generateTestObjects(
@@ -187,7 +189,7 @@ export function PutProfileScenario(config, tags, info) {
         },
         options: [],
         config: config,
-        tags: tags,
+        tags: {},
       });
     });
   }
@@ -234,7 +236,7 @@ export function PutProfileScenario(config, tags, info) {
     },
     options: [],
     config: config,
-    tags: tags,
+    tags: {},
   });
 
   if (positiveResult.isSuccess) {
@@ -251,8 +253,8 @@ export function PutProfileScenario(config, tags, info) {
  * @type {import("src/types/scenario.js").Scenario<import("src/entity/app.js").Profile | undefined>}
  */
 export function PostProfilePhoneScenario(config, tags, info) {
-  const featureName = "Post Profile's Phone";
-  const route = config.baseUrl + "/v1/user/link/phone";
+  const featureName = "Post Profile Phone";
+  const route = config.baseUrl + "/v1/user/link/phonee";
   const assertHandler = testPatchJsonAssert;
 
   const user = info.user;
@@ -277,7 +279,7 @@ export function PostProfilePhoneScenario(config, tags, info) {
       },
       options: [],
       config: config,
-      tags: tags,
+      tags: {},
     });
     assertHandler({
       currentTestName: "empty body",
@@ -290,7 +292,7 @@ export function PostProfilePhoneScenario(config, tags, info) {
       },
       options: [],
       config: config,
-      tags: tags,
+      tags: {},
     });
 
     const testObjects = generateTestObjects(
@@ -315,7 +317,7 @@ export function PostProfilePhoneScenario(config, tags, info) {
         },
         options: [],
         config: config,
-        tags: tags,
+        tags: {},
       });
     });
   }
@@ -362,7 +364,7 @@ export function PostProfilePhoneScenario(config, tags, info) {
     },
     options: [],
     config: config,
-    tags: tags,
+    tags: {},
   });
 
   if (positiveResult.isSuccess) {
@@ -405,7 +407,7 @@ export function PostProfileEmailScenario(config, tags, info) {
       },
       options: [],
       config: config,
-      tags: tags,
+      tags: {},
     });
     assertHandler({
       currentTestName: "empty body",
@@ -418,7 +420,7 @@ export function PostProfileEmailScenario(config, tags, info) {
       },
       options: [],
       config: config,
-      tags: tags,
+      tags: {},
     });
 
     const testObjects = generateTestObjects(
@@ -444,7 +446,7 @@ export function PostProfileEmailScenario(config, tags, info) {
         },
         options: [],
         config: config,
-        tags: tags,
+        tags: {},
       });
     });
   }
@@ -491,7 +493,7 @@ export function PostProfileEmailScenario(config, tags, info) {
     },
     options: [],
     config: config,
-    tags: tags,
+    tags: {},
   });
 
   if (positiveResult.isSuccess) {
