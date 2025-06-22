@@ -382,9 +382,9 @@ export function PostProfilePhoneScenario(config, tags, info) {
  * @type {import("src/types/scenario.js").Scenario<import("src/entity/app.js").Profile | undefined>}
  */
 export function PostProfileEmailScenario(config, tags, info) {
-  const featureName = "Post Profile's Email";
+  const featureName = "Post Profile Email";
   const route = config.baseUrl + "/v1/user/link/email";
-  const assertHandler = testPatchJsonAssert;
+  const assertHandler = testPostJsonAssert;
 
   const user = info.user;
   if (!isUser(user)) {

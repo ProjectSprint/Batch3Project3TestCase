@@ -37,6 +37,10 @@ const profilePhonePutSchema = z.object({
   phone: phoneSchema
 })
 
+const profileEmailPutSchema = z.object({
+  email: emailSchema
+})
+
 const s = new TestServer({});
 
 /** @type {string[]} */
@@ -141,31 +145,40 @@ s.addRoute("POST", "/v1/user/link/phone", async (req, res) => {
   }
 });
 
-// /** @type {string[]} */
-// s.addRoute("POST", "/v1/user/link/email", async (req, res) => {
-//   try {
-//     const body = await s.getRequestBody(req);
-//     const validate = emailSchema.safeParse(body);
-//     if (validate.success) {
-//       s.sendJsonResponse(res, 200, {
-//         email: "name@name.com",
-//         phone: "",
-//         fileId: "",
-//         fileUri: "",
-//         fileThumbnailUri: "",
-//         bankAccountName: "",
-//         bankAccountHolder: "",
-//         bankAccountNumber: "",
-//       });
-//     } else {
-//       s.sendJsonResponse(res, 400, { status: "failed" });
-//       return;
-//     }
-//     return;
-//   } catch (error) {
-//     s.sendJsonResponse(res, 500, { status: "failed" });
-//   }
-// });
+/** @type {string[]} */
+const registerdEmail = [];
+s.addRoute("POST", "/v1/user/link/email", async (req, res) => {
+  try {
+    const body = await s.getRequestBody(req);
+    const validate = profileEmailPutSchema.safeParse(body);
+
+    if (validate.success) {
+      if (registerdEmail.includes(validate.data.email)) {
+        s.sendJsonResponse(res, 409, { status: "failed" });
+        return;
+      }
+
+      registerdEmail.push(validate.data.email);
+
+      s.sendJsonResponse(res, 200, {
+        email: validate.data.email,
+        phone: "",
+        fileId: "",
+        fileUri: "",
+        fileThumbnailUri: "",
+        bankAccountName: "",
+        bankAccountHolder: "",
+        bankAccountNumber: "",
+      });
+    } else {
+      s.sendJsonResponse(res, 400, { status: "failed" });
+      return;
+    }
+    return;
+  } catch (error) {
+    s.sendJsonResponse(res, 500, { status: "failed" });
+  }
+});
 
 test("Profile Scenario", async (go) => {
   let serverPort = 0;
@@ -220,7 +233,29 @@ test("Profile Scenario", async (go) => {
   //   );
   // });
 
-  go.test("PostProfilePhoneScenario should return 0 exit code", async () => {
+  // go.test("PostProfilePhoneScenario should return 0 exit code", async () => {
+  //   const info = {
+  //     user: {
+  //       email: "asdf@adf.com",
+  //       phone: "+45646464",
+  //       password: "asdfasdf",
+  //       token: "Bearer asdfasdf",
+  //     }
+  //   };
+  //   await assert.doesNotReject(
+  //     exec(`${process.env.K6_PATH} run src/main.js`, {
+  //       env: {
+  //         BASE_URL: `http://127.0.0.1:${serverPort}`,
+  //         MOCK_INFO: `${JSON.stringify(info)}`,
+  //         RUN_UNIT_TEST: "true",
+  //         SCENARIO_NAME: "PostProfilePhoneScenario",
+  //       },
+  //     }),
+  //     console.error,
+  //   );
+  // });
+
+  go.test("PostProfileEmailScenario should return 0 exit code", async () => {
     const info = {
       user: {
         email: "asdf@adf.com",
@@ -235,7 +270,7 @@ test("Profile Scenario", async (go) => {
           BASE_URL: `http://127.0.0.1:${serverPort}`,
           MOCK_INFO: `${JSON.stringify(info)}`,
           RUN_UNIT_TEST: "true",
-          SCENARIO_NAME: "PostProfilePhoneScenario",
+          SCENARIO_NAME: "PostProfileEmailScenario",
         },
       }),
       console.error,
