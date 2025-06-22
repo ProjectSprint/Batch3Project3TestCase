@@ -254,8 +254,8 @@ export function PutProfileScenario(config, tags, info) {
  */
 export function PostProfilePhoneScenario(config, tags, info) {
   const featureName = "Post Profile Phone";
-  const route = config.baseUrl + "/v1/user/link/phonee";
-  const assertHandler = testPatchJsonAssert;
+  const route = config.baseUrl + "/v1/user/link/phone";
+  const assertHandler = testPostJsonAssert;
 
   const user = info.user;
   if (!isUser(user)) {
@@ -300,6 +300,7 @@ export function PostProfilePhoneScenario(config, tags, info) {
         phone: {
           type: "string",
           notNull: false,
+          isPhoneNumber: true
         },
       },
       positivePayload,

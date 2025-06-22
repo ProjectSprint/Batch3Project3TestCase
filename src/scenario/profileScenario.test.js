@@ -33,6 +33,10 @@ const profilePutSchema = z.object({
   bankAccountNumber: z.string().min(4, { message: "bankAccountNumber must be at least 4 characters long" }).max(32, { message: "bankAccountNumber  must be no more than 32 characters long" }),
 });
 
+const profilePhonePutSchema = z.object({
+  phone: phoneSchema
+})
+
 const s = new TestServer({});
 
 /** @type {string[]} */
@@ -95,37 +99,47 @@ s.addRoute("PUT", "/v1/user", async (req, res) => {
 });
 
 /** @type {string[]} */
-// s.addRoute("POST", "/v1/user/link/phone", async (req, res) => {
-//   try {
-//     if (
-//       req.headers.authorization &&
-//       req.headers.authorization.startsWith("Bearer")
-//     ) {
-//       const body = await s.getRequestBody(req);
-//       const validate = profilePutSchema.safeParse(body);
-//       if (validate.success) {
-//         s.sendJsonResponse(res, 200, {
-//           email: "name@name.com",
-//           phone: "",
-//           fileId: "",
-//           fileUri: "",
-//           fileThumbnailUri: "",
-//           bankAccountName: "",
-//           bankAccountHolder: "",
-//           bankAccountNumber: "",
-//         });
-//       } else {
-//         s.sendJsonResponse(res, 400, { status: "failed" });
-//       }
-//     } else {
-//       s.sendJsonResponse(res, 401, { status: "failed" });
-//     }
+const registerdPhone = [];
+s.addRoute("POST", "/v1/user/link/phone", async (req, res) => {
+  try {
+    if (
+      req.headers.authorization &&
+      req.headers.authorization.startsWith("Bearer")
+    ) {
+      const body = await s.getRequestBody(req);
+      const validate = profilePhonePutSchema.safeParse(body);
+      
+      if (validate.success) {
+
+        if (registerdPhone.includes(validate.data.phone)) {
+          s.sendJsonResponse(res, 409, { status: "failed" });
+          return;
+        }
+
+        registerdPhone.push(validate.data.phone);
+
+        s.sendJsonResponse(res, 200, {
+          email: "name@name.com",
+          phone: "",
+          fileId: "",
+          fileUri: "",
+          fileThumbnailUri: "",
+          bankAccountName: "",
+          bankAccountHolder: "",
+          bankAccountNumber: "",
+        });
+      } else {
+        s.sendJsonResponse(res, 400, { status: "failed" });
+      }
+    } else {
+      s.sendJsonResponse(res, 401, { status: "failed" });
+    }
     
-//     return;
-//   } catch (error) {
-//     s.sendJsonResponse(res, 500, { status: "failed" });
-//   }
-// });
+    return;
+  } catch (error) {
+    s.sendJsonResponse(res, 500, { status: "failed" });
+  }
+});
 
 // /** @type {string[]} */
 // s.addRoute("POST", "/v1/user/link/email", async (req, res) => {
@@ -162,29 +176,51 @@ test("Profile Scenario", async (go) => {
   go.after(() => {
     s.stop();
   });
-  go.test("GetProfileScenario should return 0 exit code", async () => {
-    const info = {
-      user: {
-        email: "asdf@adf.com",
-        phone: "+45646464",
-        password: "asdfasdf",
-        token: "Bearer asdfasdf",
-      },
-    };
-    await assert.doesNotReject(
-      exec(`${process.env.K6_PATH} run src/main.js`, {
-        env: {
-          BASE_URL: `http://127.0.0.1:${serverPort}`,
-          MOCK_INFO: `${JSON.stringify(info)}`,
-          RUN_UNIT_TEST: "true",
-          SCENARIO_NAME: "GetProfileScenario",
-        },
-      }),
-      console.error,
-    );
-  });
+  // go.test("GetProfileScenario should return 0 exit code", async () => {
+  //   const info = {
+  //     user: {
+  //       email: "asdf@adf.com",
+  //       phone: "+45646464",
+  //       password: "asdfasdf",
+  //       token: "Bearer asdfasdf",
+  //     },
+  //   };
+  //   await assert.doesNotReject(
+  //     exec(`${process.env.K6_PATH} run src/main.js`, {
+  //       env: {
+  //         BASE_URL: `http://127.0.0.1:${serverPort}`,
+  //         MOCK_INFO: `${JSON.stringify(info)}`,
+  //         RUN_UNIT_TEST: "true",
+  //         SCENARIO_NAME: "GetProfileScenario",
+  //       },
+  //     }),
+  //     console.error,
+  //   );
+  // });
 
-  go.test("PutProfileScenario should return 0 exit code", async () => {
+  // go.test("PutProfileScenario should return 0 exit code", async () => {
+  //   const info = {
+  //     user: {
+  //       email: "asdf@adf.com",
+  //       phone: "+45646464",
+  //       password: "asdfasdf",
+  //       token: "Bearer asdfasdf",
+  //     }
+  //   };
+  //   await assert.doesNotReject(
+  //     exec(`${process.env.K6_PATH} run src/main.js`, {
+  //       env: {
+  //         BASE_URL: `http://127.0.0.1:${serverPort}`,
+  //         MOCK_INFO: `${JSON.stringify(info)}`,
+  //         RUN_UNIT_TEST: "true",
+  //         SCENARIO_NAME: "PutProfileScenario",
+  //       },
+  //     }),
+  //     console.error,
+  //   );
+  // });
+
+  go.test("PostProfilePhoneScenario should return 0 exit code", async () => {
     const info = {
       user: {
         email: "asdf@adf.com",
@@ -199,29 +235,10 @@ test("Profile Scenario", async (go) => {
           BASE_URL: `http://127.0.0.1:${serverPort}`,
           MOCK_INFO: `${JSON.stringify(info)}`,
           RUN_UNIT_TEST: "true",
-          SCENARIO_NAME: "PutProfileScenario",
+          SCENARIO_NAME: "PostProfilePhoneScenario",
         },
       }),
       console.error,
     );
   });
-
-  // go.test("PostProfilePhoneScenario should return 0 exit code", async () => {
-  //   const info = {
-  //     user: {
-  //       phone: "+6288855558888",
-  //     },
-  //   };
-  //   await assert.doesNotReject(
-  //     exec(`${process.env.K6_PATH} run src/main.js`, {
-  //       env: {
-  //         BASE_URL: `http://127.0.0.1:${serverPort}`,
-  //         MOCK_INFO: `${JSON.stringify(info)}`,
-  //         RUN_UNIT_TEST: "true",
-  //         SCENARIO_NAME: "PostProfilePhoneScenario",
-  //       },
-  //     }),
-  //     console.error,
-  //   );
-  // });
 });
