@@ -16,7 +16,7 @@ import {
 import { 
   PostPurchaseScenario,
   PostPurchaseIdScenario
-} from "./scenario/pruchaseScenario.js";
+} from "./scenario/purchaseScenario.js";
 
 export const options = {
   vus: 1,

@@ -31,10 +31,10 @@ const purchaseIdPostSchema = z.object({
     fileIds: z.array(z.string()).min(1, {message: "file id must at least one item"})
 });
 
-
-
 const s = new TestServer({});
 
+const productIds = ["1", "3"]
+const fileIds = ["file123", "oka955"]
 /** @type {string[]} */
 s.addRoute("POST", "/v1/purchase", async (req, res) => {
   try {
@@ -52,8 +52,17 @@ s.addRoute("POST", "/v1/purchase", async (req, res) => {
             const validatePhone = phoneSchema.safeParse(validate.data.senderContactDetail);
             if (!validatePhone.success) {
                 s.sendJsonResponse(res, 400, { status: "failed" });
-                return;
+                return; 
             }
+        }
+        
+        if (validate.data.purchasedItems.length > 0) {
+          for (let i = 0; i < validate.data.purchasedItems.length; i++) {
+            if (productIds.includes(validate.data.purchasedItems[i].productId)) {
+              s.sendJsonResponse(res, 400, { status: "failed" });
+              return;
+            }
+          }
         }
 
         s.sendJsonResponse(res, 201, {
@@ -100,7 +109,9 @@ s.addRoute("POST", "/v1/purchase/:purchaseId", async (req, res) => {
     const validate = purchaseIdPostSchema.safeParse(body);
       
     if (validate.success) {
-
+        if (body.fileId.length < 3 || body.fileId.length > 3) {
+          s.sendJsonResponse(res, 400, { status: "failed" });  
+        }
         s.sendJsonResponse(res, 201, {});
       } else {
         s.sendJsonResponse(res, 400, { status: "failed" });
