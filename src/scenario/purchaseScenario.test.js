@@ -45,12 +45,14 @@ s.addRoute("POST", "/v1/purchase", async (req, res) => {
         if (validate.data.senderContactType === "email") {
             const validateEmail = emailSchema.safeParse(validate.data.senderContactDetail);
             if (!validateEmail.success) {
+                console.log("email")
                 s.sendJsonResponse(res, 400, { status: "failed" });
                 return;
             }
         } else {
             const validatePhone = phoneSchema.safeParse(validate.data.senderContactDetail);
             if (!validatePhone.success) {
+                console.log("phone")
                 s.sendJsonResponse(res, 400, { status: "failed" });
                 return; 
             }
@@ -58,7 +60,9 @@ s.addRoute("POST", "/v1/purchase", async (req, res) => {
         
         if (validate.data.purchasedItems.length > 0) {
           for (let i = 0; i < validate.data.purchasedItems.length; i++) {
-            if (productIds.includes(validate.data.purchasedItems[i].productId)) {
+            if (!productIds.includes(validate.data.purchasedItems[i].productId)) {
+              console.log("products", productIds)
+              console.log("productId", validate.data.purchasedItems[i].productId)
               s.sendJsonResponse(res, 400, { status: "failed" });
               return;
             }
@@ -93,11 +97,13 @@ s.addRoute("POST", "/v1/purchase", async (req, res) => {
           ]
         });
       } else {
+        console.log("fail parse")
         s.sendJsonResponse(res, 400, { status: "failed" });
       }
 
     return;
   } catch (error) {
+    console.log("Error", error)
     s.sendJsonResponse(res, 500, { status: "failed" });
   }
 });
@@ -109,7 +115,7 @@ s.addRoute("POST", "/v1/purchase/:purchaseId", async (req, res) => {
     const validate = purchaseIdPostSchema.safeParse(body);
       
     if (validate.success) {
-        if (body.fileId.length < 3 || body.fileId.length > 3) {
+        if (validate.data.fileIds.length < 3 || validate.data.fileIds.length > 3) {
           s.sendJsonResponse(res, 400, { status: "failed" });  
         }
         s.sendJsonResponse(res, 201, {});

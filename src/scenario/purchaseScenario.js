@@ -30,11 +30,11 @@ export function PostPurchaseScenario(config, tags, info) {
   const positivePayload = {
     purchasedItems: [ 
         {
-          productId: productIds[generateRandomNumber(0,1)],
+          productId: "1",
           qty: generateRandomNumber(0,3)
         },
         {
-          productId: productIds[generateRandomNumber(0,1)],
+          productId: "3",
           qty: generateRandomNumber(0,3)
         },
     ],
@@ -172,12 +172,14 @@ export function PostPurchaseScenario(config, tags, info) {
       tags: {},
     });
   })
+  
+  console.log("positiveResults=====", positiveResults)
 
   if (positiveResults.every((result) => {return result.isSuccess})) {
     return getPurchaseResponse(positiveResults[0].res, {}, featureName);
   } else {
     console.warn(
-      `${featureName} | Skipping getUser due to failed login assertions.`,
+      `${featureName} | Skipping getPurchaseResponse due to failed post assertions.`,
     );
     return undefined;
   }
@@ -262,7 +264,7 @@ export function PostPurchaseIdScenario(config, tags, info) {
     return getPurchaseResponse(positiveResult.res, {}, featureName);
   } else {
     console.warn(
-      `${featureName} | Skipping getUser due to failed login assertions.`,
+      `${featureName} | Skipping getPurchaseResponse due to failed assertions.`,
     );
     return undefined;
   }
