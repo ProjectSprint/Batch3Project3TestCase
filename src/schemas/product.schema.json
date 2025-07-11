@@ -1,6 +1,6 @@
 {
   "$ref": "#/definitions/Product",
-  "$schema": "http://json-schema.org/draft-04/schema#",
+  "$schema": "http://json-schema.org/draft-06/schema#",
   "definitions": {
     "ProductCategory": {
       "enum": [
@@ -16,13 +16,16 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
+        "productId": {
+          "type": "string"
+        },
         "name": {
           "type": "string",
           "minLength": 4,
           "maxLength": 32
         },
         "category": {
-          "$ref": "#/definitions/Types.ContactType"
+          "$ref": "#/definitions/ProductCategory"
         },
         "qty": {
           "type": "number",
@@ -36,6 +39,18 @@
           "type": "string"
         },
         "fileId": {
+          "type": "string"
+        },
+        "fileUri": {
+          "type": "string"
+        },
+        "fileThumbnailUri": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string"
+        },
+        "updatedAt": {
           "type": "string"
         }
       },

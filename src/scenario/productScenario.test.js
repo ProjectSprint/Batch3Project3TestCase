@@ -7,7 +7,7 @@ import child_process from "node:child_process";
 import assert from "node:assert";
 const exec = promisify(child_process.exec);
 
-const getSchema = z.object({
+const postSchema = z.object({
   name: z.string(),
   category: z.string(),
   qty: z.number(),
@@ -19,6 +19,9 @@ const getSchema = z.object({
 const s = new TestServer({});
 
 /** @type {string[]} */
+const validFileId = ["file1", "file2", "file3"];
+
+/** @type {string[]} */
 s.addRoute("POST", "/v1/product", async (req, res) => {
   try {
     if (
@@ -27,22 +30,25 @@ s.addRoute("POST", "/v1/product", async (req, res) => {
     ) 
     {
       const body = await s.getRequestBody(req);
-      const validate = getSchema.safeParse(body);
+      const validate = postSchema.safeParse(body);
 
       if (validate.success) {
-        s.sendJsonResponse(res, 200, {
-          productId: "name@name.com",
-          name: "",
-          category: "",
+        if (validFileId.includes(validate.data.fileId) === false) {
+          s.sendJsonResponse(res, 400, { status: "failed" });
+          return;
+        }
+        s.sendJsonResponse(res, 201, {
+          productId: "prd0123",
+          name: "hengpon",
+          category: "Food",
           qty: 1,
           price: 100,
-
-          fileId: "",
-          fileUri: "",
-          fileThumbnailUri: "",
-
-          createdAt: "",
-          updatedAt: "",
+          sku: "sku123",
+          fileId: "file1",
+          fileUri: "file1",
+          fileThumbnailUri: "file1",
+          createdAt: "a",
+          updatedAt: "b"
         });
       } else {
         s.sendJsonResponse(res, 400, { status: "failed" });
@@ -180,8 +186,8 @@ test("Product Scenario", async (go) => {
       user: {
         email: "asdf@adf.com",
         phone: "+45646464",
-        password: "asdfasdf",
-        token: "Bearer asdfasdf",
+        password: "asraf123",
+        token: "Bearer asraf123",
       },
     };
     await assert.doesNotReject(

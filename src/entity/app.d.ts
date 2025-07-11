@@ -3,6 +3,14 @@ export enum ContactType {
   email = 'email',
 }
 
+export enum ProductCategory {
+  Food = "Food",
+  Beverage = "Beverage",
+  Clothes = "Clothes",
+  Furniture = "Furniture",
+  Tools = "Tools"
+}
+
 export type User = {
   fileId?: string;
   fileUri?: string;
@@ -36,7 +44,7 @@ export type Profile = {
 export type Product = {
   productId: string;
   name: string;
-  category: string;
+  category: ProductCategory;
   qty: number;
   price: number;
   sku: string;
@@ -46,6 +54,16 @@ export type Product = {
   createdAt?: string;
   updatedAt?: string;
 }
+
+export type PostProduct = {
+  name: string;
+  category: ProductCategory;
+  qty: number;
+  price: number;
+  sku: string;
+  fileId: string;
+}
+
 
 export type PurchaseRequest = {
   purchasedItems: Array<{

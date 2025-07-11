@@ -31,6 +31,7 @@ export function getProduct(res, positivePayload, featureName) {
     const jsonResult = res.json();
     if (jsonResult && typeof jsonResult == "object") {
       obj = combine(jsonResult, positivePayload);
+      console.log("obj", obj)
       if (isProduct(obj)) {
         return obj;
       }
@@ -40,6 +41,7 @@ export function getProduct(res, positivePayload, featureName) {
     console.log(featureName + " | json is not object", jsonResult);
     return;
   } catch (e) {
+
     console.log(featureName + " | json or validation error:", e, "body:", obj);
     return;
   }
