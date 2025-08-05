@@ -50,9 +50,20 @@ export function getAssertChecks(
     const userConditionFn = conditions[testMsg];
     const testName = `${featureName} | ${testMsg}`;
 
-    const k6CheckerFn = () => {
+    checks[testName] = () => {
       try {
-        return userConditionFn(parsedJson, k6response);
+        const result = userConditionFn(parsedJson, k6response);
+
+        if (config.debug) {
+          console.log(`${testName} | assert result: ${result}`);
+          if (!result && parseError) {
+            console.log(
+              `${testName} | Note: JSON parsing may have failed earlier (${parseError})`,
+            );
+          }
+        }
+
+        return result;
       } catch (checkError) {
         if (config.debug) {
           console.error(
@@ -62,21 +73,6 @@ export function getAssertChecks(
         return false;
       }
     };
-
-    if (config.debug) {
-      checks[testName] = () => {
-        const result = k6CheckerFn();
-        console.log(`${testName} | assert result: ${result}`);
-        if (!result && parseError) {
-          console.log(
-            `${testName} | Note: JSON parsing may have failed earlier (${parseError})`,
-          );
-        }
-        return result;
-      };
-    } else {
-      checks[testName] = k6CheckerFn;
-    }
   });
 
   if (config.debug) {
