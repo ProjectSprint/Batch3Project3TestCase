@@ -7,20 +7,23 @@ import {
   RegisterEmailScenario,
   RegisterPhoneScenario,
 } from "./scenario/registerScenario.js";
-import { 
-  GetProfileScenario, 
-  PostProfileEmailScenario, 
-  PostProfilePhoneScenario, 
-  PutProfileScenario
+import {
+  GetProfileScenario,
+  PostProfileEmailScenario,
+  PostProfilePhoneScenario,
+  PutProfileScenario,
 } from "./scenario/profileScenario.js";
-import { 
+import {
   PostPurchaseScenario,
-  PostPurchaseIdScenario
+  PostPurchaseIdScenario,
 } from "./scenario/purchaseScenario.js";
 
 export const options = {
   vus: 1,
   iterations: 1,
+  tresholds: {
+    http_req_failed: ["count<1", true],
+  },
 };
 
 const smallFile = open("./figure/image-50KB.jpg", "b");
@@ -41,7 +44,7 @@ const scenarios = {
   PostProfilePhoneScenario: PostProfilePhoneScenario,
   PostProfileEmailScenario: PostProfileEmailScenario,
   PostPurchaseScenario: PostPurchaseScenario,
-  PostPurchaseIdScenario: PostPurchaseIdScenario
+  PostPurchaseIdScenario: PostPurchaseIdScenario,
 };
 
 export default function () {
