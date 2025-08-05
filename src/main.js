@@ -22,7 +22,7 @@ export const options = {
   vus: 1,
   iterations: 1,
   tresholds: {
-    http_req_failed: ["count<1", true],
+    http_req_failed: ["count<1"],
   },
 };
 
