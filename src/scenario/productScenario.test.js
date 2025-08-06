@@ -13,7 +13,7 @@ const getSchema = z.object({
   qty: z.number(),
   price: z.number(),
   sku: z.string(),
-  fileId: z.string()
+  fileId: z.string(),
 });
 
 const s = new TestServer({});
@@ -24,8 +24,7 @@ s.addRoute("POST", "/v1/product", async (req, res) => {
     if (
       req.headers.authorization &&
       req.headers.authorization.startsWith("Bearer")
-    ) 
-    {
+    ) {
       const body = await s.getRequestBody(req);
       const validate = getSchema.safeParse(body);
 
@@ -82,7 +81,7 @@ s.addRoute("POST", "/v1/product", async (req, res) => {
 //     } else {
 //       s.sendJsonResponse(res, 401, { status: "failed" });
 //     }
-    
+
 //     return;
 //   } catch (error) {
 //     s.sendJsonResponse(res, 500, { status: "failed" });
@@ -99,7 +98,7 @@ s.addRoute("POST", "/v1/product", async (req, res) => {
 //     ) {
 //       const body = await s.getRequestBody(req);
 //       const validate = profilePhonePutSchema.safeParse(body);
-      
+
 //       if (validate.success) {
 
 //         if (registerdPhone.includes(validate.data.phone)) {
@@ -125,7 +124,7 @@ s.addRoute("POST", "/v1/product", async (req, res) => {
 //     } else {
 //       s.sendJsonResponse(res, 401, { status: "failed" });
 //     }
-    
+
 //     return;
 //   } catch (error) {
 //     s.sendJsonResponse(res, 500, { status: "failed" });

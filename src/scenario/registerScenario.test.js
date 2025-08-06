@@ -17,7 +17,7 @@ const passwordSchema = z
 const phoneSchema = z.string().regex(/^\+\d+$/, {
   message: "Phone number must start with '+' followed by digits",
 });
-
+// TODO: test login email & phone
 const LoginEmailRequestSchema = z.object({
   email: z.string().email({ message: "Invalid email format" }),
   password: passwordSchema,
