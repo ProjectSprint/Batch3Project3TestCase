@@ -64,7 +64,6 @@ export type PostProduct = {
   fileId: string;
 }
 
-
 export type PurchaseRequest = {
   purchasedItems: Array<{
     productId: string;

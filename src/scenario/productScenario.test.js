@@ -7,7 +7,7 @@ import child_process from "node:child_process";
 import assert from "node:assert";
 const exec = promisify(child_process.exec);
 
-const postSchema = z.object({
+const postPutSchema = z.object({
   name: z.string(),
   category: z.string(),
   qty: z.number(),
@@ -20,6 +20,7 @@ const s = new TestServer({});
 
 /** @type {string[]} */
 const validFileId = ["file1", "file2", "file3"];
+const availableProduct = [];
 
 /** @type {string[]} */
 s.addRoute("POST", "/v1/product", async (req, res) => {
@@ -30,23 +31,24 @@ s.addRoute("POST", "/v1/product", async (req, res) => {
     ) 
     {
       const body = await s.getRequestBody(req);
-      const validate = postSchema.safeParse(body);
+      const validate = postPutSchema.safeParse(body);
 
       if (validate.success) {
         if (validFileId.includes(validate.data.fileId) === false) {
           s.sendJsonResponse(res, 400, { status: "failed" });
           return;
         }
+        availableProduct.push("prd0123");
         s.sendJsonResponse(res, 201, {
           productId: "prd0123",
-          name: "hengpon",
-          category: "Food",
-          qty: 1,
-          price: 100,
-          sku: "sku123",
-          fileId: "file1",
-          fileUri: "file1",
-          fileThumbnailUri: "file1",
+          name: body.name,
+          category: body.category,
+          qty: body.qty,
+          price: body.price,
+          sku: body.sku,
+          fileId: body.fileId,
+          fileUri: body.fileUri,
+          fileThumbnailUri: body.fileThumbnailUri,
           createdAt: "a",
           updatedAt: "b"
         });
@@ -62,81 +64,81 @@ s.addRoute("POST", "/v1/product", async (req, res) => {
   }
 });
 
-// /** @type {string[]} */
-// s.addRoute("PUT", "/v1/user", async (req, res) => {
-//   try {
-//     if (
-//       req.headers.authorization &&
-//       req.headers.authorization.startsWith("Bearer")
-//     ) {
-//       const body = await s.getRequestBody(req);
-//       const validate = profilePutSchema.safeParse(body);
-//       if (validate.success) {
-//         s.sendJsonResponse(res, 200, {
-//           email: "name@name.com",
-//           phone: "",
-//           fileId: "",
-//           fileUri: "",
-//           fileThumbnailUri: "",
-//           bankAccountName: "",
-//           bankAccountHolder: "",
-//           bankAccountNumber: "",
-//         });
-//       } else {
-//         s.sendJsonResponse(res, 400, { status: "failed" });
-//       }
-//     } else {
-//       s.sendJsonResponse(res, 401, { status: "failed" });
-//     }
+/** @type {string[]} */
+s.addRoute("PUT", "/v1/product/:productId", async (req, res) => {
+  try {
+    if (
+      req.headers.authorization &&
+      req.headers.authorization.startsWith("Bearer")
+    ) {
+      const body = await s.getRequestBody(req);
+      const validate = postPutSchema.safeParse(body);
+      if (validate.success) {
+        s.sendJsonResponse(res, 200, {
+          productId: "prd0123",
+          name: body.name,
+          category: body.category,
+          qty: body.qty,
+          price: body.price,
+          sku: body.sku,
+          fileId: body.fileId,
+          fileUri: body.fileUri,
+          fileThumbnailUri: body.fileThumbnailUri,
+          createdAt: "a",
+          updatedAt: "b"
+        });
+      } else {
+        s.sendJsonResponse(res, 400, { status: "failed" });
+      }
+    } else {
+      s.sendJsonResponse(res, 401, { status: "failed" });
+    }
     
-//     return;
-//   } catch (error) {
-//     s.sendJsonResponse(res, 500, { status: "failed" });
-//   }
-// });
+    return;
+  } catch (error) {
+    s.sendJsonResponse(res, 500, { status: "failed" });
+  }
+});
 
-// /** @type {string[]} */
-// const registerdPhone = [];
-// s.addRoute("POST", "/v1/user/link/phone", async (req, res) => {
-//   try {
-//     if (
-//       req.headers.authorization &&
-//       req.headers.authorization.startsWith("Bearer")
-//     ) {
-//       const body = await s.getRequestBody(req);
-//       const validate = profilePhonePutSchema.safeParse(body);
-      
-//       if (validate.success) {
+/** @type {string[]} */
+s.addRoute("GET", "/v1/product", async (req, res) => {
+  try {
+    s.sendJsonResponse(res, 200, 
+        [
+          {
+            productId: "prd0123",
+            name: "sambalado",
+            category: "Food",
+            qty: 1,
+            price: 100,
+            sku: "FD1100",
+            fileId: "file123",
+            fileUri: "file123",
+            fileThumbnailUri: "",
+            createdAt: "a",
+            updatedAt: "b"
+          },
+          {
+            productId: "prd0124",
+            name: "cap-cin-cai",
+            category: "Food",
+            qty: 1,
+            price: 100,
+            sku: "FD1101",
+            fileId: "file124",
+            fileUri: "file124",
+            fileThumbnailUri: "",
+            createdAt: "g",
+            updatedAt: "c"
+          },
+        ]
+      );
 
-//         if (registerdPhone.includes(validate.data.phone)) {
-//           s.sendJsonResponse(res, 409, { status: "failed" });
-//           return;
-//         }
-
-//         registerdPhone.push(validate.data.phone);
-
-//         s.sendJsonResponse(res, 200, {
-//           email: "name@name.com",
-//           phone: "",
-//           fileId: "",
-//           fileUri: "",
-//           fileThumbnailUri: "",
-//           bankAccountName: "",
-//           bankAccountHolder: "",
-//           bankAccountNumber: "",
-//         });
-//       } else {
-//         s.sendJsonResponse(res, 400, { status: "failed" });
-//       }
-//     } else {
-//       s.sendJsonResponse(res, 401, { status: "failed" });
-//     }
-    
-//     return;
-//   } catch (error) {
-//     s.sendJsonResponse(res, 500, { status: "failed" });
-//   }
-// });
+    return;
+  } catch (error) {
+    s.sendJsonResponse(res, 500, { status: "failed" });
+  }
+});
 
 // /** @type {string[]} */
 // const registerdEmail = [];
@@ -181,7 +183,30 @@ test("Product Scenario", async (go) => {
   go.after(() => {
     s.stop();
   });
-  go.test("PostProductScenario should return 0 exit code", async () => {
+
+  // go.test("PostProductScenario should return 0 exit code", async () => {
+  //   const info = {
+  //     user: {
+  //       email: "asdf@adf.com",
+  //       phone: "+45646464",
+  //       password: "asraf123",
+  //       token: "Bearer asraf123",
+  //     },
+  //   };
+  //   await assert.doesNotReject(
+  //     exec(`${process.env.K6_PATH} run src/main.js`, {
+  //       env: {
+  //         BASE_URL: `http://127.0.0.1:${serverPort}`,
+  //         MOCK_INFO: `${JSON.stringify(info)}`,
+  //         RUN_UNIT_TEST: "true",
+  //         SCENARIO_NAME: "PostProductScenario",
+  //       },
+  //     }),
+  //     console.error,
+  //   );
+  // });
+
+  go.test("GetProductScenario should return 0 exit code", async () => {
     const info = {
       user: {
         email: "asdf@adf.com",
@@ -196,10 +221,11 @@ test("Product Scenario", async (go) => {
           BASE_URL: `http://127.0.0.1:${serverPort}`,
           MOCK_INFO: `${JSON.stringify(info)}`,
           RUN_UNIT_TEST: "true",
-          SCENARIO_NAME: "PostProductScenario",
+          SCENARIO_NAME: "GetProductScenario",
         },
       }),
       console.error,
     );
   });
+
 });

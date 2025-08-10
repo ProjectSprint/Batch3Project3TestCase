@@ -17,7 +17,10 @@ import {
   PostPurchaseScenario,
   PostPurchaseIdScenario
 } from "./scenario/purchaseScenario.js";
-import { PostProductScenario } from "./scenario/productScenario.js";
+import { 
+  GetProductScenario,
+  PostProductScenario 
+} from "./scenario/productScenario.js";
 
 export const options = {
   vus: 1,
@@ -43,7 +46,8 @@ const scenarios = {
   PostProfileEmailScenario: PostProfileEmailScenario,
   PostPurchaseScenario: PostPurchaseScenario,
   PostPurchaseIdScenario: PostPurchaseIdScenario,
-  PostProductScenario: PostProductScenario
+  PostProductScenario: PostProductScenario,
+  GetProductScenario: GetProductScenario,
 };
 
 export default function () {
