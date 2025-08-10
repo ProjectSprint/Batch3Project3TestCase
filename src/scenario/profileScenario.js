@@ -106,22 +106,21 @@ export function PutProfileScenario(config, tags, info) {
   const featureName = "Put Profile";
   const route = config.baseUrl + "/v1/user";
   const assertHandler = testPutJsonAssert;
-  
+
   const user = info.user;
-  
+
   if (!isUser(user)) {
     console.warn(`${featureName} needs a valid user`);
     return undefined;
   }
 
-  
   const positivePayload = {
     fileId: "123abc",
     bankAccountName: generateRandomUsername(),
     bankAccountHolder: generateRandomUsername(),
     bankAccountNumber: `${generateRandomNumber(9999, 999999999999)}`,
   };
-  
+
   if (config.runNegativeCase) {
     assertHandler({
       currentTestName: "no token",
@@ -264,7 +263,7 @@ export function PostProfilePhoneScenario(config, tags, info) {
   }
 
   const positivePayload = {
-    phone: generateRandomPhoneNumber(true)
+    phone: generateRandomPhoneNumber(true),
   };
 
   if (config.runNegativeCase) {
@@ -300,7 +299,7 @@ export function PostProfilePhoneScenario(config, tags, info) {
         phone: {
           type: "string",
           notNull: false,
-          isPhoneNumber: true
+          isPhoneNumber: true,
         },
       },
       positivePayload,
@@ -393,7 +392,7 @@ export function PostProfileEmailScenario(config, tags, info) {
   }
 
   const positivePayload = {
-    email: generateRandomEmail()
+    email: generateRandomEmail(),
   };
 
   if (config.runNegativeCase) {
@@ -506,3 +505,4 @@ export function PostProfileEmailScenario(config, tags, info) {
     return undefined;
   }
 }
+

@@ -11,27 +11,35 @@ const phoneSchema = z.string().regex(/^\+\d+$/, {
   message: "Phone number must start with '+' followed by digits",
 });
 
-const emailSchema = z.string().regex(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, {
-  message: "Email must be in a valid format",
-});
+const emailSchema = z
+  .string()
+  .regex(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, {
+    message: "Email must be in a valid format",
+  });
 
 const purchaseItemsSchema = z.object({
-    productId: z.string(),
-    qty: z.number()
+  productId: z.string(),
+  qty: z.number(),
 });
 
 const purchasePostSchema = z.object({
-    purchasedItems: z.array(purchaseItemsSchema),
-    senderName: z.string().min(4, { message: "senderName must be at least 4 characters long" }).max(55, { message: "senderName must be no more than 55 characters long" }),
-    senderContactType: z.enum(["email", "phone"]),
-    senderContactDetail: z.string()
-})
+  purchasedItems: z.array(purchaseItemsSchema),
+  senderName: z
+    .string()
+    .min(4, { message: "senderName must be at least 4 characters long" })
+    .max(55, { message: "senderName must be no more than 55 characters long" }),
+  senderContactType: z.enum(["email", "phone"]),
+  senderContactDetail: z.string(),
+});
 
 const purchaseIdPostSchema = z.object({
-    fileIds: z.array(z.string()).min(1, {message: "file id must at least one item"})
+  fileIds: z
+    .array(z.string())
+    .min(1, { message: "file id must at least one item" }),
 });
 
 const s = new TestServer({});
+
 
 const productIds = ["1", "3"]
 const fileIds = ["file123", "oka955"]
@@ -43,13 +51,17 @@ s.addRoute("POST", "/v1/purchase", async (req, res) => {
       
     if (validate.success) {
         if (validate.data.senderContactType === "email") {
-            const validateEmail = emailSchema.safeParse(validate.data.senderContactDetail);
+            const validateEmail = emailSchema.safeParse(
+              validate.data.senderContactDetail
+            );
             if (!validateEmail.success) {
                 s.sendJsonResponse(res, 400, { status: "failed" });
                 return;
             }
         } else {
-            const validatePhone = phoneSchema.safeParse(validate.data.senderContactDetail);
+            const validatePhone = phoneSchema.safeParse(
+              validate.data.senderContactDetail
+            );
             if (!validatePhone.success) {
                 s.sendJsonResponse(res, 400, { status: "failed" });
                 return; 
@@ -109,7 +121,10 @@ s.addRoute("POST", "/v1/purchase/:purchaseId", async (req, res) => {
     const validate = purchaseIdPostSchema.safeParse(body);
       
     if (validate.success) {
-        if (validate.data.fileIds.length < 3 || validate.data.fileIds.length > 3) {
+        if (
+          validate.data.fileIds.length < 3 || 
+          validate.data.fileIds.length > 3
+        ) {
           s.sendJsonResponse(res, 400, { status: "failed" });  
         }
         s.sendJsonResponse(res, 201, {});

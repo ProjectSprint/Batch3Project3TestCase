@@ -9,11 +9,11 @@ import {
   LoginEmailScenario,
   LoginPhoneScenario,
 } from "./scenario/registerScenario.js";
-import { 
-  GetProfileScenario, 
-  PostProfileEmailScenario, 
-  PostProfilePhoneScenario, 
-  PutProfileScenario
+import {
+  GetProfileScenario,
+  PostProfileEmailScenario,
+  PostProfilePhoneScenario,
+  PutProfileScenario,
 } from "./scenario/profileScenario.js";
 import { 
   PostPurchaseScenario,
@@ -29,6 +29,9 @@ import {
 export const options = {
   vus: 1,
   iterations: 1,
+  tresholds: {
+    http_req_failed: ["count<1"],
+  },
 };
 
 const smallFile = open("./figure/image-50KB.jpg", "b");

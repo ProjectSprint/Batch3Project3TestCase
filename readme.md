@@ -1,20 +1,20 @@
-# TutupLapak Test Cases!
-## ProjectSprint Batch 3 Project 3
+# ProjectSprint Challenge
+## TutupLapak Test Cases!
 
 ### Status
 - ✅ Register 
 - ✅ Login 
-- 🏗️ Get Profile 
-- 🏗️ Put Profile 
-- 🏗️ Link Phone Profile 
-- 🏗️ Link Email Profile 
+- ✅ Get Profile 
+- ✅ Put Profile 
+- ✅ Link Phone Profile 
+- ✅ Link Email Profile 
 - ✅ File Upload
-- 🏗️ Post Product 
-- 🏗️ Get Product 
-- 🏗️ Patch Product 
-- 🏗️ Delete Product 
-- 🏗️ Post Purchase 
-- 🏗️ Post Purchase Proof 
+- ✅ Post Product 
+- ✅ Get Product 
+- ✅ Patch Product 
+- ✅ Delete Product 
+- ✅ Post Purchase 
+- ✅ Post Purchase Proof 
 
 ### Prerequisites
 - [ k6 ](https://k6.io/docs/get-started/installation/)

@@ -11,9 +11,11 @@ const phoneSchema = z.string().regex(/^\+\d+$/, {
   message: "Phone number must start with '+' followed by digits",
 });
 
-const emailSchema = z.string().regex(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, {
-  message: "Email must be in a valid format",
-});
+const emailSchema = z
+  .string()
+  .regex(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, {
+    message: "Email must be in a valid format",
+  });
 
 const requestSchema = z.object({
   email: z.string(),
@@ -28,18 +30,33 @@ const requestSchema = z.object({
 
 const profilePutSchema = z.object({
   fileId: z.string(),
-  bankAccountName: z.string().min(4, { message: "bankAccountName must be at least 4 characters long" }).max(32, { message: "bankAccountName  must be no more than 32 characters long" }),
-  bankAccountHolder: z.string().min(4, { message: "bankAccountHolder must be at least 4 characters long" }).max(32, { message: "bankAccountHolder  must be no more than 32 characters long" }),
-  bankAccountNumber: z.string().min(4, { message: "bankAccountNumber must be at least 4 characters long" }).max(32, { message: "bankAccountNumber  must be no more than 32 characters long" }),
+  bankAccountName: z
+    .string()
+    .min(4, { message: "bankAccountName must be at least 4 characters long" })
+    .max(32, {
+      message: "bankAccountName  must be no more than 32 characters long",
+    }),
+  bankAccountHolder: z
+    .string()
+    .min(4, { message: "bankAccountHolder must be at least 4 characters long" })
+    .max(32, {
+      message: "bankAccountHolder  must be no more than 32 characters long",
+    }),
+  bankAccountNumber: z
+    .string()
+    .min(4, { message: "bankAccountNumber must be at least 4 characters long" })
+    .max(32, {
+      message: "bankAccountNumber  must be no more than 32 characters long",
+    }),
 });
 
 const profilePhonePutSchema = z.object({
-  phone: phoneSchema
-})
+  phone: phoneSchema,
+});
 
 const profileEmailPutSchema = z.object({
-  email: emailSchema
-})
+  email: emailSchema,
+});
 
 const s = new TestServer({});
 
@@ -95,7 +112,7 @@ s.addRoute("PUT", "/v1/user", async (req, res) => {
     } else {
       s.sendJsonResponse(res, 401, { status: "failed" });
     }
-    
+
     return;
   } catch (error) {
     s.sendJsonResponse(res, 500, { status: "failed" });
@@ -112,9 +129,8 @@ s.addRoute("POST", "/v1/user/link/phone", async (req, res) => {
     ) {
       const body = await s.getRequestBody(req);
       const validate = profilePhonePutSchema.safeParse(body);
-      
-      if (validate.success) {
 
+      if (validate.success) {
         if (registerdPhone.includes(validate.data.phone)) {
           s.sendJsonResponse(res, 409, { status: "failed" });
           return;
@@ -138,7 +154,7 @@ s.addRoute("POST", "/v1/user/link/phone", async (req, res) => {
     } else {
       s.sendJsonResponse(res, 401, { status: "failed" });
     }
-    
+
     return;
   } catch (error) {
     s.sendJsonResponse(res, 500, { status: "failed" });
@@ -217,7 +233,7 @@ test("Profile Scenario", async (go) => {
         phone: "+45646464",
         password: "asdfasdf",
         token: "Bearer asdfasdf",
-      }
+      },
     };
     await assert.doesNotReject(
       exec(`${process.env.K6_PATH} run src/main.js`, {
@@ -239,7 +255,7 @@ test("Profile Scenario", async (go) => {
         phone: "+45646464",
         password: "asdfasdf",
         token: "Bearer asdfasdf",
-      }
+      },
     };
     await assert.doesNotReject(
       exec(`${process.env.K6_PATH} run src/main.js`, {
@@ -261,7 +277,7 @@ test("Profile Scenario", async (go) => {
         phone: "+45646464",
         password: "asdfasdf",
         token: "Bearer asdfasdf",
-      }
+      },
     };
     await assert.doesNotReject(
       exec(`${process.env.K6_PATH} run src/main.js`, {
