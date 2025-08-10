@@ -500,3 +500,148 @@ export function PutProductScenario(config, tags, info) {
       return undefined;
     }
 }
+
+/**
+ * @type {import("src/types/scenario.js").Scenario<import("src/entity/app.js").Product | undefined>}
+ */
+export function DeleteProductScenario(config, tags, info) {
+  const featureName = "Delete Product";
+  const route = config.baseUrl + "/v1/product/:productId";
+  const assertHandler = testPutJsonAssert;
+  const user = info.user;
+  if (!isUser(user)) {
+    console.warn(`${featureName} needs a valid user or file`);
+    return undefined;
+  }
+
+  // akses objek produk via k6
+  const mockProduct = info.product;
+  if (!isProduct(mockProduct)) {
+    console.warn(`${featureName} needs a valid product`);
+    return undefined;
+  }
+  // dari sini sudah bisa pakai mockProduct
+  
+  const positivePayload1 = {
+    productId: mockProduct.productId,
+    name: generateRandomName(),
+    category: "Food",
+    qty: 1,
+    price: 100,
+    sku: "sku12345",
+    fileId: validFileId[generateRandomNumber(0, validFileId.length - 1)],
+    fileUri: "file1.jpeg",
+    fileThumbnailUri: "tmb_file1.jpeg",
+  };
+  
+  const negativePayload = clone(positivePayload1);
+  negativePayload.productId = "idSalah0123";
+  
+  let positivePayloads = [positivePayload1];
+  if (config.runNegativeCase) {
+    assertHandler({
+      currentTestName: "no token",
+      featureName: featureName,
+      route: route,
+      body: {},
+      headers: {},
+      expectedCase: {
+        ["should return 401"]: (_parsed, res) => res.status === 401,
+      },
+      options: [],
+      config: config,
+      tags: {},
+    });
+    assertHandler({
+      currentTestName: "productId is not exist",
+      featureName: featureName,
+      route: route,
+      body: negativePayload,
+      headers: { Authorization: user.token },
+      expectedCase: {
+        ["should return 404"]: (_parsed, res) => res.status === 404,
+      },
+      options: [],
+      config: config,
+      tags: {},
+    });
+    
+    const testObjects = generateTestObjects(
+      {
+        name: {
+          type: "string",
+          notNull: false,
+          minLength: 4,
+          maxLength: 32
+        },
+        category: {
+          type: "string",
+          notNull: false,
+          enum: ["Food", "Beverage", "Clothes", "Furniture", "Tools"]
+        },
+        qty: {
+          type: "number",
+          min: 1
+        },
+        price: {
+          type: "number",
+          min: 100
+        },
+        sku: {
+          type: "string",
+          notNull: false,
+          minLength: 1,
+          maxLength: 32
+        },
+        fileId: {
+          type: "string",
+          notNull: false
+        }
+      },
+      negativePayload
+    );
+    
+    
+    testObjects.forEach((payload) => {
+      assertHandler({
+        currentTestName: "invalid payload",
+        featureName: featureName,
+        route: route,
+        body: payload,
+        headers: { Authorization: user.token },
+        expectedCase: {
+            ["should return 400"]: (_parsed, res) => res.status === 400,
+          },
+          options: [],
+          config: config,
+          tags: {},
+        });
+      });
+    }
+    
+    // --- Positive Case ---
+    let positiveResults = positivePayloads.map((payload, _index) => {
+      return assertHandler({
+        currentTestName: "valid payload",
+        featureName: featureName,
+        route: route,
+        body: payload,
+        headers: { Authorization: user.token },
+        expectedCase: {
+          ["should return 200"]: (_parsed, res) => res.status === 200,
+        },
+        options: [],
+        config: config,
+        tags: {},
+      });
+    });
+    
+    if (positiveResults.every((result) => {return result.isSuccess})) {
+      return getProduct(positiveResults[0].res, {}, featureName);
+    } else {
+      console.warn(
+        `${featureName} | Skipping getProduct due to failed assertions.`,
+      );
+      return undefined;
+    }
+}

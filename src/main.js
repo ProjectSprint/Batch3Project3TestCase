@@ -18,6 +18,7 @@ import {
   PostPurchaseIdScenario
 } from "./scenario/purchaseScenario.js";
 import { 
+  DeleteProductScenario,
   GetProductScenario,
   PostProductScenario, 
   PutProductScenario
@@ -50,6 +51,7 @@ const scenarios = {
   PostProductScenario: PostProductScenario,
   GetProductScenario: GetProductScenario,
   PutProductScenario: PutProductScenario,
+  DeleteProductScenario: DeleteProductScenario,
 };
 
 export default function () {

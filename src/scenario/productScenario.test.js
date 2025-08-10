@@ -28,6 +28,10 @@ const putSchema = z.object({
   fileThumbnailUri: z.string(),
 });
 
+const deleteSchema = z.object({
+  productId: z.string(),
+});
+
 const s = new TestServer({});
 
 /** @type {string[]} */
@@ -163,40 +167,34 @@ s.addRoute("GET", "/v1/product", async (req, res) => {
   }
 });
 
-// /** @type {string[]} */
-// const registerdEmail = [];
-// s.addRoute("POST", "/v1/user/link/email", async (req, res) => {
-//   try {
-//     const body = await s.getRequestBody(req);
-//     const validate = profileEmailPutSchema.safeParse(body);
+/** @type {string[]} */
+const registerdEmail = [];
+s.addRoute("DELETE", "/v1/product/:productId", async (req, res) => {
+  try {
+    if (
+      req.headers.authorization &&
+      req.headers.authorization.startsWith("Bearer")
+    ) {
+      const body = await s.getRequestBody(req);
+      const validate = deleteSchema.safeParse(body);
+      if (validate.success) {
+        if (!availableProduct.includes(validate.data.productId)) {
+          s.sendJsonResponse(res, 404, { status: "failed" });
+          return;
+        }
 
-//     if (validate.success) {
-//       if (registerdEmail.includes(validate.data.email)) {
-//         s.sendJsonResponse(res, 409, { status: "failed" });
-//         return;
-//       }
-
-//       registerdEmail.push(validate.data.email);
-
-//       s.sendJsonResponse(res, 200, {
-//         email: validate.data.email,
-//         phone: "",
-//         fileId: "",
-//         fileUri: "",
-//         fileThumbnailUri: "",
-//         bankAccountName: "",
-//         bankAccountHolder: "",
-//         bankAccountNumber: "",
-//       });
-//     } else {
-//       s.sendJsonResponse(res, 400, { status: "failed" });
-//       return;
-//     }
-//     return;
-//   } catch (error) {
-//     s.sendJsonResponse(res, 500, { status: "failed" });
-//   }
-// });
+        s.sendJsonResponse(res, 200, {});
+      } else {
+        s.sendJsonResponse(res, 400, { status: "failed" });
+      }
+    } else {
+      s.sendJsonResponse(res, 401, { status: "failed" });
+    }
+    return;
+  } catch (error) {
+    s.sendJsonResponse(res, 500, { status: "failed" });
+  }
+});
 
 test("Product Scenario", async (go) => {
   let serverPort = 0;
@@ -207,49 +205,49 @@ test("Product Scenario", async (go) => {
     s.stop();
   });
 
-  // go.test("PostProductScenario should return 0 exit code", async () => {
-  //   const info = {
-  //     user: {
-  //       email: "asdf@adf.com",
-  //       phone: "+45646464",
-  //       password: "asraf123",
-  //       token: "Bearer asraf123",
-  //     },
-  //   };
-  //   await assert.doesNotReject(
-  //     exec(`${process.env.K6_PATH} run src/main.js`, {
-  //       env: {
-  //         BASE_URL: `http://127.0.0.1:${serverPort}`,
-  //         MOCK_INFO: `${JSON.stringify(info)}`,
-  //         RUN_UNIT_TEST: "true",
-  //         SCENARIO_NAME: "PostProductScenario",
-  //       },
-  //     }),
-  //     console.error,
-  //   );
-  // });
+  go.test("PostProductScenario should return 0 exit code", async () => {
+    const info = {
+      user: {
+        email: "asdf@adf.com",
+        phone: "+45646464",
+        password: "asraf123",
+        token: "Bearer asraf123",
+      },
+    };
+    await assert.doesNotReject(
+      exec(`${process.env.K6_PATH} run src/main.js`, {
+        env: {
+          BASE_URL: `http://127.0.0.1:${serverPort}`,
+          MOCK_INFO: `${JSON.stringify(info)}`,
+          RUN_UNIT_TEST: "true",
+          SCENARIO_NAME: "PostProductScenario",
+        },
+      }),
+      console.error,
+    );
+  });
 
-  // go.test("GetProductScenario should return 0 exit code", async () => {
-  //   const info = {
-  //     user: {
-  //       email: "asdf@adf.com",
-  //       phone: "+45646464",
-  //       password: "asraf123",
-  //       token: "Bearer asraf123",
-  //     },
-  //   };
-  //   await assert.doesNotReject(
-  //     exec(`${process.env.K6_PATH} run src/main.js`, {
-  //       env: {
-  //         BASE_URL: `http://127.0.0.1:${serverPort}`,
-  //         MOCK_INFO: `${JSON.stringify(info)}`,
-  //         RUN_UNIT_TEST: "true",
-  //         SCENARIO_NAME: "GetProductScenario",
-  //       },
-  //     }),
-  //     console.error,
-  //   );
-  // });
+  go.test("GetProductScenario should return 0 exit code", async () => {
+    const info = {
+      user: {
+        email: "asdf@adf.com",
+        phone: "+45646464",
+        password: "asraf123",
+        token: "Bearer asraf123",
+      },
+    };
+    await assert.doesNotReject(
+      exec(`${process.env.K6_PATH} run src/main.js`, {
+        env: {
+          BASE_URL: `http://127.0.0.1:${serverPort}`,
+          MOCK_INFO: `${JSON.stringify(info)}`,
+          RUN_UNIT_TEST: "true",
+          SCENARIO_NAME: "GetProductScenario",
+        },
+      }),
+      console.error,
+    );
+  });
 
   go.test("PutProductScenario should return 0 exit code", async () => {
     const info = {
@@ -280,6 +278,41 @@ test("Product Scenario", async (go) => {
           MOCK_INFO: `${JSON.stringify(info)}`,
           RUN_UNIT_TEST: "true",
           SCENARIO_NAME: "PutProductScenario",
+        },
+      }),
+      console.error,
+    );
+  });
+
+  go.test("DeleteProductScenario should return 0 exit code", async () => {
+    const info = {
+      product: {
+        productId: "prd0123",
+        name: "sambalado",
+        category: "Food",
+        qty: 1,
+        price: 100,
+        sku: "FD1100",
+        fileId: "file123",
+        fileUri: "file123",
+        fileThumbnailUri: "",
+        createdAt: "a",
+        updatedAt: "b",
+      },
+      user: {
+        email: "asdf@adf.com",
+        phone: "+45646464",
+        password: "asraf123",
+        token: "Bearer asraf123",
+      },
+    };
+    await assert.doesNotReject(
+      exec(`${process.env.K6_PATH} run src/main.js`, {
+        env: {
+          BASE_URL: `http://127.0.0.1:${serverPort}`,
+          MOCK_INFO: `${JSON.stringify(info)}`,
+          RUN_UNIT_TEST: "true",
+          SCENARIO_NAME: "DeleteProductScenario",
         },
       }),
       console.error,
