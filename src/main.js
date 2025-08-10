@@ -1,11 +1,13 @@
 import exec from "k6/execution";
-import {
-  LoginEmailScenario,
-  LoginPhoneScenario,
-} from "./scenario/loginScenario.js";
+// import {
+//   LoginEmailScenario,
+//   LoginPhoneScenario,
+// } from "./scenario/loginScenario.js";
 import {
   RegisterEmailScenario,
   RegisterPhoneScenario,
+  LoginEmailScenario,
+  LoginPhoneScenario,
 } from "./scenario/registerScenario.js";
 import {
   GetProfileScenario,
@@ -13,10 +15,16 @@ import {
   PostProfilePhoneScenario,
   PutProfileScenario,
 } from "./scenario/profileScenario.js";
-import {
+import { 
   PostPurchaseScenario,
-  PostPurchaseIdScenario,
+  PostPurchaseIdScenario
 } from "./scenario/purchaseScenario.js";
+import { 
+  DeleteProductScenario,
+  GetProductScenario,
+  PostProductScenario, 
+  PutProductScenario
+} from "./scenario/productScenario.js";
 
 export const options = {
   vus: 1,
@@ -45,6 +53,10 @@ const scenarios = {
   PostProfileEmailScenario: PostProfileEmailScenario,
   PostPurchaseScenario: PostPurchaseScenario,
   PostPurchaseIdScenario: PostPurchaseIdScenario,
+  PostProductScenario: PostProductScenario,
+  GetProductScenario: GetProductScenario,
+  PutProductScenario: PutProductScenario,
+  DeleteProductScenario: DeleteProductScenario,
 };
 
 export default function () {

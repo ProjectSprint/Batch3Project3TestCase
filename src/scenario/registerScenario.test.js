@@ -41,7 +41,7 @@ const RegisterPhoneRequestSchema = z.object({
 const s = new TestServer({});
 
 /** @type {string[]} */
-const registerdPhone = [];
+const registerdPhone = ["+628123123123"];
 s.addRoute("POST", "/v1/register/phone", async (req, res) => {
   try {
     const body = await s.getRequestBody(req);
@@ -66,8 +66,31 @@ s.addRoute("POST", "/v1/register/phone", async (req, res) => {
   }
 });
 
+s.addRoute("POST", "/v1/login/phone", async (req, res) => {
+  try {
+    const body = await s.getRequestBody(req);
+    const validate = RegisterPhoneRequestSchema.safeParse(body);
+    if (!validate.success) {
+      s.sendJsonResponse(res, 400, { status: "failed" });
+      return;
+    }
+    if (!registerdPhone.includes(validate.data.phone)) {
+      s.sendJsonResponse(res, 404, { status: "failed" });
+      return;
+    }
+    s.sendJsonResponse(res, 200, {
+      email: null,
+      phone: validate.data.phone,
+      token: "token",
+    });
+    return;
+  } catch (error) {
+    s.sendJsonResponse(res, 500, { status: "failed" });
+  }
+});
+
 /** @type {string[]} */
-const registerdEmail = [];
+const registerdEmail = ["mas@gmail.com"];
 s.addRoute("POST", "/v1/register/email", async (req, res) => {
   try {
     const body = await s.getRequestBody(req);
@@ -82,6 +105,29 @@ s.addRoute("POST", "/v1/register/email", async (req, res) => {
     }
     registerdEmail.push(validate.data.email);
     s.sendJsonResponse(res, 201, {
+      email: validate.data.email,
+      phone: null,
+      token: "token",
+    });
+    return;
+  } catch (error) {
+    s.sendJsonResponse(res, 500, { status: "failed" });
+  }
+});
+
+s.addRoute("POST", "/v1/login/email", async (req, res) => {
+  try {
+    const body = await s.getRequestBody(req);
+    const validate = RegisterEmailRequestSchema.safeParse(body);
+    if (!validate.success) {
+      s.sendJsonResponse(res, 400, { status: "failed" });
+      return;
+    }
+    if (!registerdEmail.includes(validate.data.email)) {
+      s.sendJsonResponse(res, 404, { status: "failed" });
+      return;
+    }
+    s.sendJsonResponse(res, 200, {
       email: validate.data.email,
       phone: null,
       token: "token",
@@ -114,6 +160,20 @@ test("Register Scenario", async (go) => {
     );
   });
 
+  go.test("LoginEmailScenario should return 0 exit code", async () => {
+    await assert.doesNotReject(
+      exec(`${process.env.K6_PATH} run src/main.js`, {
+        env: {
+          BASE_URL: `http://127.0.0.1:${serverPort}`,
+          MOCK_INFO: ``,
+          RUN_UNIT_TEST: "true",
+          SCENARIO_NAME: "LoginEmailScenario",
+        },
+      }),
+      console.error,
+    );
+  });
+
   go.test("RegisterPhoneScenario should return 0 exit code", async () => {
     await assert.doesNotReject(
       exec(`${process.env.K6_PATH} run src/main.js`, {
@@ -122,6 +182,20 @@ test("Register Scenario", async (go) => {
           MOCK_INFO: ``,
           RUN_UNIT_TEST: "true",
           SCENARIO_NAME: "RegisterPhoneScenario",
+        },
+      }),
+      console.error,
+    );
+  });
+
+  go.test("LoginPhoneScenario should return 0 exit code", async () => {
+    await assert.doesNotReject(
+      exec(`${process.env.K6_PATH} run src/main.js`, {
+        env: {
+          BASE_URL: `http://127.0.0.1:${serverPort}`,
+          MOCK_INFO: ``,
+          RUN_UNIT_TEST: "true",
+          SCENARIO_NAME: "LoginPhoneScenario",
         },
       }),
       console.error,
