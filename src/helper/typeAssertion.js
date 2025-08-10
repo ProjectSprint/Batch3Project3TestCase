@@ -37,7 +37,6 @@ export function createValidator(schemaString) {
   return function validate(value) {
     /** @type {ValidationError[]} */
     const errors = [];
-    console.log("validate", schema);
     const resolvedSchema = resolveSchema(schema, context);
     validateAgainstSchema(value, resolvedSchema, context, "", "#", errors);
 

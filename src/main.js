@@ -19,7 +19,8 @@ import {
 } from "./scenario/purchaseScenario.js";
 import { 
   GetProductScenario,
-  PostProductScenario 
+  PostProductScenario, 
+  PutProductScenario
 } from "./scenario/productScenario.js";
 
 export const options = {
@@ -48,6 +49,7 @@ const scenarios = {
   PostPurchaseIdScenario: PostPurchaseIdScenario,
   PostProductScenario: PostProductScenario,
   GetProductScenario: GetProductScenario,
+  PutProductScenario: PutProductScenario,
 };
 
 export default function () {
