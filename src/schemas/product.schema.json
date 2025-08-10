@@ -62,6 +62,12 @@
         "sku",
         "fileId"
       ]
+    },
+    "Products": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Product"
+      }
     }
   }
 }

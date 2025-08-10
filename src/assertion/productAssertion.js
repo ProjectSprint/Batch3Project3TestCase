@@ -2,9 +2,8 @@ import { combine } from "../helper/generator.js";
 import { createValidator } from "../helper/typeAssertion.js";
 
 const productSchema = open("../schemas/product.schema.json");
-const productSchemas = open("../schemas/products.schema.json");
 const isValid = createValidator(productSchema);
-const isProductsValid = createValidator(productSchemas);
+const isProductsValid = createValidator(productSchema.replace("#/definitions/Product", "#/definitions/Products"));
 
 /**
  * Asserts that a value is a valid User object
