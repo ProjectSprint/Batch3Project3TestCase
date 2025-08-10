@@ -1,11 +1,13 @@
 import exec from "k6/execution";
-import {
-  LoginEmailScenario,
-  LoginPhoneScenario,
-} from "./scenario/loginScenario.js";
+// import {
+//   LoginEmailScenario,
+//   LoginPhoneScenario,
+// } from "./scenario/loginScenario.js";
 import {
   RegisterEmailScenario,
   RegisterPhoneScenario,
+  LoginEmailScenario,
+  LoginPhoneScenario,
 } from "./scenario/registerScenario.js";
 import { 
   GetProfileScenario, 

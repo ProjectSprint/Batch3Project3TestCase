@@ -41,6 +41,12 @@ export type Profile = {
   bankAccontNumber: string;
 }
 
+export type UserLogin = {
+  email: string;
+  phone: string;
+  password: string;
+}
+
 export type Product = {
   productId: string;
   name: string;

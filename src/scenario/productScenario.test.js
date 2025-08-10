@@ -38,7 +38,8 @@ const s = new TestServer({});
 const validFileId = ["file1", "file2", "file3"];
 
 /** @type {string[]} */
-const availableProduct = ["prd0123"];
+const availableProduct = [];
+let productIdCount = 123;
 
 /** @type {string[]} */
 s.addRoute("POST", "/v1/product", async (req, res) => {
@@ -57,8 +58,10 @@ s.addRoute("POST", "/v1/product", async (req, res) => {
           return;
         }
 
+        let productId = "prd0" +  productIdCount++;
+        availableProduct.push(productId);
         s.sendJsonResponse(res, 201, {
-          productId: "prd0123",
+          productId: productId,
           name: body.name,
           category: body.category,
           qty: body.qty,
