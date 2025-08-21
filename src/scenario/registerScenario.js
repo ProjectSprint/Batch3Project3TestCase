@@ -9,6 +9,11 @@ import {
 import { isExists } from "../helper/assertion.js";
 
 /**
+ * @type {import("src/entity/app.js").UserLogin[]}
+ */
+let registeredUserEmail = [{email: "mas@gmail.com", phone: "", password: "password"}];
+
+/**
  * @type {import("src/types/scenario.js").Scenario<import("src/entity/app.js").User | undefined>}
  */
 export function RegisterEmailScenario(config, tags, info) {
@@ -103,8 +108,13 @@ export function RegisterEmailScenario(config, tags, info) {
     });
   }
   if (registerResult.isSuccess) {
+      registeredUserEmail.push({
+      email: positivePayload.email,
+      phone: "",
+      password: positivePayload.password,
+    });
+    
     const usr = getUser(registerResult.res, positivePayload, featureName);
-    console.log("usr: ", usr);
     return usr;
   } else {
     console.warn(
@@ -113,6 +123,104 @@ export function RegisterEmailScenario(config, tags, info) {
     return undefined;
   }
 }
+
+
+/**
+ * @type {import("src/types/scenario.js").Scenario<import("src/entity/app.js").User | undefined>}
+ */
+export function LoginEmailScenario(config, tags, info) {
+  const featureName = "Login Email";
+  const route = config.baseUrl + "/v1/login/email";
+  const assertHandler = testPostJsonAssert;
+
+  const positivePayload = {
+    email: registeredUserEmail[0].email,
+    password: registeredUserEmail[0].password,
+  };
+
+
+  if (config.runNegativeCase) {
+    assertHandler({
+      currentTestName: "empty body",
+      featureName: featureName,
+      route: route,
+      body: {},
+      headers: {},
+      expectedCase: {
+        // Use underscore '_' prefix for unused 'parsed' parameter
+        ["should return 400"]: (_parsed, res) => res.status === 400,
+      },
+      options: [],
+      config: config,
+      tags: tags,
+    });
+
+    const testObjects = generateTestObjects(
+      {
+        email: { type: "string", notNull: true, isEmail: true },
+        password: {
+          type: "string",
+          notNull: true,
+          minLength: 8,
+          maxLength: 32,
+        },
+      },
+      positivePayload,
+    );
+    testObjects.forEach((payload) => {
+      assertHandler({
+        currentTestName: "invalid payload",
+        featureName: featureName,
+        route: route,
+        body: payload,
+        headers: {},
+        expectedCase: {
+          ["should return 400"]: (_parsed, res) => res.status === 400,
+        },
+        options: [],
+        config: config,
+        tags: tags,
+      });
+    });
+  }
+
+  // --- Positive Case ---
+  const registerResult = assertHandler({
+    currentTestName: "valid payload",
+    featureName: featureName,
+    route: route,
+    body: positivePayload,
+    headers: {},
+    expectedCase: {
+      ["should return 200"]: (_parsed, res) => res.status === 200,
+      ["should have email"]: (parsed, _res) =>
+        isExists(parsed, "email", ["string"]),
+      ["should have phone"]: (parsed, _res) =>
+        isExists(parsed, "phone", ["string", null]),
+      ["should have token"]: (parsed, _res) =>
+        isExists(parsed, "token", ["string"]),
+    },
+    options: [],
+    config: config,
+    tags: tags,
+  });
+
+  // --- Return User ---
+  if (registerResult.isSuccess) {
+    const usr = getUser(registerResult.res, positivePayload, featureName);
+    return usr;
+  } else {
+    console.warn(
+      `${featureName} | Skipping getUser due to failed registration assertions.`,
+    );
+    return undefined;
+  }
+}
+
+/**
+ * @type {import("src/entity/app.js").UserLogin[]}
+ */
+const registeredUserPhone = [{phone: "+628123123123", email: "", password: "password"}];
 
 /**
  * @type {import("src/types/scenario.js").Scenario<import("src/entity/app.js").User | undefined>}
@@ -197,25 +305,110 @@ export function RegisterPhoneScenario(config, tags, info) {
     tags: tags,
   });
 
-  // --- Negative Case: Conflict Check ---
-  if (config.runNegativeCase && registerResult.isSuccess) {
-    testPostJsonAssert({
-      currentTestName: "phone conflict",
+  // --- Return User ---
+  if (registerResult.isSuccess) {
+    registeredUserPhone.push({
+      email: "",
+      phone: positivePayload.phone,
+      password: positivePayload.password,
+    });
+
+    // Pass the successful response and original payload to getUser
+    const usr = getUser(registerResult.res, positivePayload, featureName);
+    return usr;
+  } else {
+    console.warn(
+      `${featureName} | Skipping getUser due to failed registration assertions.`,
+    );
+    return undefined;
+  }
+}
+
+/**
+ * @type {import("src/types/scenario.js").Scenario<import("src/entity/app.js").User | undefined>}
+ */
+export function LoginPhoneScenario(config, tags, info) {
+  const featureName = "Login Phone";
+  const route = config.baseUrl + "/v1/login/phone";
+  const assertHandler = testPostJsonAssert;
+
+  const positivePayload = {
+    phone: registeredUserPhone[0].phone,
+    password: registeredUserPhone[0].password,
+  };
+
+  if (config.runNegativeCase) {
+    assertHandler({
+      currentTestName: "empty body",
       featureName: featureName,
       route: route,
-      body: positivePayload,
+      body: {},
       headers: {},
       expectedCase: {
-        ["should return 409"]: (_parsed, res) => res.status === 409, // <-- Expect conflict
+        ["should return 400"]: (_parsed, res) => res.status === 400,
       },
       options: [],
       config: config,
       tags: tags,
     });
+
+    // Generate test objects for invalid phone/password combinations
+    const testObjects = generateTestObjects(
+      {
+        phone: { type: "string", notNull: true, isPhoneNumber: true }, // <-- Updated schema field
+        password: {
+          type: "string",
+          notNull: true,
+          minLength: 8,
+          maxLength: 32,
+        },
+      },
+      positivePayload, // Base payload for variations
+    );
+    testObjects.forEach((payload) => {
+      assertHandler({
+        currentTestName: "invalid payload",
+        featureName: featureName,
+        route: route,
+        body: payload,
+        headers: {},
+        expectedCase: {
+          ["should return 400"]: (_parsed, res) => res.status === 400,
+        },
+        options: [],
+        config: config,
+        tags: tags,
+      });
+    });
   }
 
+  // --- Positive Case ---
+  const registerResult = assertHandler({
+    currentTestName: "valid payload",
+    featureName: featureName,
+    route: route,
+    body: positivePayload,
+    headers: {},
+    expectedCase: {
+      ["should return 201"]: (_parsed, res) => res.status === 200,
+      ["should have email or be null"]: (
+        parsed,
+        _res, // <-- Expect email might be null
+      ) => isExists(parsed, "email", ["string", null]),
+      ["should have phone"]: (
+        parsed,
+        _res, // <-- Expect phone to exist
+      ) => isExists(parsed, "phone", ["string"]),
+      ["should have token"]: (parsed, _res) =>
+        isExists(parsed, "token", ["string"]),
+    },
+    options: [],
+    config: config,
+    tags: tags,
+  });
+  
   // --- Return User ---
-  if (registerResult.isSuccess) {
+  if (registerResult.isSuccess) {    
     // Pass the successful response and original payload to getUser
     const usr = getUser(registerResult.res, positivePayload, featureName);
     return usr;

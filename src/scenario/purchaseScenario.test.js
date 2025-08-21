@@ -40,72 +40,73 @@ const purchaseIdPostSchema = z.object({
 
 const s = new TestServer({});
 
-const productIds = ["1", "3"];
-const fileIds = ["file123", "oka955"];
+
+const productIds = ["1", "3"]
+const fileIds = ["file123", "oka955"]
 /** @type {string[]} */
 s.addRoute("POST", "/v1/purchase", async (req, res) => {
   try {
     const body = await s.getRequestBody(req);
     const validate = purchasePostSchema.safeParse(body);
-
+      
     if (validate.success) {
-      if (validate.data.senderContactType === "email") {
-        const validateEmail = emailSchema.safeParse(
-          validate.data.senderContactDetail,
-        );
-        if (!validateEmail.success) {
-          s.sendJsonResponse(res, 400, { status: "failed" });
-          return;
+        if (validate.data.senderContactType === "email") {
+            const validateEmail = emailSchema.safeParse(
+              validate.data.senderContactDetail
+            );
+            if (!validateEmail.success) {
+                s.sendJsonResponse(res, 400, { status: "failed" });
+                return;
+            }
+        } else {
+            const validatePhone = phoneSchema.safeParse(
+              validate.data.senderContactDetail
+            );
+            if (!validatePhone.success) {
+                s.sendJsonResponse(res, 400, { status: "failed" });
+                return; 
+            }
         }
-      } else {
-        const validatePhone = phoneSchema.safeParse(
-          validate.data.senderContactDetail,
-        );
-        if (!validatePhone.success) {
-          s.sendJsonResponse(res, 400, { status: "failed" });
-          return;
-        }
-      }
-
-      if (validate.data.purchasedItems.length > 0) {
-        for (let i = 0; i < validate.data.purchasedItems.length; i++) {
-          if (!productIds.includes(validate.data.purchasedItems[i].productId)) {
-            s.sendJsonResponse(res, 400, { status: "failed" });
-            return;
+        
+        if (validate.data.purchasedItems.length > 0) {
+          for (let i = 0; i < validate.data.purchasedItems.length; i++) {
+            if (!productIds.includes(validate.data.purchasedItems[i].productId)) {
+              s.sendJsonResponse(res, 400, { status: "failed" });
+              return;
+            }
           }
         }
-      }
 
-      s.sendJsonResponse(res, 201, {
-        purchaseId: "abc123def",
-        purchaseItems: [
-          {
-            productId: "xyz789",
-            name: "",
-            category: "",
-            qty: 1,
-            price: 100,
-            sku: "",
-            fileId: "file789xyz",
-            fileUri: "1618x8068",
-            fileThumbnailUri: "",
-            createdAt: "",
-            updatedAt: "",
-          },
-        ],
-        totalPrice: 1,
-        paymentDetails: [
-          {
-            bankAccountName: "",
-            bankAccountHolder: "",
-            bankAccountNumber: "",
-            totalPrice: 1,
-          },
-        ],
-      });
-    } else {
-      s.sendJsonResponse(res, 400, { status: "failed" });
-    }
+        s.sendJsonResponse(res, 201, {
+          purchaseId: "abc123def",
+          purchaseItems: [
+            {
+                productId: "xyz789",
+                name: "",
+                category: "",
+                qty: 1,
+                price: 100,
+                sku: "",
+                fileId: "file789xyz",
+                fileUri: "1618x8068",
+                fileThumbnailUri: "",
+                createdAt: "",
+                updatedAt: ""
+            }
+          ],
+          totalPrice: 1,
+          paymentDetails: [
+            {
+                bankAccountName: "",
+                bankAccountHolder: "",
+                bankAccountNumber: "",
+                totalPrice: 1
+            }
+          ]
+        });
+      } else {
+        s.sendJsonResponse(res, 400, { status: "failed" });
+      }
 
     return;
   } catch (error) {
@@ -118,18 +119,18 @@ s.addRoute("POST", "/v1/purchase/:purchaseId", async (req, res) => {
   try {
     const body = await s.getRequestBody(req);
     const validate = purchaseIdPostSchema.safeParse(body);
-
+      
     if (validate.success) {
-      if (
-        validate.data.fileIds.length < 3 ||
-        validate.data.fileIds.length > 3
-      ) {
+        if (
+          validate.data.fileIds.length < 3 || 
+          validate.data.fileIds.length > 3
+        ) {
+          s.sendJsonResponse(res, 400, { status: "failed" });  
+        }
+        s.sendJsonResponse(res, 201, {});
+      } else {
         s.sendJsonResponse(res, 400, { status: "failed" });
       }
-      s.sendJsonResponse(res, 201, {});
-    } else {
-      s.sendJsonResponse(res, 400, { status: "failed" });
-    }
 
     return;
   } catch (error) {
@@ -145,13 +146,13 @@ test("Purchase Scenario", async (go) => {
   go.after(() => {
     s.stop();
   });
-
+  
   go.test("PostPurchaseScenario should return 0 exit code", async () => {
     await assert.doesNotReject(
       exec(`${process.env.K6_PATH} run src/main.js`, {
         env: {
           BASE_URL: `http://127.0.0.1:${serverPort}`,
-          MOCK_INFO: "",
+          MOCK_INFO: '',
           RUN_UNIT_TEST: "true",
           SCENARIO_NAME: "PostPurchaseScenario",
         },
@@ -165,7 +166,7 @@ test("Purchase Scenario", async (go) => {
       exec(`${process.env.K6_PATH} run src/main.js`, {
         env: {
           BASE_URL: `http://127.0.0.1:${serverPort}`,
-          MOCK_INFO: "",
+          MOCK_INFO: '',
           RUN_UNIT_TEST: "true",
           SCENARIO_NAME: "PostPurchaseIdScenario",
         },
@@ -173,4 +174,5 @@ test("Purchase Scenario", async (go) => {
       console.error,
     );
   });
+
 });
