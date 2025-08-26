@@ -505,4 +505,3 @@ export function PostProfileEmailScenario(config, tags, info) {
     return undefined;
   }
 }
-
