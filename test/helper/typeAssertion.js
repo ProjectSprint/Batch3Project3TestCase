@@ -28,7 +28,7 @@ export function createValidator(schemaString) {
     throw new Error(`Invalid JSON schema string: ${error}`);
   }
 
-  /** @type {import('src/types/typeAssertion.d.ts').ValidationContext} */
+  /** @type {import('../types/typeAssertion.d.ts').ValidationContext} */
   const context = {
     definitions: schema.definitions ? { ...schema.definitions } : {},
     rootSchema: schema,
@@ -48,9 +48,9 @@ export function createValidator(schemaString) {
 }
 
 /**
- * @param {import('src/types/typeAssertion.js').JSONSchemaDefinition} schema
- * @param {import('src/types/typeAssertion.d.ts').ValidationContext} context
- * @returns {import('src/types/typeAssertion.d.ts').JSONSchemaDefinition}
+ * @param {import('../types/typeAssertion.js').JSONSchemaDefinition} schema
+ * @param {import('../types/typeAssertion.d.ts').ValidationContext} context
+ * @returns {import('../types/typeAssertion.d.ts').JSONSchemaDefinition}
  */
 function resolveSchema(schema, context) {
   if (schema.$ref) {
@@ -73,14 +73,14 @@ function resolveSchema(schema, context) {
 
     if (currentSchema.$ref) {
       return resolveSchema(
-        /** @type {import('src/types/typeAssertion.d.ts').JSONSchemaDefinition} */ (
+        /** @type {import('../types/typeAssertion.d.ts').JSONSchemaDefinition} */ (
           currentSchema
         ),
         context,
       );
     }
 
-    return /** @type {import('src/types/typeAssertion.d.ts').JSONSchemaDefinition} */ (
+    return /** @type {import('../types/typeAssertion.d.ts').JSONSchemaDefinition} */ (
       currentSchema
     );
   }
@@ -146,8 +146,8 @@ function validateFormat(value, format) {
 
 /**
  * @param {any} value
- * @param {import('src/types/typeAssertion.d.ts').JSONSchemaDefinition} schema
- * @param {import('src/types/typeAssertion.d.ts').ValidationContext} context
+ * @param {import('../types/typeAssertion.d.ts').JSONSchemaDefinition} schema
+ * @param {import('../types/typeAssertion.d.ts').ValidationContext} context
  * @param {string} path - Current JSON path
  * @param {string} schemaPath - Current schema path
  * @param {ValidationError[]} errors - Array to collect errors
@@ -369,7 +369,7 @@ function validateAgainstSchema(
 /**
  * Validates string constraints
  * @param {any} value
- * @param {import('src/types/typeAssertion.d.ts').JSONSchemaDefinition} schema
+ * @param {import('../types/typeAssertion.d.ts').JSONSchemaDefinition} schema
  * @param {string} path
  * @param {string} schemaPath
  * @param {ValidationError[]} errors
@@ -428,7 +428,7 @@ function validateString(value, schema, path, schemaPath, errors) {
 /**
  * Validates number constraints
  * @param {any} value
- * @param {import('src/types/typeAssertion.d.ts').JSONSchemaDefinition} schema
+ * @param {import('../types/typeAssertion.d.ts').JSONSchemaDefinition} schema
  * @param {boolean} mustBeInteger
  * @param {string} path
  * @param {string} schemaPath
@@ -537,8 +537,8 @@ function validateNumber(
 
 /**
  * @param {any} value
- * @param {import('src/types/typeAssertion.d.ts').JSONSchemaDefinition} schema
- * @param {import('src/types/typeAssertion.d.ts').ValidationContext} context
+ * @param {import('../types/typeAssertion.d.ts').JSONSchemaDefinition} schema
+ * @param {import('../types/typeAssertion.d.ts').ValidationContext} context
  * @param {string} path
  * @param {string} schemaPath
  * @param {ValidationError[]} errors
@@ -672,8 +672,8 @@ function validateObject(value, schema, context, path, schemaPath, errors) {
 
 /**
  * @param {any} value
- * @param {import('src/types/typeAssertion.d.ts').JSONSchemaDefinition} schema
- * @param {import('src/types/typeAssertion.d.ts').ValidationContext} context
+ * @param {import('../types/typeAssertion.d.ts').JSONSchemaDefinition} schema
+ * @param {import('../types/typeAssertion.d.ts').ValidationContext} context
  * @param {string} path
  * @param {string} schemaPath
  * @param {ValidationError[]} errors

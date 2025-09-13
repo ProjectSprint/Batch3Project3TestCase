@@ -5,11 +5,11 @@ import { testPostMultipartAssert } from "../helper/testRequest.js";
 import { isExists } from "../helper/assertion.js";
 
 /**
- * @param {import("src/entity/app.js").User} user // Adjusted path, verify correctness
+ * @param {import("../entity/app.js").User} user
  * @param {{small: ArrayBuffer, smallName:string,medium: ArrayBuffer, mediumName:string,big: ArrayBuffer, bigName: string,invalid: ArrayBuffer,invalidName:string}} fileToTest
- * @param {import("src/types/config.js").Config} config
+ * @param {import("../types/config.js").Config} config
  * @param {{[name: string]: string}} tags
- * @returns {import("src/entity/app.js").UploadedFile | undefined} uri
+ * @returns {import("../entity/app.js").UploadedFile | undefined} uri
  */
 export function UploadFileScenario(user, fileToTest, config, tags) {
   const featureName = "Upload File";

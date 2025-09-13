@@ -7,8 +7,8 @@ const isValid = createValidator(productSchema);
 /**
  * Asserts that a value is a valid User object
  * @param {any} value - The value to assert
- * @returns {value is import("src/entity/app.js").Product}
- * @throws {import("src/types/typeAssertion.js").ValidationError[]}
+ * @returns {value is import("../entity/app.js").Product}
+ * @throws {import("test/types/typeAssertion.js").ValidationError[]}
  */
 export function isProduct(value) {
   const obj = value;
@@ -23,7 +23,7 @@ export function isProduct(value) {
  * @param {import("k6/http").RefinedResponse<any>} res
  * @param {any} positivePayload
  * @param {string} featureName
- * @returns {import('src/entity/app.js').Product | undefined}
+ * @returns {import('../entity/app.js').Product | undefined}
  */
 export function getProduct(res, positivePayload, featureName) {
   let obj;

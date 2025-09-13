@@ -2,11 +2,11 @@
  * Asserts the response of a k6 request. Parses JSON once.
  * @param {import("k6/http").RefinedResponse<import("k6/http").ResponseType>} k6response The k6 HTTP response.
  * @param {string} httpMethod The HTTP method used (e.g., "GET", "POST").
- * @param {import("k6").JSONValue | import("../types/k6-http.d.ts").StructuredRequestBody | string} requestPayload The payload sent (or params string). Adjust path if needed.
+ * @param {import("k6").JSONValue | import("k6/http").StructuredRequestBody | string} requestPayload The payload sent (or params string). Adjust path if needed.
  * @param {{[name: string]: string}} requestHeader The headers sent.
  * @param {string} featureName The name of the feature/scenario part.
- * @param {import("src/types/assertion.js").Checkers} conditions The checks to perform. Adjust path if needed.
- * @param {import("src/types/config.js").Config} config The configuration object. Adjust path if needed.
+ * @param {import("../types/testRequest.js").Checkers} conditions The checks to perform. Adjust path if needed.
+ * @param {import("../types/config.js").Config} config The configuration object. Adjust path if needed.
  * @returns {Record<string, import("k6").Checker<import("k6/http").RefinedResponse<import("k6/http").ResponseType>>>} Checkes that can be inputted in k6 check()
  */
 export function getAssertChecks(

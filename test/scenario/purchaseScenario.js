@@ -23,7 +23,7 @@ import {
 
 const productIds = ["1", "2", "3", "4"];
 /**
- * @type {import("src/types/scenario.js").Scenario<import("src/entity/app.js").PurchaseResponse | undefined>}
+ * @type {import("../types/scenario.js").Scenario<import("../entity/app.js").PurchaseResponse | undefined>}
  */
 export function PostPurchaseScenario(config, tags, info) {
   const featureName = "Post Purchase";
@@ -212,7 +212,7 @@ export function PostPurchaseScenario(config, tags, info) {
 
 const fileIds = ["file123", "oka955"];
 /**
- * @type {import("src/types/scenario.js").Scenario<import("src/entity/app.js").PurchaseResponse | undefined>}
+ * @type {import("../types/scenario.js").Scenario<import("../entity/app.js").PurchaseResponse | undefined>}
  */
 export function PostPurchaseIdScenario(config, tags, info) {
   const featureName = "Post Purchase Id";

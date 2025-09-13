@@ -15,14 +15,14 @@ test:
 # Pull and run tests in one command
 pull-test: pull test
 
-SCHEMA_DIR = src/schemas
+SCHEMA_DIR = test/schemas
 $(SCHEMA_DIR):
 	mkdir -p $(SCHEMA_DIR)
 
 # Generate schema for a specific type
 .PHONY: schema
 schema: $(SCHEMA_DIR)
-	npx ts-json-schema-generator --path ./src/entity/**/*.ts --type 'Types.$(type)' -o $(SCHEMA_DIR)/$(type).schema.json
+	npx ts-json-schema-generator --path ./../entity/**/*.ts --type../types.$(type)' -o $(SCHEMA_DIR)/$(type).schema.json
 
 # Help command to show available targets
 help:

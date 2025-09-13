@@ -53,7 +53,6 @@ export default function () {
     baseUrl: __ENV.BASE_URL ? __ENV.BASE_URL : "http://localhost:8080",
     debug: __ENV.DEBUG ? true : false,
     runNegativeCase: true,
-    runUnitTest: __ENV.RUN_UNIT_TEST ? __ENV.RUN_UNIT_TEST == "true" : false,
   };
 
   const tags = {
@@ -61,26 +60,17 @@ export default function () {
   };
   console.log(`k6 | Firing to ${config.baseUrl}`);
 
-  if (config.runUnitTest) {
-    console.log(`k6 | Run unit test received!`);
-    const scenarioName = /** @type {string} */ (__ENV.SCENARIO_NAME);
-    const mockInfo = JSON.parse(__ENV.MOCK_INFO ? __ENV.MOCK_INFO : "{}");
-    console.log(`k6 | Executing ${scenarioName} scenario`);
-    console.log(`k6 | Mocked information:`, mockInfo);
-
-    const test = scenarios[scenarioName];
-    if (test) {
-      const testResult = test(config, tags, mockInfo);
-      if (!testResult) {
-        return exec.test.abort(`${scenarioName} scenario failed`);
-      }
-      return;
-    }
-    console.log(`k6 | test ${scenarioName} doesn't exist`);
-    return;
-  }
-
   // ===== REGISTER TEST =====
+  const emailUsr = RegisterEmailScenario(config, tags, {});
+  LoginEmailScenario(config, tags, emailUsr);
+  GetProfileScenario(config, tags, { info: emailUsr });
+  PostProfilePhoneScenario(config, tags, { info: emailUsr });
+  PutProfileScenario(config, tags, { info: emailUsr });
+
+  const phoneUsr = RegisterPhoneScenario(config, tags, {});
+  LoginPhoneScenario(config, tags, phoneUsr);
+  PostProfileEmailScenario(config, tags, { info: phoneUsr });
+
   // ===== PROFILE TEST =====
   // ===== DEPARTMENT TEST =====
 }

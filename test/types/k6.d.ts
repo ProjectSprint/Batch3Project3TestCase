@@ -13,7 +13,7 @@
  * duck typing for noninstances with an identical public shape.
  *
  * This follows the pattern used in the TypeScript compiler:
- * https://github.com/Microsoft/TypeScript/blob/7b48a182c05ea4dea81bab73ecbbe9e013a79e99/src/compiler/types.ts#L693-L698
+ * https://github.com/Microsoft/TypeScript/blob/7b48a182c05ea4dea81bab73ecbbe9e013a79e99/test/compiler/types.ts#L693-L698
  *
  * @packageDocumentation
  */

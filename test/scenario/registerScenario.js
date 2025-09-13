@@ -9,7 +9,7 @@ import {
 import { isExists } from "../helper/assertion.js";
 
 /**
- * @type {import("src/types/scenario.js").Scenario<import("src/entity/app.js").User | undefined>}
+ * @type {import("../types/scenario.js").Scenario<import("../entity/app.js").User | undefined>}
  */
 export function RegisterEmailScenario(config, tags, info) {
   const featureName = "Register Email";
@@ -115,9 +115,9 @@ export function RegisterEmailScenario(config, tags, info) {
 }
 
 /**
- * @type {import("src/types/scenario.js").Scenario<import("src/entity/app.js").User | undefined>}
+ * @type {import("../types/scenario.js").Scenario<import("../entity/app.js").User | undefined>}
  */
-export function RegisterPhoneScenario(config, tags, info) {
+export function RegisterPhoneScenario(config, tags) {
   const featureName = "Register Phone";
   const route = config.baseUrl + "/v1/register/phone";
   const assertHandler = testPostJsonAssert;

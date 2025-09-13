@@ -1,17 +1,18 @@
 import { combine } from "../helper/generator.js";
 import { createValidator } from "../helper/typeAssertion.js";
 
-const fileSchema = open("../schemas/File.schema.json");
-const isValid = createValidator(fileSchema);
+const userSchema = open("./schemas/user.schema.json");
+const isValid = createValidator(userSchema);
 
 /**
  * Asserts that a value is a valid User object
  * @param {any} value - The value to assert
- * @returns {value is import("src/entity/app.js").UploadedFile}
- * @throws {import("src/types/typeAssertion.js").ValidationError[]}
+ * @returns {value is import("../entity/app.js").User}
+ * @throws {import("test/types/typeAssertion.js").ValidationError[]}
  */
-export function isFile(value) {
-  const res = isValid(value);
+export function isUser(value) {
+  const obj = value;
+  const res = isValid(obj);
   if (res.valid) {
     return true;
   }
@@ -22,14 +23,15 @@ export function isFile(value) {
  * @param {import("k6/http").RefinedResponse<any>} res
  * @param {any} positivePayload
  * @param {string} featureName
- * @returns {import('src/entity/app.js').UploadedFile | undefined}
+ * @returns {import('../entity/app.js').User | undefined}
  */
-export function getFile(res, positivePayload, featureName) {
+export function getUser(res, positivePayload, featureName) {
+  let obj;
   try {
     const jsonResult = res.json();
     if (jsonResult && typeof jsonResult == "object") {
-      const obj = combine(jsonResult, positivePayload);
-      if (isFile(obj)) {
+      obj = combine(jsonResult, positivePayload);
+      if (isUser(obj)) {
         return obj;
       }
       console.log(featureName + " | object is not matching schema", obj);
@@ -38,12 +40,7 @@ export function getFile(res, positivePayload, featureName) {
     console.log(featureName + " | json is not object", jsonResult);
     return;
   } catch (e) {
-    console.log(
-      featureName + " | json or validation error:",
-      e,
-      "body:",
-      res.body,
-    );
+    console.log(featureName + " | json or validation error:", e, "body:", obj);
     return;
   }
 }

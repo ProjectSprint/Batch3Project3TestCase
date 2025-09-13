@@ -19,7 +19,7 @@ import { getProfile, isProfile } from "../assertion/profileAssertion.js";
 import { isFile } from "../assertion/fileAssertion.js";
 
 /**
- * @type {import("src/types/scenario.js").Scenario<import("src/entity/app.js").Profile | undefined>}
+ * @type {import("../types/scenario.js").Scenario<import("../entity/app.js").Profile | undefined>}
  */
 export function GetProfileScenario(config, tags, info) {
   const featureName = "Get Profile";
@@ -100,7 +100,7 @@ export function GetProfileScenario(config, tags, info) {
 }
 
 /**
- * @type {import("src/types/scenario.js").Scenario<import("src/entity/app.js").Profile | undefined>}
+ * @type {import("../types/scenario.js").Scenario<import("../entity/app.js").Profile | undefined>}
  */
 export function PutProfileScenario(config, tags, info) {
   const featureName = "Put Profile";
@@ -249,7 +249,7 @@ export function PutProfileScenario(config, tags, info) {
 }
 
 /**
- * @type {import("src/types/scenario.js").Scenario<import("src/entity/app.js").Profile | undefined>}
+ * @type {import("../types/scenario.js").Scenario<import("../entity/app.js").Profile | undefined>}
  */
 export function PostProfilePhoneScenario(config, tags, info) {
   const featureName = "Post Profile Phone";
@@ -378,7 +378,7 @@ export function PostProfilePhoneScenario(config, tags, info) {
 }
 
 /**
- * @type {import("src/types/scenario.js").Scenario<import("src/entity/app.js").Profile | undefined>}
+ * @type {import("../types/scenario.js").Scenario<import("../entity/app.js").Profile | undefined>}
  */
 export function PostProfileEmailScenario(config, tags, info) {
   const featureName = "Post Profile Email";

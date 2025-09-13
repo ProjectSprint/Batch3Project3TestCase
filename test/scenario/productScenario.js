@@ -15,7 +15,7 @@ const fileIds = ["file123", "oka955"];
 // TODO: PUT Product /v1/product (with the test)
 // TODO: DELETE Product /v1/product (with the test)
 /**
- * @type {import("src/types/scenario.js").Scenario<import("src/entity/app.js").Product | undefined>}
+ * @type {import("../types/scenario.js").Scenario<import("../entity/app.js").Product | undefined>}
  */
 export function PostProductScenario(config, tags, info) {
   const featureName = "Post Product";

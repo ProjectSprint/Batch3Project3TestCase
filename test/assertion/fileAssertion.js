@@ -1,18 +1,17 @@
 import { combine } from "../helper/generator.js";
 import { createValidator } from "../helper/typeAssertion.js";
 
-const userSchema = open("../schemas/user.schema.json");
-const isValid = createValidator(userSchema);
+const fileSchema = open("./schemas/File.schema.json");
+const isValid = createValidator(fileSchema);
 
 /**
  * Asserts that a value is a valid User object
  * @param {any} value - The value to assert
- * @returns {value is import("src/entity/app.js").User}
- * @throws {import("src/types/typeAssertion.js").ValidationError[]}
+ * @returns {value is import("../entity/app.js").UploadedFile}
+ * @throws {import("test/types/typeAssertion.js").ValidationError[]}
  */
-export function isUser(value) {
-  const obj = value;
-  const res = isValid(obj);
+export function isFile(value) {
+  const res = isValid(value);
   if (res.valid) {
     return true;
   }
@@ -23,15 +22,14 @@ export function isUser(value) {
  * @param {import("k6/http").RefinedResponse<any>} res
  * @param {any} positivePayload
  * @param {string} featureName
- * @returns {import('src/entity/app.js').User | undefined}
+ * @returns {import('../entity/app.js').UploadedFile | undefined}
  */
-export function getUser(res, positivePayload, featureName) {
-  let obj;
+export function getFile(res, positivePayload, featureName) {
   try {
     const jsonResult = res.json();
     if (jsonResult && typeof jsonResult == "object") {
-      obj = combine(jsonResult, positivePayload);
-      if (isUser(obj)) {
+      const obj = combine(jsonResult, positivePayload);
+      if (isFile(obj)) {
         return obj;
       }
       console.log(featureName + " | object is not matching schema", obj);
@@ -40,7 +38,12 @@ export function getUser(res, positivePayload, featureName) {
     console.log(featureName + " | json is not object", jsonResult);
     return;
   } catch (e) {
-    console.log(featureName + " | json or validation error:", e, "body:", obj);
+    console.log(
+      featureName + " | json or validation error:",
+      e,
+      "body:",
+      res.body,
+    );
     return;
   }
 }
