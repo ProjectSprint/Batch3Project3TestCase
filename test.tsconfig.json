@@ -1,0 +1,44 @@
+{
+  "compilerOptions": {
+    "types": [
+      "node"
+    ],
+    "allowJs": true,
+    "checkJs": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "ES2019",
+    "module": "commonjs",
+    "lib": [
+      "ES2019",
+      "DOM"
+    ],
+    "strict": true,
+    "moduleResolution": "node",
+    "baseUrl": "./",
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "sourceMap": true,
+    "paths": {
+      "k6/http": [
+        "./test/types/k6-http.d.ts"
+      ],
+      "k6/execution": [
+        "./test/types/k6-execution.d.ts"
+      ],
+      "k6": [
+        "./test/types/k6.d.ts"
+      ]
+    }
+  },
+  "include": [
+    "test/**/*.js",
+    "test/**/*.jsx",
+    "test/**/*.ts",
+    "test/**/*.d.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}

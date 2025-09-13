@@ -1,24 +1,24 @@
+import tseslint from "@typescript-eslint/eslint-plugin";
+import tsparser from "@typescript-eslint/parser";
+import prettierPlugin from "eslint-plugin-prettier";
+import prettierConfig from "eslint-config-prettier";
+
 /** @type {import('eslint').Linter.Config[]} */
 export default [
+  // ============================
+  // ./test (k6 environment)
+  // ============================
   {
-    files: ["**/*.node.js"],
+    files: ["test/**/*.js"],
     languageOptions: {
+      ecmaVersion: 2019, // k6 supports ES2019 (no optional chaining, etc.)
       sourceType: "module",
-    },
-    // Rules specific to Node.js files or empty to use defaults
-    rules: {
-      // You can add any Node.js specific rules here
-    },
-  },
-  {
-    files: ["**/*.js"],
-    ignores: ["**/*.node.js", "**/*.test.js"],
-    languageOptions: {
-      sourceType: "module",
+      parserOptions: {
+        project: "./test.tsconfig.json", // ✅ points to your existing tsconfig
+      },
     },
     rules: {
       "object-shorthand": ["error", "never"],
-      // Prevent logical operator shortcuts and nullish coalescing
       "no-unused-expressions": [
         "error",
         {
@@ -41,25 +41,22 @@ export default [
           message: "Private class fields are not supported in k6",
         },
       ],
-      // Prevent other unsupported features
       "no-async-promise-executor": "error",
       "no-await-in-loop": "error",
       "no-console": ["error", { allow: ["log", "warn", "error"] }],
       "no-import-assign": "error",
-
       "no-restricted-imports": [
         "error",
         {
           patterns: [
             {
-              group: ["src/*"],
+              group: ["test/*"],
               message:
-                "Please use relative imports instead of importing from 'src/'",
+                "Please use relative imports instead of importing from 'test/'",
             },
           ],
         },
       ],
-      // Prevent newer array methods
       "no-restricted-properties": [
         "error",
         {
@@ -78,8 +75,6 @@ export default [
           message: "Object.fromEntries() is not supported in k6",
         },
       ],
-
-      // Only allow supported globals
       "no-restricted-globals": [
         "error",
         {
@@ -87,6 +82,52 @@ export default [
           message: "globalThis is not supported in k6",
         },
       ],
+    },
+  },
+  // ============================
+  // ./src (Node.js 24 + TypeScript)
+  // ============================
+  {
+    files: ["src/**/*.{js,ts,tsx}"],
+    languageOptions: {
+      parser: tsparser,
+      parserOptions: {
+        ecmaVersion: "latest",
+        sourceType: "module",
+        project: "./tsconfig.json",
+      },
+    },
+    plugins: {
+      "@typescript-eslint": tseslint,
+      prettier: prettierPlugin,
+    },
+    rules: {
+      ...tseslint.configs.recommended.rules,
+      ...tseslint.configs["recommended-requiring-type-checking"].rules,
+      ...prettierConfig.rules,
+
+      // TypeScript specific rules
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        { argsIgnorePattern: "^_" },
+      ],
+      "@typescript-eslint/no-explicit-any": "warn",
+      "@typescript-eslint/explicit-function-return-type": "off",
+      "@typescript-eslint/explicit-module-boundary-types": "off",
+      "@typescript-eslint/await-thenable": "error",
+      "@typescript-eslint/no-misused-promises": "error",
+
+      "@typescript-eslint/no-floating-promises": "off",
+      "@typescript-eslint/no-unsafe-argument": "off",
+      "@typescript-eslint/no-unsafe-assignment": "off",
+      "@typescript-eslint/no-unsafe-call": "off",
+      "@typescript-eslint/no-unsafe-member-access": "off",
+
+      // General rules
+      "no-console": "warn",
+      "prefer-const": "error",
+      "no-var": "error",
+      "object-shorthand": "error",
     },
   },
 ];
