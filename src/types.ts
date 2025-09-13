@@ -1,3 +1,4 @@
+// src/types.ts
 import { TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
 import {
   FastifyBaseLogger,

@@ -3,7 +3,6 @@ import { StatusCodes } from "http-status-codes";
 import { Server } from "./types.js";
 
 export function registerAuthHandler(s: Server) {
-  // this is just a sample handler
   s.post(
     "/",
     {
