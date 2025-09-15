@@ -11,10 +11,11 @@ export class FileMetadata {
   uploadedAt: Date;
 
   constructor(data?: Partial<FileMetadata>) {
+    console.log(data)
     this.id = randomUUID();
-    this.originalName = data?.filename ?? "";
-    this.mimeType = data?.mimetype ?? "";
-    this.size = data?.size ?? "";
+    this.originalName = data?.fileName ?? "";
+    this.mimeType = data?.mimeType ?? "";
+    this.size = data?.size ?? 0;
     this.uploadedAt = new Date();
   }
 
@@ -22,7 +23,8 @@ export class FileMetadata {
     const errors: string[] = [];
 
     // cek mimetype
-    cryptoonst allowedTypes = ["image/jpeg", "image/png", "image/jpg"];
+    const allowedTypes = ["image/jpeg", "image/png", "image/jpg"];
+    console.log(this.mimeType)
     if (!allowedTypes.includes(this.mimeType)) {
       errors.push("ekstensi harus jpg / jpeg / png");
     }

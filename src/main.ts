@@ -1,4 +1,5 @@
 import { fastify } from "fastify";
+import  multipart from "@fastify/multipart";
 import { TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
 import { StatusCodes } from "http-status-codes";
 import {
@@ -7,7 +8,7 @@ import {
   loginEmailHandler,
   loginPhoneHandler,
 } from "./routes.js";
-import { fileHandler } from "./routes.file.ts";
+import { postFileHandler } from "./routes.file.ts";
 import { verifyToken } from "./helper.auth.js";
 import { enumRoutes } from "./enum.routes.js";
 
@@ -35,6 +36,8 @@ server.setErrorHandler(function (error, _, reply) {
   reply.status(StatusCodes.INTERNAL_SERVER_ERROR).send();
   return;
 });
+
+server.register(multipart, { limits: { fileSize: 100 * 1024 } });
 
 // authentication
 server.addHook('preHandler', async (request: any, reply) => {

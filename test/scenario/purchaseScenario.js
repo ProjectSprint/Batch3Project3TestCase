@@ -21,8 +21,6 @@ import {
   getPurchaseResponse,
 } from "../assertion/purchaseAssertion.js";
 
-const productIds = ["1", "2", "3", "4"];
-
 /**
  * @type {import("../types/scenario.js").Scenario<import("../entity/app.js").PurchaseResponse | undefined>}
  */
@@ -32,7 +30,7 @@ export function PostPurchaseScenario(config, tags, info) {
   const assertHandler = testPostJsonAssert;
 
   const positivePayload = {
-    purchasedItems: [ 
+    purchasedItems: [
         {
           productId: "1",
           qty: generateRandomNumber(0,3)
@@ -194,7 +192,7 @@ export function PostPurchaseScenario(config, tags, info) {
       tags: {},
     });
   })
-  
+
   console.log("positiveResults=====", positiveResults)
 
   if (positiveResults.every((result) => {return result.isSuccess})) {
@@ -217,7 +215,7 @@ export function PostPurchaseIdScenario(config, tags, info) {
   const assertHandler = testPostJsonAssert;
 
   const positivePayload = {
-    fileIds: [ 
+    fileIds: [
         fileIds[generateRandomNumber(0,1)],
         fileIds[generateRandomNumber(0,1)],
         fileIds[generateRandomNumber(0,1)]
