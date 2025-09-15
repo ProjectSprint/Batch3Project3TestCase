@@ -1,30 +1,28 @@
 import exec from "k6/execution";
-// import {
-//   LoginEmailScenario,
-//   LoginPhoneScenario,
-// } from "./scenario/loginScenario.js";
 import {
   RegisterEmailScenario,
   RegisterPhoneScenario,
-  LoginEmailScenario,
-  LoginPhoneScenario,
 } from "./scenario/registerScenario.js";
 import {
-  GetProfileScenario,
-  PostProfileEmailScenario,
-  PostProfilePhoneScenario,
-  PutProfileScenario,
-} from "./scenario/profileScenario.js";
-import { 
-  PostPurchaseScenario,
-  PostPurchaseIdScenario
-} from "./scenario/purchaseScenario.js";
-import { 
-  DeleteProductScenario,
-  GetProductScenario,
-  PostProductScenario, 
-  PutProductScenario
-} from "./scenario/productScenario.js";
+  LoginEmailScenario,
+  LoginPhoneScenario,
+} from "./scenario/loginScenario.js";
+// import {
+//   GetProfileScenario,
+//   PostProfileEmailScenario,
+//   PostProfilePhoneScenario,
+//   PutProfileScenario,
+// } from "./scenario/profileScenario.js";
+// import {
+//   PostPurchaseScenario,
+//   PostPurchaseIdScenario
+// } from "./scenario/purchaseScenario.js";
+// import {
+//   DeleteProductScenario,
+//   GetProductScenario,
+//   PostProductScenario,
+//   PutProductScenario
+// } from "./scenario/productScenario.js";
 
 export const options = {
   vus: 1,
@@ -47,16 +45,16 @@ const scenarios = {
   RegisterPhoneScenario: RegisterPhoneScenario,
   LoginEmailScenario: LoginEmailScenario,
   LoginPhoneScenario: LoginPhoneScenario,
-  GetProfileScenario: GetProfileScenario,
-  PutProfileScenario: PutProfileScenario,
-  PostProfilePhoneScenario: PostProfilePhoneScenario,
-  PostProfileEmailScenario: PostProfileEmailScenario,
-  PostPurchaseScenario: PostPurchaseScenario,
-  PostPurchaseIdScenario: PostPurchaseIdScenario,
-  PostProductScenario: PostProductScenario,
-  GetProductScenario: GetProductScenario,
-  PutProductScenario: PutProductScenario,
-  DeleteProductScenario: DeleteProductScenario,
+  // GetProfileScenario: GetProfileScenario,
+  // PutProfileScenario: PutProfileScenario,
+  // PostProfilePhoneScenario: PostProfilePhoneScenario,
+  // PostProfileEmailScenario: PostProfileEmailScenario,
+  // PostPurchaseScenario: PostPurchaseScenario,
+  // PostPurchaseIdScenario: PostPurchaseIdScenario,
+  // PostProductScenario: PostProductScenario,
+  // GetProductScenario: GetProductScenario,
+  // PutProductScenario: PutProductScenario,
+  // DeleteProductScenario: DeleteProductScenario,
 };
 
 export default function () {
@@ -74,15 +72,16 @@ export default function () {
 
   // ===== REGISTER TEST =====
   const emailUsr = RegisterEmailScenario(config, tags, {});
-  LoginEmailScenario(config, tags, emailUsr);
-  GetProfileScenario(config, tags, { info: emailUsr });
-  PostProfilePhoneScenario(config, tags, { info: emailUsr });
-  PutProfileScenario(config, tags, { info: emailUsr });
+  LoginEmailScenario(config, tags, { user : { email: emailUsr.email, password: emailUsr.password, token: "", phone: "",  } });
+  // GetProfileScenario(config, tags, { info: emailUsr });
+  // PostProfilePhoneScenario(config, tags, { info: emailUsr });
+  // PutProfileScenario(config, tags, { info: emailUsr });
 
   const phoneUsr = RegisterPhoneScenario(config, tags, {});
-  LoginPhoneScenario(config, tags, phoneUsr);
-  PostProfileEmailScenario(config, tags, { info: phoneUsr });
+  // LoginPhoneScenario(config, tags, phoneUsr);
+  // PostProfileEmailScenario(config, tags, { info: phoneUsr });
 
   // ===== PROFILE TEST =====
   // ===== DEPARTMENT TEST =====
 }
+

@@ -3,13 +3,14 @@ import { StatusCodes } from "http-status-codes";
 import { Server } from "./types.js";
 import { User, EmailDTO, PhoneDTO } from "./model.user.ts";
 import { userRepository } from "./repo.user.ts";
-import { hashPassword, generateToken } from "./helper.auth.ts";
+import { hashPassword, generateToken, comparePassword } from "./helper.auth.ts";
 import { randomUUID } from "node:crypto";
+import { enumRoutes } from "./enum.routes.js";
 
 // TODO: Register and store return email token
 export function registerEmailHandler(s: Server) {
   s.post(
-    "/v1/register/email",
+    enumRoutes.REGISTER_EMAIL,
     {
       schema: {
         body: Type.Object({
@@ -20,6 +21,7 @@ export function registerEmailHandler(s: Server) {
     },
     async (req, res) => {
       const dto = new EmailDTO(req.body);
+
       const errors = dto.validate();
 
       if (errors.length > 0) {
@@ -32,19 +34,24 @@ export function registerEmailHandler(s: Server) {
       user.email = dto.email;
       user.password = await hashPassword(dto.password);
       try {
-        user = await userRepository.insert(user);
+        if (await userRepository.get(user) != null) {
+          res.status(StatusCodes.CONFLICT).send({ error: "Email sudah terdaftar" });
+          return;
+        }
+        await userRepository.insert(user);
       } catch (error) {
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({});
+        console.log(error);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({ error });
+        return;
       }
-
-      res.status(StatusCodes.OK).send({ email: user.email, phone: user.phone, token: generateToken(user) });
+      res.status(StatusCodes.CREATED).send({ email: user.email, phone: user.phone, token: generateToken({id: user.id}) });
     },
   );
 }
 // TODO: Register and store return phone token
 export function registerPhoneHandler(s: Server) {
   s.post(
-    "/v1/register/phone",
+    enumRoutes.REGISTER_PHONE,
     {
       schema: {
         body: Type.Object({
@@ -68,16 +75,69 @@ export function registerPhoneHandler(s: Server) {
       user.password = await hashPassword(dto.password);
 
       try {
-        user = await userRepository.insert(user);
+        if (await userRepository.get(user) != null) {
+          res.status(StatusCodes.CONFLICT).send({ error: "" });
+          return;
+        }
+        await userRepository.insert(user);
       } catch (erro) {
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({});
       }
 
-      res.status(StatusCodes.OK).send({ email: user.email, phone: user.phone, token: generateToken(user) });
+      res.status(StatusCodes.CREATED).send({ email: user.email, phone: user.phone, token: generateToken({id: user.id}) });
     },
   );
 }
+// LOGIN SCENARIO
+export function loginEmailHandler(s: Server) {
+  s.post(
+     enumRoutes.LOGIN_EMAIL,
+     {
+       schema: {
+         body: Type.Object({
+           email: Type.String(),
+           password: Type.String(),
+         }),
+       },
+     },
+     async (req, res) => {
+       const dto = new EmailDTO(req.body);
+       const errors = dto.validate();
+       if (errors.length > 0) {
+         return res.status(StatusCodes.BAD_REQUEST).send({ errors });
+       }
+ 
+       // TODO: parse req.body to User
+       var user = new User();
+       user.id = randomUUID();
+       user.email = dto.email;
+       try {
+         const userRecord = await userRepository.get(user);
+         
+         if (userRecord != null) {
+           res.status(StatusCodes.CONFLICT).send({ error: "" });
+           return;
+          }
+          
+          if (!comparePassword(userRecord.password, dto.password)) {
+            res.status(StatusCodes.BAD_REQUEST).send({ error: "" });
+            return; 
+          }
+         
+       } catch (error) {
+         console.log(error);
+         res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({ error });
+         return;
+       }
+       res.status(StatusCodes.CREATED).send({ email: user.email, phone: user.phone, token: generateToken({id: user.id}) });
+     },
+   );
+ }
+ 
+ 
+ 
 
+//
 export function registerAuthHandler(s: Server) {
   s.post(
     "/easteregg/auth",

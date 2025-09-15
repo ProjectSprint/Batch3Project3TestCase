@@ -11,11 +11,13 @@ import { isEqual, isExists } from "../helper/assertion.js";
 /**
  * @type {import("../types/scenario.js").Scenario<import("../entity/app.js").User | undefined>}
  */
-export function LoginEmailScenario(config, tags, user) {
+export function LoginEmailScenario(config, tags, info) {
   const featureName = "Login Email";
   const route = config.baseUrl + "/v1/login/email";
   const assertHandler = testPostJsonAssert;
 
+  const user = info.user;
+  console.info("user", user);
   if (!isUser(user)) {
     console.warn(`${featureName} needs a valid user`);
     return undefined;

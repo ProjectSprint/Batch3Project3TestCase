@@ -24,7 +24,6 @@ export class User {
     this.bankAccountName = data?.bankAccountName ?? "";
     this.bankAccountHolder = data?.bankAccountHolder ?? "";
     this.bankAccountNumber = data?.bankAccountNumber ?? "";
-    this.validate()
   }
 
 }
@@ -44,6 +43,7 @@ export class EmailDTO {
     else if (!isValidEmail(this.email)) errors.push("Email tidak valid");
 
     if (this.password === "") errors.push("Password wajib diisi");
+    else if (this.password.length < 8 || this.password.length > 32) errors.push("Password kurang lebih 8 - 32 karakter");
 
     return errors;
   }
@@ -65,6 +65,7 @@ export class PhoneDTO {
     else if (!isValidPhone(this.phone)) errors.push("Phone tidak valid");
 
     if (this.password === "") errors.push("Password wajib diisi");
+    else if (this.password.length < 8 || this.password.length > 32) errors.push("Password kurang lebih 8 - 32 karakter");
 
     return errors;
   }

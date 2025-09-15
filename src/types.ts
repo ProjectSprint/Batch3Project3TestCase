@@ -8,6 +8,10 @@ import {
   RawServerDefault,
 } from "fastify";
 
+export interface JwtPayload {
+  id: string;
+}
+
 export type Server = FastifyInstance<
   RawServerDefault,
   RawRequestDefaultExpression<RawServerDefault>,

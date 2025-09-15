@@ -1,5 +1,5 @@
 // src/provider.db.ts
-import Datastore from "nedb";
+import Datastore from "@seald-io/nedb";
 
 export const userCollection = new Datastore({
   filename: "./data/users.db",
