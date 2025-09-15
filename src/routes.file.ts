@@ -2,7 +2,7 @@ import { Type } from "@fastify/type-provider-typebox";
 import { StatusCodes } from "http-status-codes";
 import { Server } from "./types.js";
 import { FileMetadata, FileDTO } from "./model.file.ts";
-import { fileRepository } from "./model.file.ts"
+import { fileRepository } from "./repo.file.ts"
 import { hashPassword, generateToken, comparePassword } from "./helper.auth.ts";
 import { randomUUID } from "node:crypto";
 import { enumRoutes } from "./enum.routes.js";
@@ -18,7 +18,6 @@ export function postFileHandler(s: Server) {
       }
 
       // bikin metadata object
-      console.log(data)
       const metadata = new FileMetadata({
         originalName: data.filename,
         mimeType: data.mimetype,

@@ -5,7 +5,7 @@ export class FileRepository {
   private collection;
 
   constructor() {
-    this.collection = userCollection;
+    this.collection = fileCollection;
   }
 
   async insert(file: FileMetadata): Promise<FileMetadata | null> {
@@ -34,4 +34,4 @@ export class FileRepository {
   }
 }
 
-export const userRepository = new UserRepository();
+export const fileRepository = new FileRepository();

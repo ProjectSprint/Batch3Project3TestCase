@@ -13,10 +13,10 @@ export class FileMetadata {
   constructor(data?: Partial<FileMetadata>) {
     console.log(data)
     this.fileId = randomUUID();
-    this.fileUri = "url.com/" + (data?.fileName ?? "");
-    this.fileThumbnailUri == "url.com/" + (data?.fileName ?? "");
+    this.fileUri = "url.com/" + (data?.originalName ?? "");
+    this.fileThumbnailUri == "url.com/" + (data?.originamName ?? "");
 
-    this.originalName = data?.fileName ?? "";
+    this.originalName = data?.originalName ?? "";
     this.mimeType = data?.mimeType ?? "";
     this.size = data?.size ?? 0;
 
