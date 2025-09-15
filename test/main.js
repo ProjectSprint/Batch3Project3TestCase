@@ -72,7 +72,8 @@ export default function () {
 
   // ===== REGISTER TEST =====
   const emailUsr = RegisterEmailScenario(config, tags, {});
-  LoginEmailScenario(config, tags, { user : { email: emailUsr.email, password: emailUsr.password, token: "", phone: "",  } });
+  // re-assign variabel yang berisi token
+  emailUsr = LoginEmailScenario(config, tags, { user : { email: emailUsr.email, password: emailUsr.password, token: "", phone: "",  } });
   // GetProfileScenario(config, tags, { info: emailUsr });
   // PostProfilePhoneScenario(config, tags, { info: emailUsr });
   // PutProfileScenario(config, tags, { info: emailUsr });

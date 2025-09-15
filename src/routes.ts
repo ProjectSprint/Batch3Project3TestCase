@@ -7,10 +7,9 @@ import { hashPassword, generateToken, comparePassword } from "./helper.auth.ts";
 import { randomUUID } from "node:crypto";
 import { enumRoutes } from "./enum.routes.js";
 
-// TODO: Register and store return email token
 export function registerEmailHandler(s: Server) {
   s.post(
-    enumRoutes.REGISTER_EMAIL,
+    enumRoutes.PRODUCT,
     {
       schema: {
         body: Type.Object({
@@ -40,7 +39,6 @@ export function registerEmailHandler(s: Server) {
         }
         await userRepository.insert(user);
       } catch (error) {
-        console.log(error);
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({ error });
         return;
       }
@@ -48,7 +46,6 @@ export function registerEmailHandler(s: Server) {
     },
   );
 }
-// TODO: Register and store return phone token
 export function registerPhoneHandler(s: Server) {
   s.post(
     enumRoutes.REGISTER_PHONE,
@@ -106,36 +103,79 @@ export function loginEmailHandler(s: Server) {
        if (errors.length > 0) {
          return res.status(StatusCodes.BAD_REQUEST).send({ errors });
        }
- 
+
        // TODO: parse req.body to User
        var user = new User();
-       user.id = randomUUID();
        user.email = dto.email;
        try {
          const userRecord = await userRepository.get(user);
-         
-         if (userRecord != null) {
-           res.status(StatusCodes.CONFLICT).send({ error: "" });
-           return;
-          }
-          
-          if (!comparePassword(userRecord.password, dto.password)) {
-            res.status(StatusCodes.BAD_REQUEST).send({ error: "" });
-            return; 
-          }
-         
+
+        if (userRecord == null) {
+          res.status(StatusCodes.NOT_FOUND).send({ error: "" });
+          return;
+        }
+
+        if (!await comparePassword( dto.password, userRecord.password)) {
+          res.status(StatusCodes.BAD_REQUEST).send({ error: "" });
+          return;
+        }
+
        } catch (error) {
          console.log(error);
          res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({ error });
          return;
        }
-       res.status(StatusCodes.CREATED).send({ email: user.email, phone: user.phone, token: generateToken({id: user.id}) });
+       res.status(StatusCodes.OK).send({ email: user.email, phone: user.phone, token: generateToken({id: user.id}) });
      },
    );
  }
- 
- 
- 
+
+// LOGIN SCENARIO
+export function loginPhoneHandler(s: Server) {
+  s.post(
+     enumRoutes.LOGIN_PHONE,
+     {
+       schema: {
+         body: Type.Object({
+           phone: Type.String(),
+           password: Type.String(),
+         }),
+       },
+     },
+     async (req, res) => {
+       const dto = new PhoneDTO(req.body);
+       const errors = dto.validate();
+       if (errors.length > 0) {
+         return res.status(StatusCodes.BAD_REQUEST).send({ errors });
+       }
+
+       // TODO: parse req.body to User
+       var user = new User();
+       user.phone = dto.phone;
+       try {
+         const userRecord = await userRepository.get(user);
+
+        if (userRecord == null) {
+          res.status(StatusCodes.NOT_FOUND).send({ error: "not exist" });
+          return;
+        }
+
+          if (!await comparePassword( dto.password, userRecord.password)) {
+            res.status(StatusCodes.BAD_REQUEST).send({ error: "wrong password" });
+            return;
+          }
+
+       } catch (error) {
+         console.log(error);
+         res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({ error });
+         return;
+       }
+       res.status(StatusCodes.OK).send({ email: user.email, phone: user.phone, token: generateToken({id: user.id}) });
+    },
+  );
+}
+
+
 
 //
 export function registerAuthHandler(s: Server) {

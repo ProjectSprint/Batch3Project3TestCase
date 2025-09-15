@@ -1,7 +1,13 @@
 import { fastify } from "fastify";
 import { TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
 import { StatusCodes } from "http-status-codes";
-import { registerEmailHandler, registerPhoneHandler } from "./routes.js";
+import {
+  registerEmailHandler,
+  registerPhoneHandler,
+  loginEmailHandler,
+  loginPhoneHandler,
+} from "./routes.js";
+import { fileHandler } from "./routes.file.ts";
 import { verifyToken } from "./helper.auth.js";
 import { enumRoutes } from "./enum.routes.js";
 
@@ -34,8 +40,10 @@ server.setErrorHandler(function (error, _, reply) {
 server.addHook('preHandler', async (request: any, reply) => {
   // Kalau route public, skip
   const publicRoutes = [
-    enumRoutes.REGISTER_EMAIL, 
+    enumRoutes.REGISTER_EMAIL,
     enumRoutes.REGISTER_PHONE,
+    enumRoutes.LOGIN_EMAIL,
+    enumRoutes.LOGIN_PHONE,
   ];
   if (publicRoutes.includes(request.url)) return;
 
@@ -55,6 +63,11 @@ server.addHook('preHandler', async (request: any, reply) => {
 // handlers route
 registerEmailHandler(server);
 registerPhoneHandler(server);
+
+loginEmailHandler(server);
+loginPhoneHandler(server);
+
+postFileHandler(server);
 
 // start server
 server.listen({ port: 30000 }, function (err, _) {
