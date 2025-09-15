@@ -12,10 +12,14 @@ export class FileMetadata {
 
   constructor(data?: Partial<FileMetadata>) {
     console.log(data)
-    this.id = randomUUID();
+    this.fileId = randomUUID();
+    this.fileUri = "url.com/" + (data?.fileName ?? "");
+    this.fileThumbnailUri == "url.com/" + (data?.fileName ?? "");
+
     this.originalName = data?.fileName ?? "";
     this.mimeType = data?.mimeType ?? "";
     this.size = data?.size ?? 0;
+
     this.uploadedAt = new Date();
   }
 

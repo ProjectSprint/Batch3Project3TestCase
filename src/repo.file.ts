@@ -1,28 +1,28 @@
-import { userCollection } from "./provider.db.ts";
-import { User } from "./model.user.js";
+import { fileCollection } from "./provider.db.ts";
+import { FileMetadata } from "./model.file.js";
 
-export class UserRepository {
+export class FileRepository {
   private collection;
 
   constructor() {
     this.collection = userCollection;
   }
 
-  async insert(user: User): Promise<User | null> {
+  async insert(file: FileMetadata): Promise<FileMetadata | null> {
     return new Promise((resolve, reject) => {
-      this.collection.insert(user, (err, newDoc) => {
+      this.collection.insert(file, (err, newDoc) => {
           if (err) return reject(err);
           resolve(newDoc);
         });
     });
   }
 
-  async get(user: User): Promise<User | null> {
+  async get(file: FileMetadata): Promise<FileMetadata | null> {
     return new Promise((resolve, reject) => {
       const orQuery: any[] = [];
-      if (user.id) orQuery.push({ id: user.id });
-      if (user.email) orQuery.push({ email: user.email });
-      if (user.phone) orQuery.push({ phone: user.phone });
+      if (file.fileId) orQuery.push({ fileId: file.fileId });
+      if (file.fileUri) orQuery.push({ fileUri: file.fileUri });
+      if (file.fileThumbnailUri) orQuery.push({ fileThumbnailUri : file.fileThumbnailUri });
 
       if (orQuery.length === 0) return resolve(null);
 

@@ -2,7 +2,7 @@ import { Type } from "@fastify/type-provider-typebox";
 import { StatusCodes } from "http-status-codes";
 import { Server } from "./types.js";
 import { FileMetadata, FileDTO } from "./model.file.ts";
-import { userRepository } from "./repo.user.ts";
+import { fileRepository } from "./model.file.ts"
 import { hashPassword, generateToken, comparePassword } from "./helper.auth.ts";
 import { randomUUID } from "node:crypto";
 import { enumRoutes } from "./enum.routes.js";
@@ -32,11 +32,23 @@ export function postFileHandler(s: Server) {
       }
 
       // TODO: simpan ke repository
+      try {
+        if (await fileRepository.get(metadata) != null) {
+          res.status(StatusCodes.CONFLICT).send({ error: "file masih ada" });
+          return;
+        }
+        await fileRepository.insert(metadata);
+      } catch (error) {
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({ error });
+        return;
+      }
+
       // await fileRepository.insert(metadata);
 
       return res.status(StatusCodes.CREATED).send({
-        message: "File metadata stored successfully",
-        file: metadata,
+        fileId: metadata.fileId,
+        fileUri: metadata.fileUri,
+        fileThumbnailUri: metadata.fileThumbnailUri,
       });
     }
   )
