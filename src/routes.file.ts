@@ -1,10 +1,7 @@
-import { Type } from "@fastify/type-provider-typebox";
 import { StatusCodes } from "http-status-codes";
 import { Server } from "./types.js";
 import { FileMetadata, FileDTO } from "./model.file.ts";
 import { fileRepository } from "./repo.file.ts"
-import { hashPassword, generateToken, comparePassword } from "./helper.auth.ts";
-import { randomUUID } from "node:crypto";
 import { enumRoutes } from "./enum.routes.js";
 
 export function postFileHandler(s: Server) {
@@ -17,11 +14,16 @@ export function postFileHandler(s: Server) {
         return res.status(StatusCodes.BAD_REQUEST).send({ error: "No file uploaded" });
       }
 
-      // bikin metadata object
+      // hitung manual dari stream
+      let size = 0;
+      for await (const chunk of data.file) {
+        size += chunk.length;
+      }
+
       const metadata = new FileMetadata({
         originalName: data.filename,
         mimeType: data.mimetype,
-        size: data.file.bytesRead,
+        size,
       });
 
       // validasi metadata
@@ -42,13 +44,13 @@ export function postFileHandler(s: Server) {
         return;
       }
 
-      // await fileRepository.insert(metadata);
-
-      return res.status(StatusCodes.CREATED).send({
+      const resBody = {
         fileId: metadata.fileId,
         fileUri: metadata.fileUri,
         fileThumbnailUri: metadata.fileThumbnailUri,
-      });
+      }
+
+      return res.status(StatusCodes.OK).send(resBody);
     }
   )
 }

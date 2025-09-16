@@ -7,6 +7,10 @@ import {
   LoginEmailScenario,
   LoginPhoneScenario,
 } from "./scenario/loginScenario.js";
+import {
+  UploadFileScenario,
+} from "./scenario/fileScenario.js";
+import { generateRandomName, generateRandomNumber } from "./helper/generator.js";
 // import {
 //   GetProfileScenario,
 //   PostProfileEmailScenario,
@@ -45,6 +49,7 @@ const scenarios = {
   RegisterPhoneScenario: RegisterPhoneScenario,
   LoginEmailScenario: LoginEmailScenario,
   LoginPhoneScenario: LoginPhoneScenario,
+  UploadFileScenario: UploadFileScenario,
   // GetProfileScenario: GetProfileScenario,
   // PutProfileScenario: PutProfileScenario,
   // PostProfilePhoneScenario: PostProfilePhoneScenario,
@@ -73,9 +78,32 @@ export default function () {
   // ===== REGISTER TEST =====
   const emailUsr = RegisterEmailScenario(config, tags, {});
   // re-assign variabel yang berisi token
-  emailUsr = LoginEmailScenario(config, tags, { user : { email: emailUsr.email, password: emailUsr.password, token: "", phone: "",  } });
+  LoginEmailScenario(config, tags, { user : { email: emailUsr.email, password: emailUsr.password, token: "", phone: "",  } });
+  console.log(emailUsr)
+  if (emailUsr != undefined) {
+    fileUser = UploadFileScenario(config, tags, { 
+      user: emailUsr,
+      file: {
+        small: smallFile,
+        smallName: `small_${generateRandomNumber(5,32)}.jpg`,
+        medium: medFile,
+        mediumName: `med_${generateRandomNumber(5,32)}.jpg`,
+        big: bigFile,
+        bigName: `big_${generateRandomNumber(5,32)}.jpg`,
+        invalid: invalidFile,
+        invalidName: `invalid_${generateRandomNumber(5,32)}.sql`,
+      },
+    });
+  }
   // GetProfileScenario(config, tags, { info: emailUsr });
-  // PostProfilePhoneScenario(config, tags, { info: emailUsr });
+  PostProfilePhoneScenario(config, tags, { 
+    user: emailUsr,
+    file: {
+      small: smallFile,
+      // unsigned int32
+      smallName: `file_${generateRandomNumber(0, 4_294_967_295)}.jpg`,
+    }
+  });
   // PutProfileScenario(config, tags, { info: emailUsr });
 
   const phoneUsr = RegisterPhoneScenario(config, tags, {});

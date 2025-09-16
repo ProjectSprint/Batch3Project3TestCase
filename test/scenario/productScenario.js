@@ -13,36 +13,42 @@ import {
 } from "../helper/generator.js";
 import { isExists, isEqualWith } from "../helper/assertion.js";
 import { getProduct, getProducts, isProduct } from "../assertion/productAssertion.js";
+import { getFile } from "../assertion/fileAssertion.js";
 
 /** @type {string[]} */
 const validFileId = ["file1", "file2", "file3"];
 
 /**
-<<<<<<< HEAD:src/scenario/productScenario.js
- * @type {import("src/types/scenario.js").Scenario<import("src/entity/app.js").PostProduct | undefined>}
-=======
  * @type {import("../types/scenario.js").Scenario<import("../entity/app.js").Product | undefined>}
->>>>>>> main:test/scenario/productScenario.js
  */
 export function PostProductScenario(config, tags, info) {
   const featureName = "Post Product";
   const route = config.baseUrl + "/v1/product";
+  const routeFile = config.baseUrl + "/v1/file";
   const assertHandler = testPostJsonAssert;
+
   const user = info.user;
+  const fileToTest = info.file;
   if (!isUser(user)) {
     console.warn(`${featureName} needs a valid user or file`);
     return undefined;
   }
+
+  const positiveHeader = {
+    Authorization: `Bearer ${user.token}`
+  }
+
   
   const positivePayload1 = {
     name: generateRandomName(),
     category: "Food",
     qty: 1,
     price: 100,
-    sku: "sku12345",
-    fileId: validFileId[generateRandomNumber(0, validFileId.length - 1)],
-    fileUri: "file1.jpeg",
-    fileThumbnailUri: "tmb_file1.jpeg",
+    sku: `sku${generateRandomNumber(10,99)}_${generateRandomNumber(100,999)}`,
+    // added later when ready to test positive payload
+    fileId: "", 
+    fileUri: "",
+    fileThumbnailUri: "",
   };
   
   const positivePayload2 = clone(positivePayload1);
@@ -59,6 +65,14 @@ export function PostProductScenario(config, tags, info) {
   
   let positivePayloads = [positivePayload1, positivePayload2, positivePayload3, positivePayload4, positivePayload5];
   if (config.runNegativeCase) {
+    // Test with invalid Authorization headers
+    const negativeHeaders = [
+      { Authorization: `${user.token}` }, // Missing Bearer prefix
+      { Authorization: `Bearer asdf${user.token}` }, // Invalid token
+      { Authorization: `Bearer ` }, // Empty token
+      { Authorization: `` }, // Empty header value
+    ];
+
     assertHandler({
       currentTestName: "no token",
       featureName: featureName,
@@ -72,12 +86,27 @@ export function PostProductScenario(config, tags, info) {
       config: config,
       tags: {},
     });
+    negativeHeaders.forEach((header, index) => {
+      assertHandler({
+        currentTestName: `invalid token ${index}`,
+        featureName: featureName,
+        route: route,
+        body: {},
+        headers: header,
+        expectedCase: {
+          ["should return 401"]: (_parsed, res) => res.status === 401,
+        },
+        options: [],
+        config: config,
+        tags: {},
+      });
+    });
     assertHandler({
       currentTestName: "empty body",
       featureName: featureName,
       route: route,
       body: {},
-      headers: { Authorization: user.token },
+      headers: positiveHeader,
       expectedCase: {
         ["should return 400"]: (_parsed, res) => res.status === 400,
       },
@@ -90,7 +119,7 @@ export function PostProductScenario(config, tags, info) {
       featureName: featureName,
       route: route,
       body: negativePayload,
-      headers: { Authorization: user.token },
+      headers: positiveHeader,
       expectedCase: {
         ["should return 400"]: (_parsed, res) => res.status === 400,
       },
@@ -103,7 +132,7 @@ export function PostProductScenario(config, tags, info) {
       featureName: featureName,
       route: route,
       body: negativePayload,
-      headers: { Authorization: user.token },
+      headers: positiveHeader,
       expectedCase: {
         ["should return 400"]: (_parsed, res) => res.status === 400,
       },
@@ -167,6 +196,33 @@ export function PostProductScenario(config, tags, info) {
     
     // --- Positive Case ---
     let positiveResults = positivePayloads.map((payload, _index) => {
+      // Challenge: to Post a product is to post file. Every. Time
+      // TODO: upload file first
+      const fileToUpload = {
+        file: file(fileToTest.small, `file_${generateRandomNumber(0, 4_294_967_295)}.jpg`),
+      }
+
+      // TODO: fetch uploaded file
+      const fileResult = assertHandler({
+        currentTestName: "upload file",
+        featureName: featureName,
+        route: route,
+        body: payload,
+        headers: { Authorization: user.token },
+        expectedCase: {},
+        options: [],
+        config: config,
+        tags: {},
+      });
+
+      // TODO: assign to positive payload
+      if (fileResult.isSuccess) {
+        const file = getFile(fileResult, {}, featureName);
+        payload.fileId = file.fileId;
+        payload.fileUri = file.fileUri;
+        payload.fileThumbnailUri = file.fileThumbnailUri;
+      }
+
       return assertHandler({
         currentTestName: "valid payload",
         featureName: featureName,

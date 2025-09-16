@@ -19,6 +19,8 @@ export function postProductandler(s: Server) {
           price: Type.Number(),
           sku: Type.String(),
           fileId: Type.String(),
+          fileUri: Type.String(),
+          fileThumbnailUri: Type.String(),
         }),
       },
     },

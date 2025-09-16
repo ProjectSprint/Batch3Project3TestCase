@@ -14,7 +14,7 @@ export class FileMetadata {
     console.log(data)
     this.fileId = randomUUID();
     this.fileUri = "url.com/" + (data?.originalName ?? "");
-    this.fileThumbnailUri == "url.com/" + (data?.originamName ?? "");
+    this.fileThumbnailUri = "url.com/" + (data?.originalName ?? "");
 
     this.originalName = data?.originalName ?? "";
     this.mimeType = data?.mimeType ?? "";
@@ -27,13 +27,17 @@ export class FileMetadata {
     const errors: string[] = [];
 
     // cek mimetype
-    const allowedTypes = ["image/jpeg", "image/png", "image/jpg"];
-    console.log(this.mimeType)
+    const allowedTypes = ["image/jpeg", "image/png", "image/jpg", "jpg", "jpeg", "png"];
     if (!allowedTypes.includes(this.mimeType)) {
-      errors.push("ekstensi harus jpg / jpeg / png");
+      if (this.originalName) {
+        if (!allowedTypes.includes(this.originalName.split('.')[1])) {
+          errors.push("ekstensi harus jpg / jpeg / png");
+        }
+      }
     }
 
     // cek ukuran (plugin sudah limit, tapi double check)
+    console.log("file size > ", this.size)
     if (this.size > 100 * 1024) {
       errors.push("tidak boleh lebih 100kb");
     }

@@ -17,7 +17,6 @@ export function LoginEmailScenario(config, tags, info) {
   const assertHandler = testPostJsonAssert;
 
   const user = info.user;
-  console.info("user", user);
   if (!isUser(user)) {
     console.warn(`${featureName} needs a valid user`);
     return undefined;

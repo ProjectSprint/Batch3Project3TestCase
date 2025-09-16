@@ -9,7 +9,7 @@ import { enumRoutes } from "./enum.routes.js";
 
 export function registerEmailHandler(s: Server) {
   s.post(
-    enumRoutes.PRODUCT,
+    enumRoutes.REGISTER_EMAIL,
     {
       schema: {
         body: Type.Object({
@@ -121,7 +121,6 @@ export function loginEmailHandler(s: Server) {
         }
 
        } catch (error) {
-         console.log(error);
          res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({ error });
          return;
        }
@@ -166,7 +165,6 @@ export function loginPhoneHandler(s: Server) {
           }
 
        } catch (error) {
-         console.log(error);
          res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({ error });
          return;
        }

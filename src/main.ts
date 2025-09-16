@@ -37,7 +37,7 @@ server.setErrorHandler(function (error, _, reply) {
   return;
 });
 
-server.register(multipart, { limits: { fileSize: 100 * 1024 } });
+server.register(multipart, {});
 
 // authentication
 server.addHook('preHandler', async (request: any, reply) => {

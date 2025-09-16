@@ -3,25 +3,30 @@ import { check } from "k6";
 import { getFile, isFile } from "../assertion/fileAssertion.js";
 import { testPostMultipartAssert } from "../helper/testRequest.js";
 import { isExists } from "../helper/assertion.js";
+import { isUser } from "../assertion/userAssertion.js";
 
 /**
- * @param {import("../entity/app.js").User} user
- * @param {{small: ArrayBuffer, smallName:string,medium: ArrayBuffer, mediumName:string,big: ArrayBuffer, bigName: string,invalid: ArrayBuffer,invalidName:string}} fileToTest
- * @param {import("../types/config.js").Config} config
- * @param {{[name: string]: string}} tags
- * @returns {import("../entity/app.js").UploadedFile | undefined} uri
+ * @type {import("../types/scenario.js").Scenario<import("../entity/app.js").UploadedFile | undefined>}
  */
-export function UploadFileScenario(user, fileToTest, config, tags) {
+export function UploadFileScenario(config, tags, info) {
   const featureName = "Upload File";
   const route = config.baseUrl + "/v1/file";
   const assertHandler = testPostMultipartAssert;
+  
+  const user = info.user;
+  const fileToTest = info.file;
+
+  if (!isUser(user)) {
+    console.warn(`${featureName} needs a valid user Type`);
+    return undefined;
+  }
 
   const positivePayload = {
     file: file(fileToTest.small, fileToTest.smallName),
   };
   const positiveHeader = {
-    Authorization: `Bearer ${user.token}`,
-  };
+    Authorization: `Bearer ${user.token}`
+  }
 
   if (config.runNegativeCase) {
     // Test without Authorization header
