@@ -6,34 +6,44 @@ import { registerPhoneHandler } from "./authentication/register_phone.handler.js
 import { loginEmailHandler } from "./authentication/login_email.handler.js";
 import { loginPhoneHandler } from "./authentication/login_phone.handler.js";
 import { StatusCodes } from "http-status-codes";
+import { User } from "../entity/user.entity.js";
+import { profileGetterHandler } from "./profile/profile_getter.handler.js";
+
+declare module "fastify" {
+	interface FastifyRequest {
+		user: User;
+	}
+}
 
 export function registerRoutes(s: PSServer) {
 	const repo = new UserRepository(userCollection);
-	s.register((ins, _, done) => {
+	s.register((ins, _) => {
 		registerEmailHandler(ins, repo);
 		registerPhoneHandler(ins, repo);
 		loginEmailHandler(ins, repo);
 		loginPhoneHandler(ins, repo);
-		done();
 	});
 
-	s.register((ins, _, done) => {
+	s.register((ins, _) => {
 		ins.addHook("preHandler", async (req, res) => {
 			const token = req.headers.authorization;
 			// token is string | undefined
 			if (!token) {
-				res.send(StatusCodes.UNAUTHORIZED);
+				res.status(StatusCodes.UNAUTHORIZED).send();
 				return;
 			}
 			const userId = atob(token);
+			console.error("token", token);
+			console.error("userId", userId);
 			const user = await repo.get(userId);
+			console.error("user", user);
 			if (!user) {
-				res.send(StatusCodes.UNAUTHORIZED);
+				res.status(StatusCodes.UNAUTHORIZED).send();
 				return;
 			}
-		});
-		done();
 
-		// add route here
+			req.user = user;
+		});
+		profileGetterHandler(ins);
 	});
 }

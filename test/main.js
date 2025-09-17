@@ -7,6 +7,7 @@ import {
 	LoginEmailScenario,
 	LoginPhoneScenario,
 } from "./scenario/loginScenario.js";
+import { GetProfileScenario } from "./scenario/profileScenario.js";
 // import {
 //   GetProfileScenario,
 //   PostProfileEmailScenario,
@@ -73,8 +74,7 @@ export default function () {
 	// ===== REGISTER TEST =====
 	const emailUsr = RegisterEmailScenario(config, tags, {});
 	LoginEmailScenario(config, tags, { user: emailUsr });
-	// re-assign variabel yang berisi token
-	// GetProfileScenario(config, tags, { info: emailUsr });
+	GetProfileScenario(config, tags, { user: emailUsr });
 	// PostProfilePhoneScenario(config, tags, { info: emailUsr });
 	// PutProfileScenario(config, tags, { info: emailUsr });
 

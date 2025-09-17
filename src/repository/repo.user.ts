@@ -1,3 +1,4 @@
+import { randomUUID } from "crypto";
 import { User, UserCredential } from "../entity/user.entity.js";
 
 export class UserRepository {
@@ -22,9 +23,17 @@ export class UserRepository {
 			});
 			if (findRes.docs.length) return null;
 
-			const res = await this.repo.post({
+			const res = await this.repo.put({
+				_id: randomUUID(),
+				email: "",
 				phone,
 				password,
+				bankAccountHolder: "",
+				bankAccountName: "",
+				bankAccountNumber: "",
+				fileId: "",
+				fileThumbnailUri: "",
+				fileUri: "",
 			});
 			return {
 				_id: res.id,
@@ -46,9 +55,17 @@ export class UserRepository {
 			});
 			if (findRes.docs.length) return null;
 
-			const res = await this.repo.post({
+			const res = await this.repo.put({
+				_id: randomUUID(),
 				email,
 				password,
+				phone: "",
+				bankAccountHolder: "",
+				bankAccountName: "",
+				bankAccountNumber: "",
+				fileId: "",
+				fileThumbnailUri: "",
+				fileUri: "",
 			});
 			return {
 				_id: res.id,
