@@ -1,4 +1,3 @@
-// src/types.ts
 import { TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
 import {
   FastifyBaseLogger,
@@ -12,7 +11,7 @@ export interface JwtPayload {
   id: string;
 }
 
-export type Server = FastifyInstance<
+export type PSServer = FastifyInstance<
   RawServerDefault,
   RawRequestDefaultExpression<RawServerDefault>,
   RawReplyDefaultExpression<RawServerDefault>,

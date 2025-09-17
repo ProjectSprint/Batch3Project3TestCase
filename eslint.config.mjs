@@ -1,7 +1,6 @@
 import tseslint from "@typescript-eslint/eslint-plugin";
-import tsparser from "@typescript-eslint/parser";
-import prettierPlugin from "eslint-plugin-prettier";
-import prettierConfig from "eslint-config-prettier";
+// @ts-ignore
+import tsParser from "@typescript-eslint/parser";
 
 /** @type {import('eslint').Linter.Config[]} */
 export default [
@@ -90,7 +89,7 @@ export default [
   {
     files: ["src/**/*.{js,ts,tsx}"],
     languageOptions: {
-      parser: tsparser,
+          parser: tsParser, 
       parserOptions: {
         ecmaVersion: "latest",
         sourceType: "module",
@@ -99,12 +98,10 @@ export default [
     },
     plugins: {
       "@typescript-eslint": tseslint,
-      prettier: prettierPlugin,
     },
     rules: {
       ...tseslint.configs.recommended.rules,
       ...tseslint.configs["recommended-requiring-type-checking"].rules,
-      ...prettierConfig.rules,
 
       // TypeScript specific rules
       "@typescript-eslint/no-unused-vars": [

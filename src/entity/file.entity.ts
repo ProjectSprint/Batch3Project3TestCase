@@ -1,4 +1,3 @@
-
 import { randomUUID } from "crypto";
 
 export class FileMetadata {
@@ -11,7 +10,7 @@ export class FileMetadata {
   uploadedAt: Date;
 
   constructor(data?: Partial<FileMetadata>) {
-    console.log(data)
+    console.log(data);
     this.fileId = randomUUID();
     this.fileUri = "url.com/" + (data?.originalName ?? "");
     this.fileThumbnailUri == "url.com/" + (data?.originamName ?? "");
@@ -28,7 +27,7 @@ export class FileMetadata {
 
     // cek mimetype
     const allowedTypes = ["image/jpeg", "image/png", "image/jpg"];
-    console.log(this.mimeType)
+    console.log(this.mimeType);
     if (!allowedTypes.includes(this.mimeType)) {
       errors.push("ekstensi harus jpg / jpeg / png");
     }
@@ -47,7 +46,9 @@ export class FileDTO {
   fileUri: string;
   fileThumbnailUri: string;
 
-  constructor(data: { fileId?: string, fileUri?: string; fileThumbnailUri?: string } = {}) {
+  constructor(
+    data: { fileId?: string; fileUri?: string; fileThumbnailUri?: string } = {},
+  ) {
     this.fileId = data.fileId || randomUUID();
     this.fileUri = data.fileUri || "";
     this.fileThumbnailUri = data.fileThumbnailUri || "";
