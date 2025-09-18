@@ -7,7 +7,7 @@ import { loginEmailHandler } from "./authentication/login_email.handler.js";
 import { loginPhoneHandler } from "./authentication/login_phone.handler.js";
 import { StatusCodes } from "http-status-codes";
 import { User } from "../entity/user.entity.js";
-import { profileGetterHandler } from "./profile/profile_getter.handler.js";
+import { profilePostPhoneHandler, profileGetterHandler, profilePostEmailHandler, profilePutHandler } from "./profile/profile_getter.handler.js";
 
 declare module "fastify" {
 	interface FastifyRequest {
@@ -44,6 +44,11 @@ export function registerRoutes(s: PSServer) {
 
 			req.user = user;
 		});
+
 		profileGetterHandler(ins);
+		profilePutHandler(ins, repo);
+		profilePostEmailHandler(ins, repo);
+		profilePostPhoneHandler(ins, repo);
+
 	});
 }

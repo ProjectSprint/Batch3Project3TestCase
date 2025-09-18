@@ -131,4 +131,23 @@ export class UserRepository {
 			return null;
 		}
 	}
+
+	async updateProfile(userId: string, fileId: string, bankAccountName: string, bankAccountHolder: string, bankAccountNumber: string ): Promise<User | null> {
+		try {
+			const res = await this.repo.get(userId);
+			const updatePayload = {
+				...res,
+				_id: res._id,
+				fileId,
+				bankAccountName,
+				bankAccountHolder,
+				bankAccountNumber
+			};
+			await this.repo.put(updatePayload);
+
+			return updatePayload as User;
+		} catch {
+			return null;
+		}
+	}
 }
