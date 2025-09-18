@@ -15,12 +15,11 @@ export function profileGetterHandler(s: PSServer) {
 
 export function profilePutHandler(s: PSServer, repo: UserRepository) {
 	s.put(
-		"/v1/user", 
+		"/v1/user",
 		{
 			schema: {
 				body: Type.Object({
-					fileId: Type.String({
-					}),
+					fileId: Type.String({}),
 					bankAccountName: Type.String({
 						minLength: 4,
 						maxLength: 32,
@@ -35,11 +34,18 @@ export function profilePutHandler(s: PSServer, repo: UserRepository) {
 					}),
 				}),
 			},
-		}, 
+		},
 		async (req, res) => {
 			const usr = req.user;
-			const { fileId, bankAccountName, bankAccountHolder, bankAccountNumber } = req.body;
-			const user = await repo.updateProfile(usr._id, fileId, bankAccountName, bankAccountHolder, bankAccountNumber);
+			const { fileId, bankAccountName, bankAccountHolder, bankAccountNumber } =
+				req.body;
+			const user = await repo.updateProfile(
+				usr._id,
+				fileId,
+				bankAccountName,
+				bankAccountHolder,
+				bankAccountNumber,
+			);
 			if (user == null) {
 				res.status(StatusCodes.CONFLICT);
 				return;
@@ -47,23 +53,23 @@ export function profilePutHandler(s: PSServer, repo: UserRepository) {
 			res.status(StatusCodes.OK).send({
 				...user,
 			});
-		}
+		},
 	);
 }
 
 export function profilePostPhoneHandler(s: PSServer, repo: UserRepository) {
 	const pattern = "^\\+(" + callingCodes.join("|") + ")\\d*$";
 	s.post(
-		"/v1/user/link/phone", 
+		"/v1/user/link/phone",
 		{
 			schema: {
 				body: Type.Object({
 					phone: Type.String({
 						pattern,
-					}),	
+					}),
 				}),
 			},
-		}, 
+		},
 		async (req, res) => {
 			const usr = req.user;
 			const { phone } = req.body;
@@ -75,13 +81,13 @@ export function profilePostPhoneHandler(s: PSServer, repo: UserRepository) {
 			res.status(StatusCodes.OK).send({
 				...user,
 			});
-		}
+		},
 	);
 }
 
 export function profilePostEmailHandler(s: PSServer, repo: UserRepository) {
 	s.post(
-		"/v1/user/link/email", 
+		"/v1/user/link/email",
 		{
 			schema: {
 				body: Type.Object({
@@ -90,7 +96,7 @@ export function profilePostEmailHandler(s: PSServer, repo: UserRepository) {
 					}),
 				}),
 			},
-		}, 
+		},
 		async (req, res) => {
 			const usr = req.user;
 			const { email } = req.body;
@@ -102,6 +108,6 @@ export function profilePostEmailHandler(s: PSServer, repo: UserRepository) {
 			res.status(StatusCodes.OK).send({
 				...user,
 			});
-		}
+		},
 	);
 }

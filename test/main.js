@@ -7,10 +7,11 @@ import {
 	LoginEmailScenario,
 	LoginPhoneScenario,
 } from "./scenario/loginScenario.js";
+import { UploadFileScenario } from "./scenario/fileScenario.js";
 import {
-  UploadFileScenario,
-} from "./scenario/fileScenario.js";
-import { generateRandomName, generateRandomNumber } from "./helper/generator.js";
+	generateRandomName,
+	generateRandomNumber,
+} from "./helper/generator.js";
 // import {
 //   GetProfileScenario,
 //   PostProfileEmailScenario,
@@ -45,21 +46,21 @@ const invalidFile = open("./figure/sql-5KB.sql", "b");
  * @type {import("./types/scenario.js").Scenarios}
  */
 const scenarios = {
-  RegisterEmailScenario: RegisterEmailScenario,
-  RegisterPhoneScenario: RegisterPhoneScenario,
-  LoginEmailScenario: LoginEmailScenario,
-  LoginPhoneScenario: LoginPhoneScenario,
-  UploadFileScenario: UploadFileScenario,
-  // GetProfileScenario: GetProfileScenario,
-  // PutProfileScenario: PutProfileScenario,
-  // PostProfilePhoneScenario: PostProfilePhoneScenario,
-  // PostProfileEmailScenario: PostProfileEmailScenario,
-  // PostPurchaseScenario: PostPurchaseScenario,
-  // PostPurchaseIdScenario: PostPurchaseIdScenario,
-  // PostProductScenario: PostProductScenario,
-  // GetProductScenario: GetProductScenario,
-  // PutProductScenario: PutProductScenario,
-  // DeleteProductScenario: DeleteProductScenario,
+	RegisterEmailScenario: RegisterEmailScenario,
+	RegisterPhoneScenario: RegisterPhoneScenario,
+	LoginEmailScenario: LoginEmailScenario,
+	LoginPhoneScenario: LoginPhoneScenario,
+	UploadFileScenario: UploadFileScenario,
+	// GetProfileScenario: GetProfileScenario,
+	// PutProfileScenario: PutProfileScenario,
+	// PostProfilePhoneScenario: PostProfilePhoneScenario,
+	// PostProfileEmailScenario: PostProfileEmailScenario,
+	// PostPurchaseScenario: PostPurchaseScenario,
+	// PostPurchaseIdScenario: PostPurchaseIdScenario,
+	// PostProductScenario: PostProductScenario,
+	// GetProductScenario: GetProductScenario,
+	// PutProductScenario: PutProductScenario,
+	// DeleteProductScenario: DeleteProductScenario,
 };
 
 export default function () {
@@ -75,39 +76,36 @@ export default function () {
 	};
 	console.log(`k6 | Firing to ${config.baseUrl}`);
 
-  // ===== REGISTER TEST =====
-  const emailUsr = RegisterEmailScenario(config, tags, {});
-  // re-assign variabel yang berisi token
-  LoginEmailScenario(config, tags, { user : { email: emailUsr.email, password: emailUsr.password, token: "", phone: "",  } });
-  console.log(emailUsr)
-  if (emailUsr != undefined) {
-    fileUser = UploadFileScenario(config, tags, { 
-      user: emailUsr,
-      file: {
-        small: smallFile,
-        smallName: `small_${generateRandomNumber(5,32)}.jpg`,
-        medium: medFile,
-        mediumName: `med_${generateRandomNumber(5,32)}.jpg`,
-        big: bigFile,
-        bigName: `big_${generateRandomNumber(5,32)}.jpg`,
-        invalid: invalidFile,
-        invalidName: `invalid_${generateRandomNumber(5,32)}.sql`,
-      },
-    });
-  }
-  // GetProfileScenario(config, tags, { info: emailUsr });
-  PostProfilePhoneScenario(config, tags, { 
-    user: emailUsr,
-    file: {
-      small: smallFile,
-      // unsigned int32
-      smallName: `file_${generateRandomNumber(0, 4_294_967_295)}.jpg`,
-    }
-  });
-  // PutProfileScenario(config, tags, { info: emailUsr });
+	// ===== REGISTER TEST =====
+	const emailUsr = RegisterEmailScenario(config, tags, {});
+	LoginEmailScenario(config, tags, { user: emailUsr });
+	UploadFileScenario(config, tags, {
+		user: emailUsr,
+		file: {
+			small: smallFile,
+			smallName: `small_${generateRandomNumber(5, 32)}.jpg`,
+			medium: medFile,
+			mediumName: `med_${generateRandomNumber(5, 32)}.jpg`,
+			big: bigFile,
+			bigName: `big_${generateRandomNumber(5, 32)}.jpg`,
+			invalid: invalidFile,
+			invalidName: `invalid_${generateRandomNumber(5, 32)}.sql`,
+		},
+	});
+	// GetProfileScenario(config, tags, { info: emailUsr });
+	PostProfilePhoneScenario(config, tags, {
+		user: emailUsr,
+		file: {
+			small: smallFile,
+			// unsigned int32
+			smallName: `file_${generateRandomNumber(0, 294)}.jpg`,
+		},
+	});
+	// PutProfileScenario(config, tags, { info: emailUsr });
 
 	const phoneUsr = RegisterPhoneScenario(config, tags, {});
 	LoginPhoneScenario(config, tags, { user: phoneUsr });
+	PostProductScenario(config, tags, { user: emailUsr });
 	// PostProfileEmailScenario(config, tags, { info: phoneUsr });
 
 	// ===== PROFILE TEST =====

@@ -52,7 +52,7 @@ export function LoginEmailScenario(config, tags, info) {
 				password: {
 					type: "string",
 					notNull: true,
-					minLength: 8,
+					minLength: 7,
 					maxLength: 32,
 				},
 			},
