@@ -1,4 +1,3 @@
-
 import { randomUUID } from "crypto";
 
 export class FileMetadata {
@@ -11,10 +10,10 @@ export class FileMetadata {
   uploadedAt: Date;
 
   constructor(data?: Partial<FileMetadata>) {
-    console.log(data)
+    console.log(data);
     this.fileId = randomUUID();
     this.fileUri = "url.com/" + (data?.originalName ?? "");
-    this.fileThumbnailUri = "url.com/" + (data?.originalName ?? "");
+    this.fileThumbnailUri == "url.com/" + (data?.originamName ?? "");
 
     this.originalName = data?.originalName ?? "";
     this.mimeType = data?.mimeType ?? "";
@@ -27,17 +26,13 @@ export class FileMetadata {
     const errors: string[] = [];
 
     // cek mimetype
-    const allowedTypes = ["image/jpeg", "image/png", "image/jpg", "jpg", "jpeg", "png"];
+    const allowedTypes = ["image/jpeg", "image/png", "image/jpg"];
+    console.log(this.mimeType);
     if (!allowedTypes.includes(this.mimeType)) {
-      if (this.originalName) {
-        if (!allowedTypes.includes(this.originalName.split('.')[1])) {
-          errors.push("ekstensi harus jpg / jpeg / png");
-        }
-      }
+      errors.push("ekstensi harus jpg / jpeg / png");
     }
 
     // cek ukuran (plugin sudah limit, tapi double check)
-    console.log("file size > ", this.size)
     if (this.size > 100 * 1024) {
       errors.push("tidak boleh lebih 100kb");
     }
@@ -51,7 +46,9 @@ export class FileDTO {
   fileUri: string;
   fileThumbnailUri: string;
 
-  constructor(data: { fileId?: string, fileUri?: string; fileThumbnailUri?: string } = {}) {
+  constructor(
+    data: { fileId?: string; fileUri?: string; fileThumbnailUri?: string } = {},
+  ) {
     this.fileId = data.fileId || randomUUID();
     this.fileUri = data.fileUri || "";
     this.fileThumbnailUri = data.fileThumbnailUri || "";

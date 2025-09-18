@@ -11,12 +11,12 @@ const isValid = createValidator(userSchema);
  * @throws {import("test/types/typeAssertion.js").ValidationError[]}
  */
 export function isUser(value) {
-  const obj = value;
-  const res = isValid(obj);
-  if (res.valid) {
-    return true;
-  }
-  throw res.errors;
+	const obj = value;
+	const res = isValid(obj);
+	if (res.valid) {
+		return true;
+	}
+	return false;
 }
 
 /**
@@ -26,21 +26,21 @@ export function isUser(value) {
  * @returns {import('../entity/app.js').User | undefined}
  */
 export function getUser(res, positivePayload, featureName) {
-  let obj;
-  try {
-    const jsonResult = res.json();
-    if (jsonResult && typeof jsonResult == "object") {
-      obj = combine(jsonResult, positivePayload);
-      if (isUser(obj)) {
-        return obj;
-      }
-      console.log(featureName + " | object is not matching schema", obj);
-      return;
-    }
-    console.log(featureName + " | json is not object", jsonResult);
-    return;
-  } catch (e) {
-    console.log(featureName + " | json or validation error:", e, "body:", obj);
-    return;
-  }
+	let obj;
+	try {
+		const jsonResult = res.json();
+		if (jsonResult && typeof jsonResult == "object") {
+			obj = combine(jsonResult, positivePayload);
+			if (isUser(obj)) {
+				return obj;
+			}
+			console.warn(featureName + " | object is not matching schema", obj);
+			return;
+		}
+		console.warn(featureName + " | json is not object", jsonResult);
+		return;
+	} catch (e) {
+		console.warn(featureName + " | json or validation error:", e, "body:", obj);
+		return;
+	}
 }

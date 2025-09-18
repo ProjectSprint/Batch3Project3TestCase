@@ -34,13 +34,15 @@ export function postProductandler(s: Server) {
       }
 
       // TODO: parse req.body to User
-      var user = new User();
+      const user = new User();
       user.id = randomUUID();
       user.email = dto.email;
       user.password = await hashPassword(dto.password);
       try {
-        if (await userRepository.get(user) != null) {
-          res.status(StatusCodes.CONFLICT).send({ error: "Email sudah terdaftar" });
+        if ((await userRepository.get(user)) != null) {
+          res
+            .status(StatusCodes.CONFLICT)
+            .send({ error: "Email sudah terdaftar" });
           return;
         }
         await userRepository.insert(user);
@@ -48,7 +50,13 @@ export function postProductandler(s: Server) {
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({ error });
         return;
       }
-      res.status(StatusCodes.CREATED).send({ email: user.email, phone: user.phone, token: generateToken({id: user.id}) });
+      res
+        .status(StatusCodes.CREATED)
+        .send({
+          email: user.email,
+          phone: user.phone,
+          token: generateToken({ id: user.id }),
+        });
     },
   );
 }

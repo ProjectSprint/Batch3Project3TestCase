@@ -742,7 +742,7 @@ export function generateTestObjects(schema, validTemplate) {
                   generateViolationsForProp(
                     `${propPath}[0].${nestedProp}`,
                     nestedRules,
-                    parentArr?.[0]?.[nestedProp],
+                    parentArr?.[0]?.[nestedProp], // fix eslint rule
                   );
                 },
               );
