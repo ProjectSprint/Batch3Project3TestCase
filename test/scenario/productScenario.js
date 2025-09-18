@@ -1,6 +1,8 @@
+import { file, get } from "k6/http";
 import {
   testGetAssert,
   testPostJsonAssert,
+  testPostMultipartAssert,
   testPutJsonAssert,
 } from "../helper/testRequest.js";
 import { getUser, isUser } from "../assertion/userAssertion.js";
@@ -26,6 +28,7 @@ export function PostProductScenario(config, tags, info) {
   const route = config.baseUrl + "/v1/product";
   const routeFile = config.baseUrl + "/v1/file";
   const assertHandler = testPostJsonAssert;
+  const multipartHandler = testPostMultipartAssert;
 
   const user = info.user;
   const fileToTest = info.file;
@@ -38,13 +41,12 @@ export function PostProductScenario(config, tags, info) {
     Authorization: `Bearer ${user.token}`
   }
 
-  
   const positivePayload1 = {
     name: generateRandomName(),
     category: "Food",
     qty: 1,
     price: 100,
-    sku: `sku${generateRandomNumber(10,99)}_${generateRandomNumber(100,999)}`,
+    sku: `sku${generateRandomNumber(10000,99999)}`,
     // added later when ready to test positive payload
     fileId: "", 
     fileUri: "",
@@ -52,16 +54,23 @@ export function PostProductScenario(config, tags, info) {
   };
   
   const positivePayload2 = clone(positivePayload1);
+  positivePayload2.sku = `sku${generateRandomNumber(10000,99999)}`;
   positivePayload2.category = "Beverage";
   const positivePayload3 = clone(positivePayload1);
+  positivePayload3.sku = `sku${generateRandomNumber(10000,99999)}`;
   positivePayload3.category = "Clothes";
   const positivePayload4 = clone(positivePayload1);
+  positivePayload4.sku = `sku${generateRandomNumber(10000,99999)}`;
   positivePayload4.category = "Furniture";
   const positivePayload5 = clone(positivePayload1);
+  positivePayload5.sku = `sku${generateRandomNumber(10000,99999)}`;
   positivePayload5.category = "Tools";
   const negativePayload = clone(positivePayload1);
-  negativePayload.category = "Electronic";
-  negativePayload.fileId = "salah0123";
+  negativePayload.sku = `sku${generateRandomNumber(10000,99999)}`;
+  negativePayload.category = "WrongCategory";
+  negativePayload.fileId = "notexist_id";
+  const conflictPayload = clone(positivePayload1);
+
   
   let positivePayloads = [positivePayload1, positivePayload2, positivePayload3, positivePayload4, positivePayload5];
   if (config.runNegativeCase) {
@@ -77,7 +86,7 @@ export function PostProductScenario(config, tags, info) {
       currentTestName: "no token",
       featureName: featureName,
       route: route,
-      body: {},
+      body: positivePayload1,
       headers: {},
       expectedCase: {
         ["should return 401"]: (_parsed, res) => res.status === 401,
@@ -91,7 +100,7 @@ export function PostProductScenario(config, tags, info) {
         currentTestName: `invalid token ${index}`,
         featureName: featureName,
         route: route,
-        body: {},
+        body: positivePayload1,
         headers: header,
         expectedCase: {
           ["should return 401"]: (_parsed, res) => res.status === 401,
@@ -183,7 +192,7 @@ export function PostProductScenario(config, tags, info) {
         featureName: featureName,
         route: route,
         body: payload,
-        headers: { Authorization: user.token },
+        headers: positiveHeader,
         expectedCase: {
             ["should return 400"]: (_parsed, res) => res.status === 400,
           },
@@ -203,12 +212,12 @@ export function PostProductScenario(config, tags, info) {
       }
 
       // TODO: fetch uploaded file
-      const fileResult = assertHandler({
+      const fileResult = multipartHandler({
         currentTestName: "upload file",
         featureName: featureName,
-        route: route,
-        body: payload,
-        headers: { Authorization: user.token },
+        route: routeFile,
+        body: fileToUpload,
+        headers: positiveHeader,
         expectedCase: {},
         options: [],
         config: config,
@@ -217,7 +226,7 @@ export function PostProductScenario(config, tags, info) {
 
       // TODO: assign to positive payload
       if (fileResult.isSuccess) {
-        const file = getFile(fileResult, {}, featureName);
+        const file = getFile(fileResult.res, {}, featureName);
         payload.fileId = file.fileId;
         payload.fileUri = file.fileUri;
         payload.fileThumbnailUri = file.fileThumbnailUri;
@@ -228,7 +237,7 @@ export function PostProductScenario(config, tags, info) {
         featureName: featureName,
         route: route,
         body: payload,
-        headers: { Authorization: user.token },
+        headers: positiveHeader,
         expectedCase: {
           ["should return 201"]: (_parsed, res) => res.status === 201,
           
@@ -263,6 +272,46 @@ export function PostProductScenario(config, tags, info) {
       });
     });
     
+    // TODO: test conflict payload
+    if (config.runNegativeCase) {
+      const fileToUpload = {
+        file: file(fileToTest.small, `file_${generateRandomNumber(0, 4_294_967_295)}.jpg`),
+      }
+      const fileResult = multipartHandler({
+        currentTestName: "upload file",
+        featureName: featureName,
+        route: routeFile,
+        body: fileToUpload,
+        headers: positiveHeader,
+        expectedCase: {},
+        options: [],
+        config: config,
+        tags: {},
+      });
+
+      // TODO: assign to positive payload
+      if (fileResult.isSuccess) {
+        const file = getFile(fileResult.res, {}, featureName);
+        conflictPayload.fileId = file.fileId;
+        conflictPayload.fileUri = file.fileUri;
+        conflictPayload.fileThumbnailUri = file.fileThumbnailUri;
+      }
+
+      assertHandler({
+        currentTestName: "conflict product",
+        featureName: featureName,
+        route: route,
+        body: conflictPayload,
+        headers: positiveHeader,
+        expectedCase: {
+            ["should return 409"]: (_parsed, res) => res.status === 409,
+          },
+          options: [],
+          config: config,
+          tags: {},
+        });
+    }
+
     if (positiveResults.every((result) => {return result.isSuccess})) {
       return getProduct(positiveResults[0].res, {}, featureName);
     } else {
@@ -286,6 +335,44 @@ export function GetProductScenario(config, tags, info) {
     console.warn(`${featureName} needs a valid user`);
     return undefined;
   }
+  
+  // Generate the important metric
+  const cheapestPrice = 1_000;
+  const expensivePrice = 5_042_690;
+  const cheapest = {
+    name: generateRandomName(),
+    category: "Food",
+    qty: 1_000,
+    price: cheapestPrice,
+    sku: `sku${generateRandomNumber(10000,99999)}`,
+    // added later when ready to test positive payload
+    fileId: "", 
+    fileUri: "",
+    fileThumbnailUri: "",
+  };
+  const expensive = {
+    name: generateRandomName(),
+    category: "Furniture",
+    qty: 2,
+    price: expensivePrice,
+    sku: `sku${generateRandomNumber(10000,99999)}`,
+    // added later when ready to test positive payload
+    fileId: "", 
+    fileUri: "",
+    fileThumbnailUri: "",
+  }
+  const positivePayload2 = clone(positivePayload1);
+  positivePayload2.sku = `sku${generateRandomNumber(10000,99999)}`;
+  positivePayload2.category = "Beverage";
+  const positivePayload3 = clone(positivePayload1);
+  positivePayload3.sku = `sku${generateRandomNumber(10000,99999)}`;
+  positivePayload3.category = "Clothes";
+  const positivePayload4 = clone(positivePayload1);
+  positivePayload4.sku = `sku${generateRandomNumber(10000,99999)}`;
+  positivePayload4.category = "Furniture";
+  const positivePayload5 = clone(positivePayload1);
+  positivePayload5.sku = `sku${generateRandomNumber(10000,99999)}`;
+  positivePayload5.category = "Tools";
 
   // --- Positive Case ---
   const positiveResult = assertHandler({
