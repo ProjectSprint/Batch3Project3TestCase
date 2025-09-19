@@ -1,4 +1,3 @@
-import exec from "k6/execution";
 import {
 	RegisterEmailScenario,
 	RegisterPhoneScenario,
@@ -8,10 +7,13 @@ import {
 	LoginPhoneScenario,
 } from "./scenario/loginScenario.js";
 import { UploadFileScenario } from "./scenario/fileScenario.js";
+import { generateRandomNumber } from "./helper/generator.js";
 import {
-	generateRandomName,
-	generateRandomNumber,
-} from "./helper/generator.js";
+	GetProfileScenario,
+	PostProfileEmailScenario,
+	PostProfilePhoneScenario,
+	PutProfileScenario,
+} from "./scenario/profileScenario.js";
 // import {
 //   GetProfileScenario,
 //   PostProfileEmailScenario,
@@ -43,25 +45,18 @@ const bigFile = open("./figure/image-200KB.jpg", "b");
 const invalidFile = open("./figure/sql-5KB.sql", "b");
 
 /**
- * @type {import("./types/scenario.js").Scenarios}
+ * Represents a collection of file variants with different sizes and states.
+ *
+ * @typedef {Object} FileCollection
+ * @property {ArrayBuffer} small - The binary data of the small file variant.
+ * @property {string} smallName - The filename for the small file.
+ * @property {ArrayBuffer} medium - The binary data of the medium file variant.
+ * @property {string} mediumName - The filename for the medium file.
+ * @property {ArrayBuffer} big - The binary data of the big file variant.
+ * @property {string} bigName - The filename for the big file.
+ * @property {ArrayBuffer} invalid - The binary data of the invalid file variant (e.g., corrupted or placeholder).
+ * @property {string} invalidName - The filename for the invalid file.
  */
-const scenarios = {
-	RegisterEmailScenario: RegisterEmailScenario,
-	RegisterPhoneScenario: RegisterPhoneScenario,
-	LoginEmailScenario: LoginEmailScenario,
-	LoginPhoneScenario: LoginPhoneScenario,
-	UploadFileScenario: UploadFileScenario,
-	// GetProfileScenario: GetProfileScenario,
-	// PutProfileScenario: PutProfileScenario,
-	// PostProfilePhoneScenario: PostProfilePhoneScenario,
-	// PostProfileEmailScenario: PostProfileEmailScenario,
-	// PostPurchaseScenario: PostPurchaseScenario,
-	// PostPurchaseIdScenario: PostPurchaseIdScenario,
-	// PostProductScenario: PostProductScenario,
-	// GetProductScenario: GetProductScenario,
-	// PutProductScenario: PutProductScenario,
-	// DeleteProductScenario: DeleteProductScenario,
-};
 
 export default function () {
 	/** @type {import("./types/config.js").Config} */
@@ -79,33 +74,34 @@ export default function () {
 	// ===== REGISTER TEST =====
 	const emailUsr = RegisterEmailScenario(config, tags, {});
 	LoginEmailScenario(config, tags, { user: emailUsr });
-	UploadFileScenario(config, tags, {
+
+	/** @type {FileCollection} */
+	const fileTest = {
+		small: smallFile,
+		smallName: `small_${generateRandomNumber(5, 32)}.jpg`,
+		medium: medFile,
+		mediumName: `med_${generateRandomNumber(5, 32)}.jpg`,
+		big: bigFile,
+		bigName: `big_${generateRandomNumber(5, 32)}.jpg`,
+		invalid: invalidFile,
+		invalidName: `invalid_${generateRandomNumber(5, 32)}.sql`,
+	};
+	const uploadedFile = UploadFileScenario(config, tags, {
 		user: emailUsr,
-		file: {
-			small: smallFile,
-			smallName: `small_${generateRandomNumber(5, 32)}.jpg`,
-			medium: medFile,
-			mediumName: `med_${generateRandomNumber(5, 32)}.jpg`,
-			big: bigFile,
-			bigName: `big_${generateRandomNumber(5, 32)}.jpg`,
-			invalid: invalidFile,
-			invalidName: `invalid_${generateRandomNumber(5, 32)}.sql`,
-		},
+		file: fileTest,
 	});
-	// GetProfileScenario(config, tags, { info: emailUsr });
+	GetProfileScenario(config, tags, { user: emailUsr });
+	PutProfileScenario(config, tags, { user: emailUsr, file: uploadedFile });
 	PostProfilePhoneScenario(config, tags, {
 		user: emailUsr,
-		file: {
-			small: smallFile,
-			// unsigned int32
-			smallName: `file_${generateRandomNumber(0, 294)}.jpg`,
-		},
 	});
-	// PutProfileScenario(config, tags, { info: emailUsr });
+	PostProfileEmailScenario(config, tags, {
+		user: emailUsr,
+	});
 
 	const phoneUsr = RegisterPhoneScenario(config, tags, {});
 	LoginPhoneScenario(config, tags, { user: phoneUsr });
-	PostProductScenario(config, tags, { user: emailUsr });
+	// PostProductScenario(config, tags, { user: emailUsr });
 	// PostProfileEmailScenario(config, tags, { info: phoneUsr });
 
 	// ===== PROFILE TEST =====

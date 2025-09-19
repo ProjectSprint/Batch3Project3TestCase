@@ -9,7 +9,7 @@ import {
 import { isExists } from "../helper/assertion.js";
 
 /**
- * @type {import("../types/scenario.js").Scenario<import("../entity/app.js").User | undefined>}
+ * @type {import("../types/scenario.js").Scenario<any,import("../entity/app.js").User | undefined>}
  */
 export function RegisterEmailScenario(config, tags, info) {
 	const featureName = "Register Email";
@@ -121,7 +121,7 @@ export function RegisterEmailScenario(config, tags, info) {
 }
 
 /**
- * @type {import("../types/scenario.js").Scenario<import("../entity/app.js").User | undefined>}
+ * @type {import("../types/scenario.js").Scenario<any,import("../entity/app.js").User | undefined>}
  */
 export function RegisterPhoneScenario(config, tags, info) {
 	const featureName = "Register Phone";

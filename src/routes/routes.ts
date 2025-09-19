@@ -1,13 +1,18 @@
 import type { PSServer } from "../types.js";
-import { registerEmailHandler } from "./authentication/register_email.handler.js";
 import { UserRepository } from "../repository/repo.user.js";
-import { userCollection } from "../provider/provider.db.js";
-import { registerPhoneHandler } from "./authentication/register_phone.handler.js";
-import { loginEmailHandler } from "./authentication/login_email.handler.js";
-import { loginPhoneHandler } from "./authentication/login_phone.handler.js";
+import { fileCollection, userCollection } from "../provider/provider.db.js";
 import { StatusCodes } from "http-status-codes";
 import { User } from "../entity/user.entity.js";
-import { profilePostPhoneHandler, profileGetterHandler, profilePostEmailHandler, profilePutHandler } from "./profile/profile_getter.handler.js";
+import { profileReaderHandler } from "./profile_reader.handler.js";
+import { profileUpdaterHandler } from "./profile_updater.handler.js";
+import { profileEmailLinkerHandler } from "./profile_email_linker.handler.js";
+import { profilePhoneLinkerHandler } from "./profile_phone_linker.handler.js";
+import { userEmailRegistrar } from "./user_email_registrar.handler.js";
+import { userPhoneRegistrar } from "./user_phone_registrar.handler.js";
+import { userEmailAutheticator } from "./user_email_authenticator.handler.js";
+import { userPhoneAuthenticator } from "./user_phone_authenticator.handler.js";
+import { fileCreator } from "./file_creator.handler.js";
+import { FileRepository } from "../repository/repo.file.js";
 
 declare module "fastify" {
 	interface FastifyRequest {
@@ -16,16 +21,19 @@ declare module "fastify" {
 }
 
 export function registerRoutes(s: PSServer) {
-	const repo = new UserRepository(userCollection);
+	const userRepo = new UserRepository(userCollection);
+	const fileRepo = new FileRepository(fileCollection);
 	s.register((ins, _) => {
-		registerEmailHandler(ins, repo);
-		registerPhoneHandler(ins, repo);
-		loginEmailHandler(ins, repo);
-		loginPhoneHandler(ins, repo);
+		userEmailRegistrar(ins, userRepo);
+		userPhoneRegistrar(ins, userRepo);
+		userEmailAutheticator(ins, userRepo);
+		userPhoneAuthenticator(ins, userRepo);
 	});
 
 	s.register((ins, _) => {
-		ins.addHook("preHandler", async (req, res) => {
+		ins.addHook("onRequest", async (req, res) => {
+			console.log("req.url:", req.url);
+			console.log("headers:", req.headers);
 			const token = req.headers.authorization;
 			// token is string | undefined
 			if (!token) {
@@ -33,22 +41,18 @@ export function registerRoutes(s: PSServer) {
 				return;
 			}
 			const userId = atob(token);
-			console.error("token", token);
-			console.error("userId", userId);
-			const user = await repo.get(userId);
-			console.error("user", user);
+			const user = await userRepo.get(userId);
 			if (!user) {
 				res.status(StatusCodes.UNAUTHORIZED).send();
 				return;
 			}
-
 			req.user = user;
 		});
 
-		profileGetterHandler(ins);
-		profilePutHandler(ins, repo);
-		profilePostEmailHandler(ins, repo);
-		profilePostPhoneHandler(ins, repo);
-
+		profileReaderHandler(ins);
+		profileUpdaterHandler(ins, userRepo);
+		profileEmailLinkerHandler(ins, userRepo);
+		profilePhoneLinkerHandler(ins, userRepo);
+		fileCreator(ins, fileRepo);
 	});
 }

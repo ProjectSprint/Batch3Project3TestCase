@@ -1,25 +1,50 @@
 import { combine } from "../helper/generator.js";
-import { createValidator } from "../helper/typeAssertion.js";
+import { object, string, validate } from "../helper/typeAssertion.js";
 
-const profleSchema = open("./schemas/profile.schema.json");
-const isValid = createValidator(profleSchema);
+// UserFile schema
+export const UserFileSchema = object(
+	{
+		email: string(),
+		phone: string(),
+		fileId: string(),
+		fileUri: string(),
+		fileThumbnailUri: string(),
+		bankAccountName: string(),
+		bankAccountHolder: string(),
+		bankAccountNumber: string(),
+	},
+	{
+		required: [
+			"email",
+			"phone",
+			"fileId",
+			"fileUri",
+			"fileThumbnailUri",
+			"bankAccountName",
+			"bankAccountHolder",
+			"bankAccountNumber",
+		],
+		additionalProperties: false,
+	},
+);
 
 /**
- * Asserts that a value is a valid User object
- * @param {any} value - The value to assert
+ * Asserts that a value is a valid UserFile object
+ * @param {unknown} value - The value to assert
  * @returns {value is import("../entity/app.js").Profile}
  * @throws {import("test/types/typeAssertion.js").ValidationError[]}
  */
 export function isProfile(value) {
 	const obj = value;
-	const res = isValid(obj);
-	if (res.valid) {
+	const res = validate(UserFileSchema, obj);
+	if (!res.length) {
 		return true;
 	}
-	throw res.errors;
+	throw res;
 }
 
 /**
+ * Extracts a UserFile object from a k6 HTTP response
  * @param {import("k6/http").RefinedResponse<any>} res
  * @param {any} positivePayload
  * @param {string} featureName
@@ -29,7 +54,7 @@ export function getProfile(res, positivePayload, featureName) {
 	let obj;
 	try {
 		const jsonResult = res.json();
-		if (jsonResult && typeof jsonResult == "object") {
+		if (jsonResult && typeof jsonResult === "object") {
 			obj = combine(jsonResult, positivePayload);
 			if (isProfile(obj)) {
 				return obj;

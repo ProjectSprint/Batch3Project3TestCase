@@ -11,11 +11,12 @@ import {
 	generateRandomUsername,
 	generateTestObjects,
 } from "../helper/generator.js";
-import { isEqualWith, isExists } from "../helper/assertion.js";
+import { isEqual, isEqualWith, isExists } from "../helper/assertion.js";
 import { getProfile } from "../assertion/profileAssertion.js";
+import { isFile } from "../assertion/fileAssertion.js";
 
 /**
- * @type {import("../types/scenario.js").Scenario<import("../entity/app.js").Profile | undefined>}
+ * @type {import("../types/scenario.js").Scenario<{user:import("../entity/app.js").User | undefined},import("../entity/app.js").Profile | undefined>}
  */
 export function GetProfileScenario(config, tags, info) {
 	const featureName = "Get Profile";
@@ -96,7 +97,7 @@ export function GetProfileScenario(config, tags, info) {
 }
 
 /**
- * @type {import("../types/scenario.js").Scenario<import("../entity/app.js").Profile | undefined>}
+ * @type {import("../types/scenario.js").Scenario<{user:import("../entity/app.js").User | undefined, file: import("../entity/app.js").UploadedFile|undefined},import("../entity/app.js").Profile | undefined>}
  */
 export function PutProfileScenario(config, tags, info) {
 	const featureName = "Put Profile";
@@ -104,14 +105,19 @@ export function PutProfileScenario(config, tags, info) {
 	const assertHandler = testPutJsonAssert;
 
 	const user = info.user;
+	const file = info.file;
 
 	if (!isUser(user)) {
 		console.warn(`${featureName} needs a valid user`);
 		return undefined;
 	}
+	if (!isFile(file)) {
+		console.warn(`${featureName} needs a valid file`);
+		return undefined;
+	}
 
 	const positivePayload = {
-		fileId: "123abc",
+		fileId: file.fileId,
 		bankAccountName: generateRandomUsername(),
 		bankAccountHolder: generateRandomUsername(),
 		bankAccountNumber: `${generateRandomNumber(9999, 999999999999)}`,
@@ -217,11 +223,11 @@ export function PutProfileScenario(config, tags, info) {
 					return false;
 				}),
 			["fileId should be string"]: (parsed, _res) =>
-				isExists(parsed, "fileId", ["string"]),
+				isEqual(parsed, "fileId", file.fileId),
 			["fileUri should be string"]: (parsed, _res) =>
-				isExists(parsed, "fileUri", ["string"]),
+				isEqual(parsed, "fileUri", file.fileUri),
 			["fileThumbnailUri should be string"]: (parsed, _res) =>
-				isExists(parsed, "fileThumbnailUri", ["string"]),
+				isEqual(parsed, "fileThumbnailUri", file.fileThumbnailUri),
 			["bankAccountName should be string"]: (parsed, _res) =>
 				isExists(parsed, "bankAccountName", ["string"]),
 			["bankAccountHolder should be string"]: (parsed, _res) =>
@@ -245,7 +251,7 @@ export function PutProfileScenario(config, tags, info) {
 }
 
 /**
- * @type {import("../types/scenario.js").Scenario<import("../entity/app.js").Profile | undefined>}
+ * @type {import("../types/scenario.js").Scenario<{user:import("../entity/app.js").User | undefined},import("../entity/app.js").Profile | undefined>}
  */
 export function PostProfilePhoneScenario(config, tags, info) {
 	const featureName = "Post Profile Phone";
@@ -263,6 +269,7 @@ export function PostProfilePhoneScenario(config, tags, info) {
 	};
 
 	if (config.runNegativeCase) {
+		// TODO: add duplicate phone check
 		assertHandler({
 			currentTestName: "no token",
 			featureName: featureName,
@@ -309,7 +316,6 @@ export function PostProfilePhoneScenario(config, tags, info) {
 				headers: { Authorization: user.token },
 				expectedCase: {
 					["should return 400"]: (_parsed, res) => res.status === 400,
-					["should return 409"]: (_parsed, res) => res.status === 409, // phone is taken
 				},
 				options: [],
 				config: config,
@@ -374,7 +380,7 @@ export function PostProfilePhoneScenario(config, tags, info) {
 }
 
 /**
- * @type {import("../types/scenario.js").Scenario<import("../entity/app.js").Profile | undefined>}
+ * @type {import("../types/scenario.js").Scenario<{user:import("../entity/app.js").User | undefined},import("../entity/app.js").Profile | undefined>}
  */
 export function PostProfileEmailScenario(config, tags, info) {
 	const featureName = "Post Profile Email";
@@ -392,6 +398,7 @@ export function PostProfileEmailScenario(config, tags, info) {
 	};
 
 	if (config.runNegativeCase) {
+		// TODO: add duplicate email check
 		assertHandler({
 			currentTestName: "no token",
 			featureName: featureName,

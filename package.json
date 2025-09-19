@@ -7,7 +7,7 @@
   "scripts": {
     "lint:fix": "eslint --fix",
     "format:fix": "biome format --write",
-    "start": "tsx src/main.ts"
+    "dev": "tsx --watch src/main.ts"
   },
   "repository": {
     "type": "git",

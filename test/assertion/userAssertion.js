@@ -1,8 +1,25 @@
 import { combine } from "../helper/generator.js";
-import { createValidator } from "../helper/typeAssertion.js";
 
-const userSchema = open("./schemas/user.schema.json");
-const isValid = createValidator(userSchema);
+import { object, string, nullable, validate } from "../helper/typeAssertion.js"; // adjust path
+
+export const UserSchema = object(
+	{
+		bankAccountHolder: string(),
+		bankAccountName: string(),
+		bankAccountNumber: string(),
+		email: nullable(string()),
+		fileId: string(),
+		fileUri: string(),
+		imageUri: string(),
+		password: string(),
+		phone: nullable(string()),
+		token: string(),
+	},
+	{
+		required: ["email", "phone", "password", "token"],
+		additionalProperties: false,
+	},
+);
 
 /**
  * Asserts that a value is a valid User object
@@ -12,11 +29,11 @@ const isValid = createValidator(userSchema);
  */
 export function isUser(value) {
 	const obj = value;
-	const res = isValid(obj);
-	if (res.valid) {
+	const res = validate(UserSchema, obj);
+	if (!res.length) {
 		return true;
 	}
-	return false;
+	throw res;
 }
 
 /**
@@ -40,7 +57,12 @@ export function getUser(res, positivePayload, featureName) {
 		console.warn(featureName + " | json is not object", jsonResult);
 		return;
 	} catch (e) {
-		console.warn(featureName + " | json or validation error:", e, "body:", obj);
+		console.warn(
+			featureName + " | json or validation error:",
+			JSON.stringify(e),
+			"| body:",
+			obj,
+		);
 		return;
 	}
 }

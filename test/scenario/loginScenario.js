@@ -9,7 +9,7 @@ import {
 import { isEqual, isExists } from "../helper/assertion.js";
 
 /**
- * @type {import("../types/scenario.js").Scenario<import("../entity/app.js").User | undefined>}
+ * @type {import("../types/scenario.js").Scenario<{user: import("../entity/app.js").User | undefined},import("../entity/app.js").User | undefined>}
  */
 export function LoginEmailScenario(config, tags, info) {
 	const featureName = "Login Email";
@@ -123,7 +123,7 @@ export function LoginEmailScenario(config, tags, info) {
 }
 
 /**
- * @type {import("../types/scenario.js").Scenario<import("../entity/app.js").User | undefined>}
+ * @type {import("../types/scenario.js").Scenario<{user: import("../entity/app.js").User| undefined},import("../entity/app.js").User | undefined>}
  */
 export function LoginPhoneScenario(config, tags, info) {
 	const featureName = "Login Phone";

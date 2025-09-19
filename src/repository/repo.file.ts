@@ -1,37 +1,23 @@
-import { fileCollection } from "./provider.db.ts";
-import { FileMetadata } from "./model.file.js";
+import { File } from "../entity/file.entity.js";
 
 export class FileRepository {
-  private collection;
+	constructor(private readonly repo: PouchDB.Database<File>) {}
 
-  constructor() {
-    this.collection = fileCollection;
-  }
+	async get(fileId: string): Promise<File | null> {
+		try {
+			const res = await this.repo.get(fileId);
+			return res as File;
+		} catch {
+			return null;
+		}
+	}
 
-  async insert(file: FileMetadata): Promise<FileMetadata | null> {
-    return new Promise((resolve, reject) => {
-      this.collection.insert(file, (err, newDoc) => {
-          if (err) return reject(err);
-          resolve(newDoc);
-        });
-    });
-  }
-
-  async get(file: FileMetadata): Promise<FileMetadata | null> {
-    return new Promise((resolve, reject) => {
-      const orQuery: any[] = [];
-      if (file.fileId) orQuery.push({ fileId: file.fileId });
-      if (file.fileUri) orQuery.push({ fileUri: file.fileUri });
-      if (file.fileThumbnailUri) orQuery.push({ fileThumbnailUri : file.fileThumbnailUri });
-
-      if (orQuery.length === 0) return resolve(null);
-
-      this.collection.findOne<User>({ $or: orQuery }, (err, doc) => {
-        if (err) return reject(err);
-        resolve(doc ?? null);
-      });
-    });
-  }
+	async insert(file: File): Promise<File | null> {
+		try {
+			await this.repo.put(file);
+			return file;
+		} catch {
+			return null;
+		}
+	}
 }
-
-export const fileRepository = new FileRepository();

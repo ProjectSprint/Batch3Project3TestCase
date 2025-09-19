@@ -31,7 +31,11 @@ server.setErrorHandler(function (error, _, reply) {
 	return;
 });
 
-server.register(multipart, {});
+server.register(multipart, {
+	limits: {
+		fileSize: 102400,
+	},
+});
 
 registerRoutes(server);
 

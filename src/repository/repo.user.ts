@@ -1,5 +1,6 @@
 import { randomUUID } from "crypto";
 import { User, UserCredential } from "../entity/user.entity.js";
+import { File } from "../entity/file.entity.js";
 
 export class UserRepository {
 	constructor(private readonly repo: PouchDB.Database<User>) {}
@@ -100,12 +101,15 @@ export class UserRepository {
 		}
 	}
 
-	async updateEmail(userId: string, email: string): Promise<User | null> {
+	async updateEmail(user: User, email: string): Promise<User | null> {
 		try {
-			const res = await this.repo.get(userId);
+			const findRes = await this.repo.find({
+				selector: { email },
+			});
+			if (findRes.docs.length) return null;
+
 			const updatePayload = {
-				...res,
-				_id: res._id,
+				...user,
 				email,
 			};
 			await this.repo.put(updatePayload);
@@ -116,12 +120,15 @@ export class UserRepository {
 		}
 	}
 
-	async updatePhone(userId: string, phone: string): Promise<User | null> {
+	async updatePhone(user: User, phone: string): Promise<User | null> {
 		try {
-			const res = await this.repo.get(userId);
+			const findRes = await this.repo.find({
+				selector: { phone },
+			});
+			if (findRes.docs.length) return null;
+
 			const updatePayload = {
-				...res,
-				_id: res._id,
+				...user,
 				phone,
 			};
 			await this.repo.put(updatePayload);
@@ -132,16 +139,24 @@ export class UserRepository {
 		}
 	}
 
-	async updateProfile(userId: string, fileId: string, bankAccountName: string, bankAccountHolder: string, bankAccountNumber: string ): Promise<User | null> {
+	async updateProfile(
+		userId: string,
+		file: File,
+		bankAccountName: string,
+		bankAccountHolder: string,
+		bankAccountNumber: string,
+	): Promise<User | null> {
 		try {
 			const res = await this.repo.get(userId);
 			const updatePayload = {
 				...res,
 				_id: res._id,
-				fileId,
+				fileId: file.fileId,
+				fileThumbnailUri: file.fileThumbnailUri,
+				fileUri: file.fileUri,
 				bankAccountName,
 				bankAccountHolder,
-				bankAccountNumber
+				bankAccountNumber,
 			};
 			await this.repo.put(updatePayload);
 

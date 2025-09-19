@@ -1,8 +1,17 @@
 import { combine } from "../helper/generator.js";
-import { createValidator } from "../helper/typeAssertion.js";
+import { object, string, validate } from "../helper/typeAssertion.js";
 
-const fileSchema = open("./schemas/File.schema.json");
-const isValid = createValidator(fileSchema);
+export const FileSchema = object(
+	{
+		fileId: string(),
+		fileThumbnailUri: string(),
+		fileUri: string(),
+	},
+	{
+		required: ["fileId", "fileUri", "fileThumbnailUri"],
+		additionalProperties: false,
+	},
+);
 
 /**
  * Asserts that a value is a valid User object
@@ -11,11 +20,11 @@ const isValid = createValidator(fileSchema);
  * @throws {import("test/types/typeAssertion.js").ValidationError[]}
  */
 export function isFile(value) {
-	const res = isValid(value);
-	if (res.valid) {
+	const res = validate(FileSchema, value);
+	if (!res.length) {
 		return true;
 	}
-	throw res.errors;
+	throw res;
 }
 
 /**
