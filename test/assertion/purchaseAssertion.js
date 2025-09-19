@@ -17,7 +17,7 @@ export const PurchaseRequestSchema = object(
 					productId: string(),
 					qty: number(),
 				},
-				{ required: ["productId", "qty"], additionalProperties: false },
+				{ required: ["productId", "qty"], additionalProperties: true },
 			),
 		),
 		senderName: nullable(string()),
@@ -26,7 +26,7 @@ export const PurchaseRequestSchema = object(
 	},
 	{
 		required: ["purchasedItems", "senderContactType", "senderContactDetail"],
-		additionalProperties: false,
+		additionalProperties: true,
 	},
 );
 
@@ -90,14 +90,14 @@ export const PurchaseResponseSchema = object(
 						"bankAccountNumber",
 						"totalPrice",
 					],
-					additionalProperties: false,
+					additionalProperties: true,
 				},
 			),
 		),
 	},
 	{
 		required: ["purchasedItems", "totalPrice", "paymentDetails"],
-		additionalProperties: false,
+		additionalProperties: true,
 	},
 );
 

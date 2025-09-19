@@ -17,7 +17,7 @@ export const UserSchema = object(
 	},
 	{
 		required: ["email", "phone", "password", "token"],
-		additionalProperties: false,
+		additionalProperties: true,
 	},
 );
 

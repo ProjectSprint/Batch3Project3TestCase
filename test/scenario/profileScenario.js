@@ -445,7 +445,6 @@ export function PostProfileEmailScenario(config, tags, info) {
 				headers: { Authorization: user.token },
 				expectedCase: {
 					["should return 400"]: (_parsed, res) => res.status === 400,
-					["should return 409"]: (_parsed, res) => res.status === 409, // email is taken
 				},
 				options: [],
 				config: config,

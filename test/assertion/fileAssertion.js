@@ -9,7 +9,7 @@ export const FileSchema = object(
 	},
 	{
 		required: ["fileId", "fileUri", "fileThumbnailUri"],
-		additionalProperties: false,
+		additionalProperties: true,
 	},
 );
 

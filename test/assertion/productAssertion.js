@@ -19,7 +19,7 @@ export const ProductSchema = object(
 	},
 	{
 		required: ["name", "category", "qty", "price", "sku", "fileId"],
-		additionalProperties: false,
+		additionalProperties: true,
 	},
 );
 

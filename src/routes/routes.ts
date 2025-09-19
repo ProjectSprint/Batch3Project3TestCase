@@ -32,8 +32,6 @@ export function registerRoutes(s: PSServer) {
 
 	s.register((ins, _) => {
 		ins.addHook("onRequest", async (req, res) => {
-			console.log("req.url:", req.url);
-			console.log("headers:", req.headers);
 			const token = req.headers.authorization;
 			// token is string | undefined
 			if (!token) {
@@ -50,7 +48,7 @@ export function registerRoutes(s: PSServer) {
 		});
 
 		profileReaderHandler(ins);
-		profileUpdaterHandler(ins, userRepo);
+		profileUpdaterHandler(ins, userRepo, fileRepo);
 		profileEmailLinkerHandler(ins, userRepo);
 		profilePhoneLinkerHandler(ins, userRepo);
 		fileCreator(ins, fileRepo);

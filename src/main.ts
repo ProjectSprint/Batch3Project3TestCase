@@ -4,9 +4,13 @@ import { TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
 import { StatusCodes } from "http-status-codes";
 import { registerRoutes } from "./routes/routes.js";
 
-const server = fastify({})
-	.decorateRequest("user")
-	.withTypeProvider<TypeBoxTypeProvider>();
+const server = fastify({
+	ajv: {
+		customOptions: {
+			coerceTypes: false,
+		},
+	},
+}).withTypeProvider<TypeBoxTypeProvider>();
 
 // middlewares
 // global panic handler

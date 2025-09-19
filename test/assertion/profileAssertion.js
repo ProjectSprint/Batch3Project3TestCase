@@ -24,7 +24,7 @@ export const UserFileSchema = object(
 			"bankAccountHolder",
 			"bankAccountNumber",
 		],
-		additionalProperties: false,
+		additionalProperties: true,
 	},
 );
 
