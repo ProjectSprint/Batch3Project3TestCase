@@ -12,8 +12,8 @@ import {
 	generateTestObjects,
 } from "../helper/generator.js";
 import { isEqual, isEqualWith, isExists } from "../helper/assertion.js";
-import { getProfile } from "../assertion/profileAssertion.js";
 import { isFile } from "../assertion/fileAssertion.js";
+import { getProfile } from "../assertion/profileAssertion.js";
 
 /**
  * @type {import("../types/scenario.js").Scenario<{user:import("../entity/app.js").User | undefined},import("../entity/app.js").Profile | undefined>}
