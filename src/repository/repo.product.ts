@@ -14,7 +14,7 @@ export class ProductRepository {
 	}
 
 	async insert(
-		product: Omit<Product, "_id" | "createdAt" | "updatedAt">,
+		product: Omit<Product, "_id" | "productId" | "createdAt" | "updatedAt">,
 	): Promise<Product | null> {
 		try {
 			// Check SKU uniqueness
@@ -85,19 +85,19 @@ export class ProductRepository {
 	}
 
 	async findAll({
-		limit = 5,
-		offset = 0,
+		limit,
+		offset,
 		productId,
 		sku,
 		category,
 		sortBy,
 	}: {
-		limit?: number;
-		offset?: number;
-		productId?: string;
-		sku?: string;
-		category?: string;
-		sortBy?: "newest" | "oldest" | "cheapest" | "expensive";
+		limit?: number | undefined;
+		offset?: number | undefined;
+		productId?: string | undefined;
+		sku?: string | undefined;
+		category?: string | undefined;
+		sortBy?: "newest" | "oldest" | "cheapest" | "expensive" | undefined;
 	}): Promise<Product[]> {
 		try {
 			const selector: any = {};
@@ -115,8 +115,8 @@ export class ProductRepository {
 
 			const res = await this.repo.find({
 				selector,
-				limit,
-				skip: offset,
+				limit: typeof limit === "number" ? limit : 5,
+				skip: typeof offset === "number" ? offset : 0,
 				sort: sort.length ? sort : undefined,
 			});
 

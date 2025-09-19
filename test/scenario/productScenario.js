@@ -14,17 +14,14 @@ import {
 	generateTestObjects,
 } from "../helper/generator.js";
 import { isExists, isEqualWith } from "../helper/assertion.js";
-import {
-	getProduct,
-	getProducts,
-	isProduct,
-} from "../assertion/productAssertion.js";
+import { getProduct, isProduct } from "../assertion/productAssertion.js";
+import { isFile } from "../assertion/fileAssertion.js";
 
 /** @type {string[]} */
 const validFileId = ["file1", "file2", "file3"];
 
 /**
- * @type {import("../types/scenario.js").Scenario<import("../entity/app.js").Product | undefined>}
+ * @type {import("../types/scenario.js").Scenario<{user:import("../entity/app.js").User | undefined, file: import("../entity/app.js").UploadedFile|undefined},import("../entity/app.js").Product | undefined>}
  */
 export function PostProductScenario(config, tags, info) {
 	const featureName = "Post Product";
@@ -37,6 +34,10 @@ export function PostProductScenario(config, tags, info) {
 	const fileToTest = info.file;
 	if (!isUser(user)) {
 		console.warn(`${featureName} needs a valid user or file`);
+		return undefined;
+	}
+	if (!isFile(fileToTest)) {
+		console.warn(`${featureName} needs a valid file`);
 		return undefined;
 	}
 
@@ -212,33 +213,6 @@ export function PostProductScenario(config, tags, info) {
 
 	// --- Positive Case ---
 	let positiveResults = positivePayloads.map((payload, _index) => {
-		// Challenge: to Post a product is to post file. Every. Time
-		// TODO: upload file first
-		const fileToUpload = {
-			file: file(fileToTest.small, `file_${generateRandomNumber(0, 999)}.jpg`),
-		};
-
-		// TODO: fetch uploaded file
-		const fileResult = multipartHandler({
-			currentTestName: "upload file",
-			featureName: featureName,
-			route: routeFile,
-			body: fileToUpload,
-			headers: positiveHeader,
-			expectedCase: {},
-			options: [],
-			config: config,
-			tags: {},
-		});
-
-		// TODO: assign to positive payload
-		if (fileResult.isSuccess) {
-			const file = getFile(fileResult.res, {}, featureName);
-			payload.fileId = file.fileId;
-			payload.fileUri = file.fileUri;
-			payload.fileThumbnailUri = file.fileThumbnailUri;
-		}
-
 		return assertHandler({
 			currentTestName: "valid payload",
 			featureName: featureName,

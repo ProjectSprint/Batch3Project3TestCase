@@ -1,6 +1,10 @@
 import type { PSServer } from "../types.js";
 import { UserRepository } from "../repository/repo.user.js";
-import { fileCollection, userCollection } from "../provider/provider.db.js";
+import {
+	fileCollection,
+	productCollection,
+	userCollection,
+} from "../provider/provider.db.js";
 import { StatusCodes } from "http-status-codes";
 import { User } from "../entity/user.entity.js";
 import { profileReaderHandler } from "./profile_reader.handler.js";
@@ -13,6 +17,8 @@ import { userEmailAutheticator } from "./user_email_authenticator.handler.js";
 import { userPhoneAuthenticator } from "./user_phone_authenticator.handler.js";
 import { fileCreator } from "./file_creator.handler.js";
 import { FileRepository } from "../repository/repo.file.js";
+import { productHandlers } from "./product_creator.handler.js";
+import { ProductRepository } from "../repository/repo.product.js";
 
 declare module "fastify" {
 	interface FastifyRequest {
@@ -23,6 +29,7 @@ declare module "fastify" {
 export function registerRoutes(s: PSServer) {
 	const userRepo = new UserRepository(userCollection);
 	const fileRepo = new FileRepository(fileCollection);
+	const productRepo = new ProductRepository(productCollection);
 	s.register((ins, _) => {
 		userEmailRegistrar(ins, userRepo);
 		userPhoneRegistrar(ins, userRepo);
@@ -52,5 +59,6 @@ export function registerRoutes(s: PSServer) {
 		profileEmailLinkerHandler(ins, userRepo);
 		profilePhoneLinkerHandler(ins, userRepo);
 		fileCreator(ins, fileRepo);
+		productHandlers(ins, productRepo, fileRepo);
 	});
 }
