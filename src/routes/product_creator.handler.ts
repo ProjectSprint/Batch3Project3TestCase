@@ -1,6 +1,5 @@
 import { Type } from "@fastify/type-provider-typebox";
 import { PSServer } from "../types.js";
-import { StatusCodes } from "http-status-codes";
 import { ActivityTypes } from "../const/activity_type.const.js";
 
 export function productCreatorHandler(s: PSServer) {
