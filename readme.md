@@ -29,11 +29,11 @@
 ## Cookbook 🍳
 - How can I know what's the payload that k6 give and what it receives? Run in debug mode:
     ```bash
-        DEBUG=true BASE_URL=http://localhost:8080 make test-debug
+        BASE_URL=http://localhost:8080 make test-debug
    ```
 - Searching at the log is hard, how to save it into a file?
     ```bash
-        DEBUG=true BASE_URL=http://localhost:8080 make test-debug-log
+        BASE_URL=http://localhost:8080 make test-debug-log
    ```
    now the test result will be at `output.txt`
 ## How to read the debug log?
