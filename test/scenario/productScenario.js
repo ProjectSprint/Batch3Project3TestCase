@@ -1,23 +1,19 @@
-import { file, get } from "k6/http";
 import {
 	testDeleteAssert,
 	testGetAssert,
 	testPostJsonAssert,
-	testPostMultipartAssert,
 	testPutJsonAssert,
 } from "../helper/testRequest.js";
-import { getUser, isUser } from "../assertion/userAssertion.js";
+import { isUser } from "../assertion/userAssertion.js";
 import {
 	clone,
 	combine,
 	generateRandomName,
 	generateRandomNumber,
-	generateRandomWord,
 	generateTestObjects,
 } from "../helper/generator.js";
 import {
 	isExists,
-	isEqualWith,
 	isTotalDataInRange,
 	isOrdered,
 	isEqual,
@@ -68,8 +64,6 @@ export function PostProductScenario(config, tags, info) {
 		price: 100,
 		sku: `sku${generateRandomNumber(10000, 99999)}`,
 		fileId: fileToTest.fileId,
-		fileUri: fileToTest.fileUri,
-		fileThumbnailUri: fileToTest.fileThumbnailUri,
 	};
 
 	const positivePayload2 = clone(positivePayload1);
@@ -394,6 +388,7 @@ export function GetProductScenario(config, tags, info) {
 		}),
 		tags: {},
 	});
+	// todo: get newest, oldest, sku (ngambil dari result sebelumnya), productId (ngambil dari result sebelumnya)
 	const choosenCategory =
 		activityTypes[generateRandomNumber(0, activityTypes.length - 1)];
 	assertHandler({
@@ -436,9 +431,6 @@ export function GetProductScenario(config, tags, info) {
 		return undefined;
 	}
 }
-
-/** @type {string[]} */
-const validProductId = ["prdct001", "prdct002", "prdct003"];
 
 /**
  * @type {import("../types/scenario.js").Scenario<{user:import("../entity/app.js").User | undefined,product:import("../entity/app.js").Product | undefined, file: import("../entity/app.js").UploadedFile|undefined},import("../entity/app.js").Product | undefined>}
