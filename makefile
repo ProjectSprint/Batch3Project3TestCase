@@ -19,7 +19,7 @@ test-debug:
 # Pull and run tests in one command
 test-debug-log: 
 	git pull origin main;
-	BASE_URL=$(BASE_URL) DEBUG=true k6 run test/main.js 2>&1 | sed 's/"//g' > output.txt
+	BASE_URL=$(BASE_URL) DEBUG=true k6 run test/main.js 2>&1 &> output.txt
 
 
 SCHEMA_DIR = test/schemas
