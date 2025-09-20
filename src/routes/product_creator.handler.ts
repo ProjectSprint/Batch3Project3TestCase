@@ -50,6 +50,7 @@ export function productCreatorHandler(
 				fileId,
 				fileUri: file.fileUri,
 				fileThumbnailUri: file.fileThumbnailUri,
+				createdBy: req.user._id,
 			});
 
 			if (!product) {

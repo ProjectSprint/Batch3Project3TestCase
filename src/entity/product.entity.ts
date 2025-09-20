@@ -11,6 +11,7 @@ export type Product = {
 	fileId: string;
 	fileUri: string;
 	fileThumbnailUri: string;
+	createdBy: string;
 	createdAt: Date;
 	updatedAt: Date;
 };

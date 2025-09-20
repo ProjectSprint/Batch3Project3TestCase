@@ -3,6 +3,7 @@ import { UserRepository } from "../repository/repo.user.js";
 import {
 	fileCollection,
 	productCollection,
+	purchaseCollection,
 	userCollection,
 } from "../provider/provider.db.js";
 import { StatusCodes } from "http-status-codes";
@@ -22,6 +23,8 @@ import { productCreatorHandler } from "./product_creator.handler.js";
 import { productGetterHandler } from "./product_getter.handler.js";
 import { productUpdaterHandler } from "./product_updater.handler.js";
 import { productDeleterHandler } from "./product_deleter.handler.js";
+import { purchaseHandlers } from "./purchase_creator.handler.js";
+import { PurchaseRepository } from "../repository/repo.purchase.js";
 
 declare module "fastify" {
 	interface FastifyRequest {
@@ -33,6 +36,7 @@ export function registerRoutes(s: PSServer) {
 	const userRepo = new UserRepository(userCollection);
 	const fileRepo = new FileRepository(fileCollection);
 	const productRepo = new ProductRepository(productCollection);
+	const purchaseRepo = new PurchaseRepository(purchaseCollection);
 	s.register((ins, _) => {
 		userEmailRegistrar(ins, userRepo);
 		userPhoneRegistrar(ins, userRepo);
@@ -66,5 +70,6 @@ export function registerRoutes(s: PSServer) {
 		productCreatorHandler(ins, productRepo, fileRepo);
 		productUpdaterHandler(ins, productRepo, fileRepo);
 		productDeleterHandler(ins, productRepo);
+		purchaseHandlers(ins, purchaseRepo, productRepo, userRepo, fileRepo);
 	});
 }

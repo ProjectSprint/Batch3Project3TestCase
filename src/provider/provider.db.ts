@@ -4,6 +4,7 @@ import PouchDBLike from "pouchdb-find";
 import { User } from "../entity/user.entity.js";
 import { File } from "../entity/file.entity.js";
 import { Product } from "../entity/product.entity.js";
+import { Purchase } from "../entity/purchase.entity.js";
 PouchDB.plugin(PouchDBMemory);
 PouchDB.plugin(PouchDBLike);
 const userCollection = new PouchDB<User>("users", {
@@ -16,6 +17,6 @@ export const fileCollection = new PouchDB<File>("files", { adapter: "memory" });
 export const productCollection = new PouchDB<Product>("products", {
 	adapter: "memory",
 });
-export const purchaseCollection = new PouchDB("purchases", {
+export const purchaseCollection = new PouchDB<Purchase>("purchases", {
 	adapter: "memory",
 });
