@@ -1,10 +1,10 @@
-import { ActivityTypeValue } from "../const/activity_type.const.js";
+import { ProductTypeValue } from "../const/product_type.const.js";
 
 export type Product = {
 	_id: string; // should be the same value as productId
 	productId: string;
 	name: string;
-	category: ActivityTypeValue;
+	category: ProductTypeValue;
 	qty: number;
 	price: number;
 	sku: string;

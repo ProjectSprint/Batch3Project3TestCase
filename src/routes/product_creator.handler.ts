@@ -3,17 +3,71 @@ import { StatusCodes } from "http-status-codes";
 import { PSServer } from "../types.js";
 import { ProductRepository } from "../repository/repo.product.js";
 import { FileRepository } from "../repository/repo.file.js";
-import { ActivityTypes } from "../const/activity_type.const.js";
+import { ProductTypes } from "../const/product_type.const.js";
+
+export function getProductHandler(
+	s: PSServer,
+	productRepo: ProductRepository,
+	fileRepo: FileRepository,
+) {
+	const ProductTypeSchema = Type.Union(
+		ProductTypes.map((v) => Type.Literal(v)),
+	);
+
+	/**
+	 * GET /v1/product
+	 */
+	s.get(
+		"/v1/product",
+		{
+			schema: {
+				querystring: Type.Object({
+					limit: Type.Optional(Type.Number()),
+					offset: Type.Optional(Type.Number()),
+					productId: Type.Optional(Type.String()),
+					sku: Type.Optional(Type.String()),
+					category: Type.Optional(ProductTypeSchema),
+					sortBy: Type.Optional(
+						Type.Union([
+							Type.Literal("newest"),
+							Type.Literal("oldest"),
+							Type.Literal("cheapest"),
+							Type.Literal("expensive"),
+						]),
+					),
+				}),
+			},
+		},
+		async (req, res) => {
+			const { limit, offset, productId, sku, category, sortBy } = req.query;
+
+			console.log(req.query)
+			const products = await productRepo.findAll({
+				limit,
+				offset,
+				productId,
+				sku,
+				category,
+				sortBy,
+			});
+
+			console.log(products)
+
+			res.status(StatusCodes.OK).send(products);
+		},
+	);
+
+}
 
 export function productHandlers(
 	s: PSServer,
 	productRepo: ProductRepository,
 	fileRepo: FileRepository,
 ) {
-	const ActivityTypeSchema = Type.Union(
-		ActivityTypes.map((v) => Type.Literal(v)),
+	const ProductTypeSchema = Type.Union(
+		ProductTypes.map((v) => Type.Literal(v)),
 	);
-
+	console.log("prepare produk rute")
 	/**
 	 * POST /v1/product
 	 */
@@ -23,7 +77,7 @@ export function productHandlers(
 			schema: {
 				body: Type.Object({
 					name: Type.String({ minLength: 4, maxLength: 32 }),
-					category: ActivityTypeSchema,
+					category: ProductTypeSchema,
 					qty: Type.Number({ minimum: 1 }),
 					price: Type.Number({ minimum: 100 }),
 					sku: Type.String({ minLength: 0, maxLength: 32 }),
@@ -64,46 +118,6 @@ export function productHandlers(
 	);
 
 	/**
-	 * GET /v1/product
-	 */
-	s.get(
-		"/v1/product",
-		{
-			schema: {
-				querystring: Type.Object({
-					limit: Type.Optional(Type.Number()),
-					offset: Type.Optional(Type.Number()),
-					productId: Type.Optional(Type.String()),
-					sku: Type.Optional(Type.String()),
-					category: Type.Optional(ActivityTypeSchema),
-					sortBy: Type.Optional(
-						Type.Union([
-							Type.Literal("newest"),
-							Type.Literal("oldest"),
-							Type.Literal("cheapest"),
-							Type.Literal("expensive"),
-						]),
-					),
-				}),
-			},
-		},
-		async (req, res) => {
-			const { limit, offset, productId, sku, category, sortBy } = req.query;
-
-			const products = await productRepo.findAll({
-				limit,
-				offset,
-				productId,
-				sku,
-				category,
-				sortBy,
-			});
-
-			res.status(StatusCodes.OK).send(products);
-		},
-	);
-
-	/**
 	 * PUT /v1/product/:productId
 	 */
 	s.put(
@@ -112,7 +126,7 @@ export function productHandlers(
 			schema: {
 				body: Type.Object({
 					name: Type.String({ minLength: 4, maxLength: 32 }),
-					category: ActivityTypeSchema,
+					category: ProductTypeSchema,
 					qty: Type.Number({ minimum: 1 }),
 					price: Type.Number({ minimum: 100 }),
 					sku: Type.String({ minLength: 0, maxLength: 32 }),

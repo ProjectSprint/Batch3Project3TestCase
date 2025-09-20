@@ -22,7 +22,7 @@ export function UploadFileScenario(config, tags, info) {
 	}
 
 	const positivePayload = {
-		file: file(fileToTest.medium, fileToTest.mediumName, "image/jpeg"),
+		file: file(fileToTest.small, fileToTest.smallName, "image/jpeg"),
 	};
 	const positiveHeader = {
 		Authorization: `${user.token}`,

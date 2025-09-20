@@ -2,8 +2,10 @@ import { StatusCodes } from "http-status-codes";
 import { PSServer } from "../types.js";
 import { FileRepository } from "../repository/repo.file.js";
 import { randomUUID } from "crypto";
+import  path  from "path";
 
 const ALLOWED_MIME = ["image/jpeg", "image/jpg", "image/png"];
+const ALLOWED_EXT = ["jpg", "jpeg", "png"];
 const MAX_SIZE = 100 * 1024; // 100 KiB
 export function fileCreator(s: PSServer, repo: FileRepository) {
 	s.post("/v1/file", {}, async (req, res) => {
@@ -15,7 +17,8 @@ export function fileCreator(s: PSServer, repo: FileRepository) {
 		}
 
 		// Validate mimetype
-		if (!ALLOWED_MIME.includes(data.mimetype)) {
+		const ext = path.extname(data.filename).toLowerCase().replace('.', '');
+		if (!ALLOWED_MIME.includes(data.mimetype) && !ALLOWED_EXT.includes(ext)) {
 			return res
 				.status(StatusCodes.BAD_REQUEST)
 				.send({ error: "Only jpeg, jpg, and png files are allowed" });

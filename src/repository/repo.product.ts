@@ -2,7 +2,11 @@ import { randomUUID } from "crypto";
 import { Product } from "../entity/product.entity.js";
 
 export class ProductRepository {
-	constructor(private readonly repo: PouchDB.Database<Product>) {}
+	constructor(private readonly repo: PouchDB.Database<Product>) {
+		this.repo.createIndex({
+			index: { fields: ["price"] }
+		})
+	}
 
 	async getById(productId: string): Promise<Product | null> {
 		try {
@@ -112,6 +116,8 @@ export class ProductRepository {
 				sort.push({ updatedAt: "asc" }, { createdAt: "asc" });
 			else if (sortBy === "cheapest") sort.push({ price: "asc" });
 			else if (sortBy === "expensive") sort.push({ price: "desc" });
+
+			console.log("Sort", sort)
 
 			const res = await this.repo.find({
 				selector,

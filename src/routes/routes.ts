@@ -17,7 +17,7 @@ import { userEmailAutheticator } from "./user_email_authenticator.handler.js";
 import { userPhoneAuthenticator } from "./user_phone_authenticator.handler.js";
 import { fileCreator } from "./file_creator.handler.js";
 import { FileRepository } from "../repository/repo.file.js";
-import { productHandlers } from "./product_creator.handler.js";
+import { getProductHandler, productHandlers } from "./product_creator.handler.js";
 import { ProductRepository } from "../repository/repo.product.js";
 
 declare module "fastify" {
@@ -35,6 +35,7 @@ export function registerRoutes(s: PSServer) {
 		userPhoneRegistrar(ins, userRepo);
 		userEmailAutheticator(ins, userRepo);
 		userPhoneAuthenticator(ins, userRepo);
+		getProductHandler(ins, productRepo, fileRepo);
 	});
 
 	s.register((ins, _) => {
