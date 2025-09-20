@@ -216,14 +216,12 @@ export function PostProductScenario(config, tags, info) {
 }
 
 /**
- * @type {import("../types/scenario.js").Scenario<{user:import("../entity/app.js").User | undefined, product:import("../entity/app.js").Product|undefined},import("../entity/app.js").Product|undefined>}
+ * @type {import("../types/scenario.js").Scenario<any,import("../entity/app.js").Product|undefined>}
  */
 export function GetProductScenario(config, tags, info) {
 	const featureName = "Get Product";
 	const route = config.baseUrl + "/v1/product";
 	const assertHandler = testGetAssert;
-
-	const postedProduct = info.product;
 
 	// --- Positive Case ---
 	/** @type {import("../types/testRequest.js").Checkers} */
@@ -314,6 +312,7 @@ export function GetProductScenario(config, tags, info) {
 		}),
 		tags: {},
 	});
+
 	const getAssertJson = getAssert.res.json();
 	const choosenCategory = traverseObject(getAssertJson, "[].category")[0];
 	if (!choosenCategory) {
@@ -416,8 +415,6 @@ export function GetProductScenario(config, tags, info) {
 		}),
 		tags: {},
 	});
-
-	// todo: get productId (ngambil dari result sebelumnya)
 
 	assertHandler({
 		featureName: featureName,

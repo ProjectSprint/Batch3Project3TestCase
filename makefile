@@ -1,16 +1,16 @@
 # Default values for environment variables
 DEBUG ?= false
-BASE_URL ?= http://localhost:3000
+BASE_URL ?= http://localhost:30000
 
-.PHONY: test pull-test pull-test-out
+.PHONY: test pull-test
 
 # Pull latest changes from main branch
 pull:
 	git pull origin main
 
-# Run k6 tests with environment variables
+# Run k6 tests with environment variable
 test:
-	DEBUG=$(DEBUG) BASE_URL=$(BASE_URL) k6 run main.js
+	DEBUG=$(DEBUG) BASE_URL=$(BASE_URL) k6 run test/main.js
 
 # Pull and run tests in one command
 pull-test: pull test
@@ -18,11 +18,6 @@ pull-test: pull test
 SCHEMA_DIR = test/schemas
 $(SCHEMA_DIR):
 	mkdir -p $(SCHEMA_DIR)
-
-# Generate schema for a specific type
-.PHONY: schema
-schema: $(SCHEMA_DIR)
-	npx ts-json-schema-generator --path ./../entity/**/*.ts --type../types.$(type)' -o $(SCHEMA_DIR)/$(type).schema.json
 
 # Help command to show available targets
 help:
