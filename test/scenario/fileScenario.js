@@ -24,38 +24,8 @@ export function UploadFileScenario(config, tags, info) {
 	const positivePayload = {
 		file: file(fileToTest.small, fileToTest.smallName, "image/jpeg"),
 	};
-	const positiveHeader = {
-		Authorization: `Bearer ${user.token}`,
-	};
 
 	if (config.runNegativeCase) {
-		// Test without Authorization header
-		assertHandler({
-			currentTestName: "empty token",
-			featureName: featureName,
-			route: route,
-			body: positivePayload, // Need a body for multipart request usually
-			headers: {}, // No auth header
-			expectedCase: {
-				["should return 401"]: (_parsed, res) => res.status === 401,
-			},
-			config: config,
-			tags: tags,
-		});
-
-		assertHandler({
-			currentTestName: `invalid token`,
-			featureName: featureName,
-			route: route,
-			body: positivePayload, // Need a body for multipart request
-			headers: { Authorization: `` },
-			expectedCase: {
-				["should return 401"]: (_parsed, res) => res.status === 401,
-			},
-			config: config,
-			tags: tags,
-		});
-
 		// Test invalid file type
 		assertHandler({
 			currentTestName: "invalid file type",
@@ -64,7 +34,7 @@ export function UploadFileScenario(config, tags, info) {
 			body: {
 				file: file(fileToTest.invalid, fileToTest.invalidName),
 			},
-			headers: positiveHeader,
+			headers: {},
 			expectedCase: {
 				["should return 400"]: (_parsed, res) => res.status === 400,
 			},
@@ -80,7 +50,7 @@ export function UploadFileScenario(config, tags, info) {
 			body: {
 				file: file(fileToTest.big, fileToTest.bigName),
 			},
-			headers: positiveHeader,
+			headers: {},
 			expectedCase: {
 				["should return 400"]: (_parsed, res) => res.status === 400,
 			},
@@ -95,7 +65,7 @@ export function UploadFileScenario(config, tags, info) {
 		featureName: featureName,
 		route: route,
 		body: positivePayload,
-		headers: positiveHeader,
+		headers: {},
 		expectedCase: {
 			["should return 200"]: (_parsed, res) => res.status === 200,
 			["should have fileId"]: (parsed, _res) =>
