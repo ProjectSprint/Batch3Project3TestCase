@@ -17,8 +17,11 @@ import { userEmailAutheticator } from "./user_email_authenticator.handler.js";
 import { userPhoneAuthenticator } from "./user_phone_authenticator.handler.js";
 import { fileCreator } from "./file_creator.handler.js";
 import { FileRepository } from "../repository/repo.file.js";
-import { getProductHandler, productHandlers } from "./product_creator.handler.js";
 import { ProductRepository } from "../repository/repo.product.js";
+import { productCreatorHandler } from "./product_creator.handler.js";
+import { productGetterHandler } from "./product_getter.handler.js";
+import { productUpdaterHandler } from "./product_updater.handler.js";
+import { productDeleterHandler } from "./product_deleter.handler.js";
 
 declare module "fastify" {
 	interface FastifyRequest {
@@ -35,7 +38,7 @@ export function registerRoutes(s: PSServer) {
 		userPhoneRegistrar(ins, userRepo);
 		userEmailAutheticator(ins, userRepo);
 		userPhoneAuthenticator(ins, userRepo);
-		getProductHandler(ins, productRepo, fileRepo);
+		productGetterHandler(ins, productRepo);
 	});
 
 	s.register((ins, _) => {
@@ -60,6 +63,8 @@ export function registerRoutes(s: PSServer) {
 		profileEmailLinkerHandler(ins, userRepo);
 		profilePhoneLinkerHandler(ins, userRepo);
 		fileCreator(ins, fileRepo);
-		productHandlers(ins, productRepo, fileRepo);
+		productCreatorHandler(ins, productRepo, fileRepo);
+		productUpdaterHandler(ins, productRepo, fileRepo);
+		productDeleterHandler(ins, productRepo);
 	});
 }

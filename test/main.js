@@ -16,11 +16,24 @@ import {
 } from "./scenario/profileScenario.js";
 import {
 	GetProductScenario,
-  // DeleteProductScenario,
-  // GetProductScenario,
-  PostProductScenario,
-  // PutProductScenario
+	PostProductScenario,
 } from "./scenario/productScenario.js";
+// import {
+//   GetProfileScenario,
+//   PostProfileEmailScenario,
+//   PostProfilePhoneScenario,
+//   PutProfileScenario,
+// } from "./scenario/profileScenario.js";
+// import {
+//   PostPurchaseScenario,
+//   PostPurchaseIdScenario
+// } from "./scenario/purchaseScenario.js";
+// import {
+//   DeleteProductScenario,
+//   GetProductScenario,
+//   PostProductScenario,
+//   PutProductScenario
+// } from "./scenario/productScenario.js";
 
 export const options = {
 	vus: 1,
@@ -62,8 +75,6 @@ export default function () {
 	};
 	console.log(`k6 | Firing to ${config.baseUrl}`);
 
-	const startTestTime = new Date().toISOString()
-
 	// ===== REGISTER TEST =====
 	const emailUsr = RegisterEmailScenario(config, tags, {});
 	LoginEmailScenario(config, tags, { user: emailUsr });
@@ -92,10 +103,16 @@ export default function () {
 		user: emailUsr,
 	});
 
+	PostProductScenario(config, tags, {
+		user: emailUsr,
+		file: uploadedFile,
+	});
+	GetProductScenario(config, tags, {
+		user: emailUsr,
+	});
 	const phoneUsr = RegisterPhoneScenario(config, tags, {});
 	LoginPhoneScenario(config, tags, { user: phoneUsr });
-	PostProductScenario(config, tags, { user: emailUsr, file: uploadedFile });
-	GetProductScenario(config, tags, { user: emailUsr, testBeginTime: startTestTime })
+	// PostProductScenario(config, tags, { user: emailUsr });
 	// PostProfileEmailScenario(config, tags, { info: phoneUsr });
 
 	// ===== PROFILE TEST =====

@@ -1,5 +1,6 @@
 import { file, get } from "k6/http";
 import {
+	testDeleteAssert,
 	testGetAssert,
 	testPostJsonAssert,
 	testPostMultipartAssert,
@@ -8,21 +9,34 @@ import {
 import { getUser, isUser } from "../assertion/userAssertion.js";
 import {
 	clone,
-  combine,
+	combine,
 	generateRandomName,
 	generateRandomNumber,
 	generateRandomWord,
 	generateTestObjects,
 } from "../helper/generator.js";
-import { isExists, isEqualWith, isTotalDataInRange } from "../helper/assertion.js";
+import {
+	isExists,
+	isEqualWith,
+	isTotalDataInRange,
+	isOrdered,
+	isEqual,
+} from "../helper/assertion.js";
 import { getProduct, isProduct } from "../assertion/productAssertion.js";
 import { isFile } from "../assertion/fileAssertion.js";
 
-/** @type {string[]} */
-const validFileId = ["file1", "file2", "file3"];
-
-const cheapestPrice = 1_000;
-const expensivePrice = 5_042_690;
+const activityTypes = [
+	"Walking",
+	"Yoga",
+	"Stretching",
+	"Cycling",
+	"Swimming",
+	"Dancing",
+	"Hiking",
+	"Running",
+	"HIIT",
+	"JumpRope",
+];
 
 /**
  * @type {import("../types/scenario.js").Scenario<{user:import("../entity/app.js").User | undefined, file: import("../entity/app.js").UploadedFile|undefined},import("../entity/app.js").Product | undefined>}
@@ -30,11 +44,8 @@ const expensivePrice = 5_042_690;
 export function PostProductScenario(config, tags, info) {
 	const featureName = "Post Product";
 	const route = config.baseUrl + "/v1/product";
-	const routeFile = config.baseUrl + "/v1/file";
 	const assertHandler = testPostJsonAssert;
-	const multipartHandler = testPostMultipartAssert;
 
-	console.log(info)
 	const user = info.user;
 	const fileToTest = info.file;
 	if (!isUser(user)) {
@@ -52,26 +63,35 @@ export function PostProductScenario(config, tags, info) {
 
 	const positivePayload1 = {
 		name: generateRandomName(),
-		category: "Food",
+		category: activityTypes[generateRandomNumber(0, activityTypes.length - 1)],
 		qty: 1,
 		price: 100,
 		sku: `sku${generateRandomNumber(10000, 99999)}`,
-		// added later when ready to test positive payload
 		fileId: fileToTest.fileId,
+		fileUri: fileToTest.fileUri,
+		fileThumbnailUri: fileToTest.fileThumbnailUri,
 	};
 
 	const positivePayload2 = clone(positivePayload1);
 	positivePayload2.sku = `sku${generateRandomNumber(10000, 99999)}`;
-	positivePayload2.category = "Beverage";
+	positivePayload2.category =
+		activityTypes[generateRandomNumber(0, activityTypes.length - 1)];
+
 	const positivePayload3 = clone(positivePayload1);
 	positivePayload3.sku = `sku${generateRandomNumber(10000, 99999)}`;
-	positivePayload3.category = "Clothes";
+	positivePayload3.category =
+		activityTypes[generateRandomNumber(0, activityTypes.length - 1)];
+
 	const positivePayload4 = clone(positivePayload1);
 	positivePayload4.sku = `sku${generateRandomNumber(10000, 99999)}`;
-	positivePayload4.category = "Furniture";
+	positivePayload4.category =
+		activityTypes[generateRandomNumber(0, activityTypes.length - 1)];
+
 	const positivePayload5 = clone(positivePayload1);
 	positivePayload5.sku = `sku${generateRandomNumber(10000, 99999)}`;
-	positivePayload5.category = "Tools";
+	positivePayload5.category =
+		activityTypes[generateRandomNumber(0, activityTypes.length - 1)];
+
 	const negativePayload = clone(positivePayload1);
 	negativePayload.sku = `sku${generateRandomNumber(10000, 99999)}`;
 	negativePayload.category = "WrongCategory";
@@ -85,13 +105,8 @@ export function PostProductScenario(config, tags, info) {
 		positivePayload4,
 		positivePayload5,
 	];
-	if (config.runNegativeCase) {
-		// Test with invalid Authorization headers
-		const negativeHeaders = [
-			{ Authorization: `asdf${user.token}` }, // Invalid token
-			{ Authorization: `` }, // Empty header value
-		];
 
+	if (config.runNegativeCase) {
 		assertHandler({
 			currentTestName: "no token",
 			featureName: featureName,
@@ -105,20 +120,18 @@ export function PostProductScenario(config, tags, info) {
 			config: config,
 			tags: {},
 		});
-		negativeHeaders.forEach((header, index) => {
-			assertHandler({
-				currentTestName: `invalid token ${index}`,
-				featureName: featureName,
-				route: route,
-				body: positivePayload1,
-				headers: header,
-				expectedCase: {
-					["should return 401"]: (_parsed, res) => res.status === 401,
-				},
-				options: [],
-				config: config,
-				tags: {},
-			});
+		assertHandler({
+			currentTestName: `invalid token`,
+			featureName: featureName,
+			route: route,
+			body: positivePayload1,
+			headers: { Authorization: `` },
+			expectedCase: {
+				["should return 401"]: (_parsed, res) => res.status === 401,
+			},
+			options: [],
+			config: config,
+			tags: {},
 		});
 		assertHandler({
 			currentTestName: "empty body",
@@ -214,7 +227,6 @@ export function PostProductScenario(config, tags, info) {
 
 	// --- Positive Case ---
 	let positiveResults = positivePayloads.map((payload, _index) => {
-		console.log("payload", payload)
 		return assertHandler({
 			currentTestName: "valid payload",
 			featureName: featureName,
@@ -255,7 +267,6 @@ export function PostProductScenario(config, tags, info) {
 		});
 	});
 
-	// TODO: test conflict payload
 	if (config.runNegativeCase) {
 		assertHandler({
 			currentTestName: "conflict product",
@@ -272,73 +283,6 @@ export function PostProductScenario(config, tags, info) {
 		});
 	}
 
-	// sempetin insert untuk assert get
-		// Generate the important metric
-		
-		let dummyPayloads = [];
-		dummyPayloads.push({
-			name: generateRandomName(),
-			category: "Food",
-			qty: 1_000,
-			price: cheapestPrice,
-			sku: `sku${generateRandomNumber(10000, 99999)}`,
-			// added later when ready to test positive payload
-			fileId: fileToTest.fileId,
-		});
-		dummyPayloads.push({
-			name: generateRandomName(),
-			category: "Furniture",
-			qty: 2,
-			price: expensivePrice,
-			sku: `sku${generateRandomNumber(10000, 99999)}`,
-			// added later when ready to test positive payload
-			fileId: fileToTest.fileId,
-		})
-	
-		for (let i = 0; i < 10; i++) {
-			const payload1 = {
-				name: generateRandomName(),
-				category: "Food",
-				qty: generateRandomNumber(2,1000),
-				price: generateRandomNumber(100,2_000_000),
-				sku: `sku${generateRandomNumber(10000, 99999)}`,
-				fileId: fileToTest.fileId,
-			};
-			const payload2 = clone(payload1);
-			payload2.sku = `sku${generateRandomNumber(10000, 99999)}`;
-			payload2.category = "Beverage";
-			const payload3 = clone(payload1);
-			payload3.sku = `sku${generateRandomNumber(10000, 99999)}`;
-			payload3.category = "Clothes";
-			const payload4 = clone(payload1);
-			payload4.sku = `sku${generateRandomNumber(10000, 99999)}`;
-			payload4.category = "Furniture";
-			const payload5 = clone(payload1);
-			payload5.sku = `sku${generateRandomNumber(10000, 99999)}`;
-			payload5.category = "Tools";
-			dummyPayloads.push(payload1);
-			dummyPayloads.push(payload2);
-			dummyPayloads.push(payload3);
-			dummyPayloads.push(payload4);
-			dummyPayloads.push(payload5);
-		}
-	
-		dummyPayloads.forEach(payload => {
-			console.log("dummy payload", payload)
-			var postResult = assertHandler({
-				currentTestName: "prepare dummy",
-				featureName: featureName,
-				route: route,
-				body: payload,
-				headers: positiveHeader,
-				expectedCase: {},
-				options: [],
-				config: config,
-				tags: {},
-			});
-			console.log("postResult", postResult)
-		});
-
 	if (
 		positiveResults.every((result) => {
 			return result.isSuccess;
@@ -354,26 +298,16 @@ export function PostProductScenario(config, tags, info) {
 }
 
 /**
- * @type {import("../types/scenario.js").Scenario<import("../entity/app.js").Product[]|undefined>>}
+ * @type {import("../types/scenario.js").Scenario<{user:import("../entity/app.js").User | undefined},import("../entity/app.js").Product|undefined>}
  */
 export function GetProductScenario(config, tags, info) {
 	const featureName = "Get Product";
 	const route = config.baseUrl + "/v1/product";
 	const assertHandler = testGetAssert;
-	const postHandler = testPostJsonAssert;
-
-	const user = info.user;
-	if (!isUser(user)) {
-		console.warn(`${featureName} needs a valid user`);
-		return undefined;
-	}
-
-	const testBegin = new Date(info.testBeginTime);
-	const now = new Date();
 
 	// --- Positive Case ---
-	/** @type {import("src/types/assertion.js").Checkers} */
-  const positiveCases = {
+	/** @type {import("../types/testRequest.js").Checkers} */
+	const positiveCases = {
 		["should return 200"]: (_parsed, res) => res.status === 200,
 
 		["productId should be string"]: (parsed, _res) =>
@@ -400,158 +334,101 @@ export function GetProductScenario(config, tags, info) {
 			isExists(parsed, "[].createdAt", ["string"]),
 		["updatedAt should be string"]: (parsed, _res) =>
 			isExists(parsed, "[].updatedAt", ["string"]),
-  };
+	};
 
 	// pagination test
-  assertHandler({
-    featureName: featureName,
-    config: config,
-    route: route,
-    params: {
-      limit: 1,
-      offset: 0,
-    },
-    headers: { Authorization: user.token },
-    currentTestName: "success get product with limited pagination",
-    expectedCase: combine(positiveCases, {
-      ["should have less than 2 items"]: (parsed, _res) =>
-        isTotalDataInRange(parsed, "[]", 0, 1),
-    }),
-    tags: {},
-  });
-
-  // sort: expensive
-  assertHandler({
-    featureName: featureName,
-    config: config,
-    route: route,
-    params: {
-      limit: 5,
-      offset: 0,
-      sortBy: "expensive",
-    },
-    headers: { Authorization: user.token },
-    currentTestName: "success get product with limited date",
-    expectedCase: combine(positiveCases, {
-      ["should have less than 6 items"]: (parsed, _res) =>
-        isTotalDataInRange(parsed, "[]", 0, 5),
-      ["first item should the cheapest price of all"]: (parsed, _res) =>
-        isEqualWith(parsed, "[0].price", (item) => {
-					console.log("assert [0].price type", typeof item)
-          if (typeof item === "number") {
-            return item == cheapestPrice;
-          }
-          return false;
-        }),
-    }),
-    tags: {},
-  });
 	assertHandler({
-    featureName: featureName,
-    config: config,
-    route: route,
-    params: {
-      limit: 5,
-      offset: 0,
-      sortBy: "cheapest",
-      newest: now.toISOString(),
-    },
-    headers: { Authorization: user.token },
-    currentTestName: "success get product with limited date",
-    expectedCase: combine(positiveCases, {
-      ["should have less than 6 items"]: (parsed, _res) =>
-        isTotalDataInRange(parsed, "[]", 0, 5),
-      ["should have items within the range"]: (parsed, _res) =>
-        isEqualWith(parsed, "[].createdAt", (item) => {
-          if (typeof item === "string") {
-            const date = new Date(item);
-            return date <= now && date >= testBegin;
-          }
-          return false;
-        }),
-    }),
-    tags: {},
-  });
+		featureName: featureName,
+		config: config,
+		route: route,
+		params: {
+			limit: 1,
+			offset: 0,
+		},
+		headers: {},
+		currentTestName: "success get product with limited pagination",
+		expectedCase: combine(positiveCases, {
+			["should have less than 2 items"]: (parsed, _res) =>
+				isTotalDataInRange(parsed, "[]", 0, 1),
+		}),
+		tags: {},
+	});
 
-  // calorie range test
-  assertHandler({
-    featureName: featureName,
-    config: config,
-    route: route,
-    params: {
-      limit: 5,
-      offset: 0,
-      caloriesBurnedMin: 1,
-      caloriesBurnedMax: 20,
-    },
-    headers: { Authorization: user.token },
-    currentTestName: "success get product with limited calories",
-    expectedCase: combine(positiveCases, {
-      ["should have less than 6 items"]: (parsed, _res) =>
-        isTotalDataInRange(parsed, "[]", 0, 5),
-      ["should have items within the range"]: (parsed, _res) =>
-        isEqualWith(parsed, "[].caloriesBurned", (item) => {
-          if (typeof item === "number") {
-            return item > 1 && item < 20;
-          }
-          return false;
-        }),
-    }),
-    tags: {},
-  });
+	// sort: expensive
+	assertHandler({
+		featureName: featureName,
+		config: config,
+		route: route,
+		params: {
+			limit: 5,
+			offset: 0,
+			sortBy: "expensive",
+		},
+		headers: {},
+		currentTestName: "success get product with limited date",
+		expectedCase: combine(positiveCases, {
+			["should have less than 6 items"]: (parsed, _res) =>
+				isTotalDataInRange(parsed, "[]", 0, 5),
+			["first item should the cheapest price of all"]: (parsed, _res) =>
+				isOrdered(parsed, "[].price", "desc"),
+		}),
+		tags: {},
+	});
 
-  assertHandler({
-    featureName: featureName,
-    config: config,
-    route: route,
-    params: {
-      limit: 5,
-      offset: 0,
-      category: "Food",
-    },
-    headers: { Authorization: user.token },
-    currentTestName: "success get product with limited pagination",
-    expectedCase: combine(positiveCases, {
-      ["should have less than 6 items"]: (parsed, _res) =>
-        isTotalDataInRange(parsed, "[]", 0, 5),
-      ["should have equal activityType"]: (parsed, _res) =>
-        isEqual(parsed, "[].activityType", activities[0]),
-    }),
-    tags: {},
-  });
+	assertHandler({
+		featureName: featureName,
+		config: config,
+		route: route,
+		params: {
+			limit: 5,
+			offset: 0,
+			sortBy: "cheapest",
+		},
+		headers: {},
+		currentTestName: "success get product with limited date",
+		expectedCase: combine(positiveCases, {
+			["should have less than 6 items"]: (parsed, _res) =>
+				isTotalDataInRange(parsed, "[]", 0, 5),
+			["should have items within the range"]: (parsed, _res) =>
+				isOrdered(parsed, "[].price", "asc"),
+		}),
+		tags: {},
+	});
+	const choosenCategory =
+		activityTypes[generateRandomNumber(0, activityTypes.length - 1)];
+	assertHandler({
+		featureName: featureName,
+		config: config,
+		route: route,
+		params: {
+			limit: 5,
+			offset: 0,
+			category: choosenCategory,
+		},
+		headers: {},
+		currentTestName: "success get product with limited pagination",
+		expectedCase: combine(positiveCases, {
+			["should have less than 6 items"]: (parsed, _res) =>
+				isTotalDataInRange(parsed, "[]", 0, 5),
+			["should have equal category"]: (parsed, _res) =>
+				isEqual(parsed, "[].category", choosenCategory),
+		}),
+		tags: {},
+	});
 
-  const positiveResult = assertHandler({
-    featureName: featureName,
-    config: config,
-    route: route,
-    params: {
-      limit: 10,
-      offset: 0,
-    },
-    headers: { Authorization: user.token },
-    currentTestName: "success get product",
-    expectedCase: combine(positiveCases, {
-      ["should have less than 11 items"]: (parsed, _res) =>
-        isTotalDataInRange(parsed, "[]", 0, 10),
-    }),
-    tags: {},
-  });
-
-
-	const positiveResultFetchAll = assertHandler({
+	const positiveResult = assertHandler({
 		featureName: featureName,
 		config: config,
 		route: route,
 		params: {},
-		headers: { Authorization: user.token },
+		headers: {},
 		currentTestName: "success get product",
 		expectedCase: positiveCases,
 		tags: {},
 	});
 
-	console.log("positiveResult", positiveResult)
 	if (positiveResult.isSuccess) {
-		return getProducts(positiveResult.res, {}, featureName);
+		return getProduct(positiveResult.res, {}, featureName);
 	} else {
 		console.warn(
 			`${featureName} | Skipping getProduct due to failed assertions.`,
@@ -564,48 +441,61 @@ export function GetProductScenario(config, tags, info) {
 const validProductId = ["prdct001", "prdct002", "prdct003"];
 
 /**
- * @type {import("../types/scenario.js").Scenario<import("../entity/app.js").Product | undefined>}
+ * @type {import("../types/scenario.js").Scenario<{user:import("../entity/app.js").User | undefined,product:import("../entity/app.js").Product | undefined, file: import("../entity/app.js").UploadedFile|undefined},import("../entity/app.js").Product | undefined>}
  */
 export function PutProductScenario(config, tags, info) {
 	const featureName = "Put Product";
 	const route = config.baseUrl + "/v1/product/:productId";
 	const assertHandler = testPutJsonAssert;
-	const user = info.user;
-	if (!isUser(user)) {
+	const mockUser = info.user;
+	const mockFile = info.file;
+	const mockProduct = info.product;
+
+	if (!isUser(mockUser)) {
 		console.warn(`${featureName} needs a valid user or file`);
 		return undefined;
 	}
-
-	// akses objek produk via k6
-	const mockProduct = info.product;
+	if (!isFile(mockFile)) {
+		console.warn(`${featureName} needs a valid file`);
+		return undefined;
+	}
 	if (!isProduct(mockProduct)) {
 		console.warn(`${featureName} needs a valid product`);
 		return undefined;
 	}
 
-	console.log("mockProduct", mockProduct);
-	// dari sini sudah bisa pakai mockProduct
-
 	const positivePayload1 = {
 		productId: mockProduct.productId,
 		name: generateRandomName(),
-		category: "Food",
+		category: activityTypes[generateRandomNumber(0, activityTypes.length - 1)],
 		qty: 1,
 		price: 100,
 		sku: "sku12345",
-		fileId: validFileId[generateRandomNumber(0, validFileId.length - 1)],
-		fileUri: "file1.jpeg",
-		fileThumbnailUri: "tmb_file1.jpeg",
+		fileId: mockFile.fileId,
+		fileUri: mockFile.fileUri,
+		fileThumbnailUri: mockFile.fileThumbnailUri,
 	};
 
 	const positivePayload2 = clone(positivePayload1);
-	positivePayload2.category = "Beverage";
+	positivePayload2.sku = `sku${generateRandomNumber(10000, 99999)}`;
+	positivePayload2.category =
+		activityTypes[generateRandomNumber(0, activityTypes.length - 1)];
+
 	const positivePayload3 = clone(positivePayload1);
-	positivePayload3.category = "Clothes";
+	positivePayload3.sku = `sku${generateRandomNumber(10000, 99999)}`;
+	positivePayload3.category =
+		activityTypes[generateRandomNumber(0, activityTypes.length - 1)];
+
 	const positivePayload4 = clone(positivePayload1);
-	positivePayload4.category = "Furniture";
+	positivePayload4.sku = `sku${generateRandomNumber(10000, 99999)}`;
+	positivePayload4.category =
+		activityTypes[generateRandomNumber(0, activityTypes.length - 1)];
+
 	const positivePayload5 = clone(positivePayload1);
-	positivePayload5.category = "Tools";
+	positivePayload5.sku = `sku${generateRandomNumber(10000, 99999)}`;
+	positivePayload5.category =
+		activityTypes[generateRandomNumber(0, activityTypes.length - 1)];
+
 	const negativePayload = clone(positivePayload1);
 	negativePayload.category = "Electronic";
 	negativePayload.fileId = "salah0123";
@@ -638,7 +528,7 @@ export function PutProductScenario(config, tags, info) {
 			featureName: featureName,
 			route: route,
 			body: {},
-			headers: { Authorization: user.token },
+			headers: { Authorization: mockUser.token },
 			expectedCase: {
 				["should return 400"]: (_parsed, res) => res.status === 400,
 			},
@@ -651,7 +541,7 @@ export function PutProductScenario(config, tags, info) {
 			featureName: featureName,
 			route: route,
 			body: negativePayload,
-			headers: { Authorization: user.token },
+			headers: { Authorization: mockUser.token },
 			expectedCase: {
 				["should return 400"]: (_parsed, res) => res.status === 400,
 			},
@@ -664,7 +554,7 @@ export function PutProductScenario(config, tags, info) {
 			featureName: featureName,
 			route: route,
 			body: negativePayload,
-			headers: { Authorization: user.token },
+			headers: { Authorization: mockUser.token },
 			expectedCase: {
 				["should return 400"]: (_parsed, res) => res.status === 400,
 			},
@@ -677,7 +567,7 @@ export function PutProductScenario(config, tags, info) {
 			featureName: featureName,
 			route: route,
 			body: negativePayload2,
-			headers: { Authorization: user.token },
+			headers: { Authorization: mockUser.token },
 			expectedCase: {
 				["should return 404"]: (_parsed, res) => res.status === 404,
 			},
@@ -727,7 +617,7 @@ export function PutProductScenario(config, tags, info) {
 				featureName: featureName,
 				route: route,
 				body: payload,
-				headers: { Authorization: user.token },
+				headers: { Authorization: mockUser.token },
 				expectedCase: {
 					["should return 400"]: (_parsed, res) => res.status === 400,
 				},
@@ -745,7 +635,7 @@ export function PutProductScenario(config, tags, info) {
 			featureName: featureName,
 			route: route,
 			body: payload,
-			headers: { Authorization: user.token },
+			headers: { Authorization: mockUser.token },
 			expectedCase: {
 				["should return 200"]: (_parsed, res) => res.status === 200,
 
@@ -795,42 +685,23 @@ export function PutProductScenario(config, tags, info) {
 }
 
 /**
- * @type {import("../types/scenario.js").Scenario<import("../entity/app.js").Product | undefined>}
+ * @type {import("../types/scenario.js").Scenario<{user:import("../entity/app.js").User | undefined,product:import("../entity/app.js").Product | undefined},import("../entity/app.js").Product | undefined>}
  */
 export function DeleteProductScenario(config, tags, info) {
 	const featureName = "Delete Product";
 	const route = config.baseUrl + "/v1/product/:productId";
-	const assertHandler = testPutJsonAssert;
-	const user = info.user;
-	if (!isUser(user)) {
+	const assertHandler = testDeleteAssert;
+	const mockUser = info.user;
+	const mockProduct = info.product;
+	if (!isUser(mockUser)) {
 		console.warn(`${featureName} needs a valid user or file`);
 		return undefined;
 	}
-
-	// akses objek produk via k6
-	const mockProduct = info.product;
 	if (!isProduct(mockProduct)) {
 		console.warn(`${featureName} needs a valid product`);
 		return undefined;
 	}
-	// dari sini sudah bisa pakai mockProduct
 
-	const positivePayload1 = {
-		productId: mockProduct.productId,
-		name: generateRandomName(),
-		category: "Food",
-		qty: 1,
-		price: 100,
-		sku: "sku12345",
-		fileId: validFileId[generateRandomNumber(0, validFileId.length - 1)],
-		fileUri: "file1.jpeg",
-		fileThumbnailUri: "tmb_file1.jpeg",
-	};
-
-	const negativePayload = clone(positivePayload1);
-	negativePayload.productId = "idSalah0123";
-
-	let positivePayloads = [positivePayload1];
 	if (config.runNegativeCase) {
 		assertHandler({
 			currentTestName: "no token",
@@ -841,20 +712,20 @@ export function DeleteProductScenario(config, tags, info) {
 			expectedCase: {
 				["should return 401"]: (_parsed, res) => res.status === 401,
 			},
-			options: [],
 			config: config,
 			tags: {},
+			params: {},
 		});
 		assertHandler({
 			currentTestName: "productId is not exist",
 			featureName: featureName,
 			route: route,
 			body: negativePayload,
-			headers: { Authorization: user.token },
+			headers: { Authorization: mockUser.token },
 			expectedCase: {
 				["should return 404"]: (_parsed, res) => res.status === 404,
 			},
-			options: [],
+			params: {},
 			config: config,
 			tags: {},
 		});
@@ -900,7 +771,7 @@ export function DeleteProductScenario(config, tags, info) {
 				featureName: featureName,
 				route: route,
 				body: payload,
-				headers: { Authorization: user.token },
+				headers: { Authorization: mockUser.token },
 				expectedCase: {
 					["should return 400"]: (_parsed, res) => res.status === 400,
 				},
@@ -918,7 +789,7 @@ export function DeleteProductScenario(config, tags, info) {
 			featureName: featureName,
 			route: route,
 			body: payload,
-			headers: { Authorization: user.token },
+			headers: { Authorization: mockUser.token },
 			expectedCase: {
 				["should return 200"]: (_parsed, res) => res.status === 200,
 			},

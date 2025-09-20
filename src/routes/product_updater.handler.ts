@@ -5,7 +5,7 @@ import { ProductRepository } from "../repository/repo.product.js";
 import { FileRepository } from "../repository/repo.file.js";
 import { ActivityTypes } from "../const/activity_type.const.js";
 
-export function productCreatorHandler(
+export function productUpdaterHandler(
 	s: PSServer,
 	productRepo: ProductRepository,
 	fileRepo: FileRepository,
@@ -15,10 +15,10 @@ export function productCreatorHandler(
 	);
 
 	/**
-	 * POST /v1/product
+	 * PUT /v1/product/:productId
 	 */
-	s.post(
-		"/v1/product",
+	s.put(
+		"/v1/product/:productId",
 		{
 			schema: {
 				body: Type.Object({
@@ -29,12 +29,15 @@ export function productCreatorHandler(
 					sku: Type.String({ minLength: 0, maxLength: 32 }),
 					fileId: Type.String({}),
 				}),
+				params: Type.Object({
+					productId: Type.String(),
+				}),
 			},
 		},
 		async (req, res) => {
+			const { productId } = req.params;
 			const { name, category, qty, price, sku, fileId } = req.body;
 
-			// validate file existence
 			const file = await fileRepo.get(fileId);
 			if (!file) {
 				return res.status(StatusCodes.BAD_REQUEST).send({
@@ -42,7 +45,7 @@ export function productCreatorHandler(
 				});
 			}
 
-			const product = await productRepo.insert({
+			const updated = await productRepo.update(productId, {
 				name,
 				category,
 				qty,
@@ -53,13 +56,20 @@ export function productCreatorHandler(
 				fileThumbnailUri: file.fileThumbnailUri,
 			});
 
-			if (!product) {
+			if (!updated) {
+				// Distinguish between conflict and not found
+				const exists = await productRepo.getById(productId);
+				if (!exists) {
+					return res.status(StatusCodes.NOT_FOUND).send({
+						message: "Product not found",
+					});
+				}
 				return res.status(StatusCodes.CONFLICT).send({
 					message: "SKU already exists",
 				});
 			}
 
-			res.status(StatusCodes.CREATED).send(product);
+			res.status(StatusCodes.OK).send(updated);
 		},
 	);
 }
