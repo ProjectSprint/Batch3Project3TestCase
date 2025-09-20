@@ -8,8 +8,13 @@ BASE_URL ?= http://localhost:30000
 pull:
 	git pull origin main
 
+# run test
+test-log: 
+	BASE_URL=$(BASE_URL) k6 run test/main.js
+
 # Pull and run tests in one command
 test-log: 
+	git pull origin main;
 	BASE_URL=$(BASE_URL) k6 run test/main.js 2>&1 | sed 's/"//g' > output.txt
 
 
