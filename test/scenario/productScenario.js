@@ -415,10 +415,10 @@ export function GetProductScenario(config, tags, info) {
 		params: {
 			limit: 5,
 			offset: 0,
-			sortBy: "newest",
+			sortBy: "oldest",
 		},
 		headers: {},
-		currentTestName: "success get newest product",
+		currentTestName: "success get oldest product",
 		expectedCase: combine(positiveCases, {
 			["should have less than 6 items"]: (parsed, _res) =>
 				isTotalDataInRange(parsed, "[]", 0, 5),
