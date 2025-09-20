@@ -9,7 +9,7 @@ pull:
 	git pull origin main
 
 # run test
-test-log: 
+test: 
 	BASE_URL=$(BASE_URL) k6 run test/main.js
 
 # Pull and run tests in one command
