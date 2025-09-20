@@ -15,8 +15,10 @@ import {
 	PutProfileScenario,
 } from "./scenario/profileScenario.js";
 import {
+	DeleteProductScenario,
 	GetProductScenario,
 	PostProductScenario,
+	PutProductScenario,
 } from "./scenario/productScenario.js";
 // import {
 //   GetProfileScenario,
@@ -107,9 +109,18 @@ export default function () {
 		user: emailUsr,
 		file: uploadedFile,
 	});
+	PutProductScenario(config, tags, {
+		user: emailUsr,
+		file: uploadedFile,
+		product: postedProduct,
+	});
 	GetProductScenario(config, tags, {
 		user: emailUsr,
-		product: postedProduct
+		product: postedProduct,
+	});
+	DeleteProductScenario(config, tags, {
+		user: emailUsr,
+		product: postedProduct,
 	});
 	const phoneUsr = RegisterPhoneScenario(config, tags, {});
 	LoginPhoneScenario(config, tags, { user: phoneUsr });

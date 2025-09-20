@@ -7,7 +7,8 @@ import { registerRoutes } from "./routes/routes.js";
 const server = fastify({
 	ajv: {
 		customOptions: {
-			coerceTypes: true,
+			coerceTypes: false,
+			strictTypes: true,
 		},
 	},
 }).withTypeProvider<TypeBoxTypeProvider>();

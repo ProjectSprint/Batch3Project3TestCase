@@ -34,6 +34,13 @@ export function profileUpdaterHandler(
 			const usr = req.user;
 			const { fileId, bankAccountName, bankAccountHolder, bankAccountNumber } =
 				req.body;
+			if (
+				bankAccountName == "true" ||
+				bankAccountHolder == "true" ||
+				bankAccountNumber == "true"
+			) {
+				console.log("true value passed the validation!");
+			}
 			const fileRes = await fileRepo.get(fileId);
 			if (!fileRes) {
 				return res.status(StatusCodes.BAD_REQUEST).send();
