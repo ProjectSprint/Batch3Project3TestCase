@@ -44,7 +44,7 @@ export function PostProductScenario(config, tags, info) {
 	}
 
 	const positiveHeader = {
-		Authorization: `${user.token}`,
+		Authorization: `Bearer ${user.token}`,
 	};
 
 	const positivePayload = {
@@ -480,6 +480,10 @@ export function PutProductScenario(config, tags, info) {
 		return undefined;
 	}
 
+	const positiveHeader = {
+		Authorization: `Bearer ${mockUser.token}`,
+	};
+
 	const positivePayload = {
 		productId: mockProduct.productId,
 		name: generateRandomName(),
@@ -513,7 +517,7 @@ export function PutProductScenario(config, tags, info) {
 			featureName: featureName,
 			route: route,
 			body: {},
-			headers: { Authorization: mockUser.token },
+			headers: positiveHeader,
 			expectedCase: {
 				["should return 400"]: (_parsed, res) => res.status === 400,
 			},
@@ -526,7 +530,7 @@ export function PutProductScenario(config, tags, info) {
 			featureName: featureName,
 			route: incorrectRoute,
 			body: positivePayload,
-			headers: { Authorization: mockUser.token },
+			headers: positiveHeader,
 			expectedCase: {
 				["should return 404"]: (_parsed, res) => res.status === 404,
 			},
@@ -576,7 +580,7 @@ export function PutProductScenario(config, tags, info) {
 				featureName: featureName,
 				route: route,
 				body: payload,
-				headers: { Authorization: mockUser.token },
+				headers: positiveHeader,
 				expectedCase: {
 					["should return 400"]: (_parsed, res) => res.status === 400,
 				},
@@ -593,7 +597,7 @@ export function PutProductScenario(config, tags, info) {
 		featureName: featureName,
 		route: route,
 		body: positivePayload,
-		headers: { Authorization: mockUser.token },
+		headers: positiveHeader,
 		expectedCase: {
 			["should return 200"]: (_parsed, res) => res.status === 200,
 
@@ -657,6 +661,10 @@ export function DeleteProductScenario(config, tags, info) {
 	const route = config.baseUrl + `/v1/product/${mockProduct.productId}`;
 	const incorrectRoute = config.baseUrl + "/v1/product/asdfassdf";
 
+	const positiveHeader = {
+		Authorization: `Bearer ${mockUser.token}`,
+	};
+
 	if (config.runNegativeCase) {
 		assertHandler({
 			currentTestName: "no token",
@@ -676,7 +684,7 @@ export function DeleteProductScenario(config, tags, info) {
 			featureName: featureName,
 			route: incorrectRoute,
 			body: {},
-			headers: { Authorization: mockUser.token },
+			headers: positiveHeader,
 			expectedCase: {
 				["should return 404"]: (_parsed, res) => res.status === 404,
 			},
@@ -690,7 +698,7 @@ export function DeleteProductScenario(config, tags, info) {
 		currentTestName: "valid payload",
 		featureName: featureName,
 		route: route,
-		headers: { Authorization: mockUser.token },
+		headers: positiveHeader,
 		expectedCase: {
 			["should return 200"]: (_parsed, res) => res.status === 200,
 		},

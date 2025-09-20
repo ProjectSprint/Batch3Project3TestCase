@@ -29,6 +29,8 @@ export function GetProfileScenario(config, tags, info) {
 		return undefined;
 	}
 
+	const header = { Authorization: `Bearer ${user.token}` };
+
 	if (config.runNegativeCase) {
 		assertHandler({
 			featureName: featureName,
@@ -50,7 +52,7 @@ export function GetProfileScenario(config, tags, info) {
 		config: config,
 		route: route,
 		params: {},
-		headers: { Authorization: user.token },
+		headers: header,
 		currentTestName: "success get profile",
 		expectedCase: {
 			["should return 200"]: (_parsed, res) => res.status === 200,
@@ -116,6 +118,8 @@ export function PutProfileScenario(config, tags, info) {
 		return undefined;
 	}
 
+	const header = { Authorization: `Bearer ${user.token}` };
+
 	const positivePayload = {
 		fileId: file.fileId,
 		bankAccountName: generateRandomUsername(),
@@ -142,7 +146,7 @@ export function PutProfileScenario(config, tags, info) {
 			featureName: featureName,
 			route: route,
 			body: {},
-			headers: { Authorization: user.token },
+			headers: header,
 			expectedCase: {
 				["should return 400"]: (_parsed, res) => res.status === 400,
 			},
@@ -184,7 +188,7 @@ export function PutProfileScenario(config, tags, info) {
 				featureName: featureName,
 				route: route,
 				body: payload,
-				headers: { Authorization: user.token },
+				headers: header,
 				expectedCase: {
 					["should return 400"]: (_parsed, res) => res.status === 400,
 				},
@@ -201,7 +205,7 @@ export function PutProfileScenario(config, tags, info) {
 		featureName: featureName,
 		route: route,
 		body: positivePayload,
-		headers: { Authorization: user.token },
+		headers: header,
 		expectedCase: {
 			["should return 200"]: (_parsed, res) => res.status === 200,
 			["email should be string"]: (parsed, _res) =>
@@ -268,6 +272,8 @@ export function PostProfilePhoneScenario(config, tags, info) {
 		phone: generateRandomPhoneNumber(true),
 	};
 
+	const header = { Authorization: `Bearer ${user.token}` };
+
 	if (config.runNegativeCase) {
 		// TODO: add duplicate phone check
 		assertHandler({
@@ -288,7 +294,7 @@ export function PostProfilePhoneScenario(config, tags, info) {
 			featureName: featureName,
 			route: route,
 			body: {},
-			headers: { Authorization: user.token },
+			headers: header,
 			expectedCase: {
 				["should return 400"]: (_parsed, res) => res.status === 400,
 			},
@@ -313,7 +319,7 @@ export function PostProfilePhoneScenario(config, tags, info) {
 				featureName: featureName,
 				route: route,
 				body: payload,
-				headers: { Authorization: user.token },
+				headers: header,
 				expectedCase: {
 					["should return 400"]: (_parsed, res) => res.status === 400,
 				},
@@ -330,7 +336,7 @@ export function PostProfilePhoneScenario(config, tags, info) {
 		featureName: featureName,
 		route: route,
 		body: positivePayload,
-		headers: { Authorization: user.token },
+		headers: header,
 		expectedCase: {
 			["should return 200"]: (_parsed, res) => res.status === 200,
 			["email should be string"]: (parsed, _res) =>
@@ -397,6 +403,8 @@ export function PostProfileEmailScenario(config, tags, info) {
 		email: generateRandomEmail(),
 	};
 
+	const header = { Authorization: `Bearer ${user.token}` };
+
 	if (config.runNegativeCase) {
 		// TODO: add duplicate email check
 		assertHandler({
@@ -417,7 +425,7 @@ export function PostProfileEmailScenario(config, tags, info) {
 			featureName: featureName,
 			route: route,
 			body: {},
-			headers: { Authorization: user.token },
+			headers: header,
 			expectedCase: {
 				["should return 400"]: (_parsed, res) => res.status === 400,
 			},
@@ -442,7 +450,7 @@ export function PostProfileEmailScenario(config, tags, info) {
 				featureName: featureName,
 				route: route,
 				body: payload,
-				headers: { Authorization: user.token },
+				headers: header,
 				expectedCase: {
 					["should return 400"]: (_parsed, res) => res.status === 400,
 				},
@@ -459,7 +467,7 @@ export function PostProfileEmailScenario(config, tags, info) {
 		featureName: featureName,
 		route: route,
 		body: positivePayload,
-		headers: { Authorization: user.token },
+		headers: header,
 		expectedCase: {
 			["should return 200"]: (_parsed, res) => res.status === 200,
 			["email should be string"]: (parsed, _res) =>

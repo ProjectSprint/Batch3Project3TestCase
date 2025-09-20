@@ -25,7 +25,7 @@ export function UploadFileScenario(config, tags, info) {
 		file: file(fileToTest.small, fileToTest.smallName, "image/jpeg"),
 	};
 	const positiveHeader = {
-		Authorization: `${user.token}`,
+		Authorization: `Bearer ${user.token}`,
 	};
 
 	if (config.runNegativeCase) {
