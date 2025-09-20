@@ -3,15 +3,15 @@ import { StatusCodes } from "http-status-codes";
 import { PSServer } from "../types.js";
 import { ProductRepository } from "../repository/repo.product.js";
 import { FileRepository } from "../repository/repo.file.js";
-import { ActivityTypes } from "../const/activity_type.const.js";
+import { ProductTypes } from "../const/product_type.const.js";
 
 export function productCreatorHandler(
 	s: PSServer,
 	productRepo: ProductRepository,
 	fileRepo: FileRepository,
 ) {
-	const ActivityTypeSchema = Type.Union(
-		ActivityTypes.map((v) => Type.Literal(v)),
+	const ProductTypeSchema = Type.Union(
+		ProductTypes.map((v) => Type.Literal(v)),
 	);
 
 	/**
@@ -23,7 +23,7 @@ export function productCreatorHandler(
 			schema: {
 				body: Type.Object({
 					name: Type.String({ minLength: 4, maxLength: 32 }),
-					category: ActivityTypeSchema,
+					category: ProductTypeSchema,
 					qty: Type.Number({ minimum: 1 }),
 					price: Type.Number({ minimum: 100 }),
 					sku: Type.String({ minLength: 0, maxLength: 32 }),

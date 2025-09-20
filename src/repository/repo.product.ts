@@ -117,8 +117,6 @@ export class ProductRepository {
 			else if (sortBy === "cheapest") sort.push({ price: "asc" });
 			else if (sortBy === "expensive") sort.push({ price: "desc" });
 
-			console.log("Sort", sort)
-
 			const res = await this.repo.find({
 				selector,
 				limit: typeof limit === "number" ? limit : 5,

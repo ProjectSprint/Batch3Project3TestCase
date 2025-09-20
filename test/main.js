@@ -103,12 +103,13 @@ export default function () {
 		user: emailUsr,
 	});
 
-	PostProductScenario(config, tags, {
+	const postedProduct = PostProductScenario(config, tags, {
 		user: emailUsr,
 		file: uploadedFile,
 	});
 	GetProductScenario(config, tags, {
 		user: emailUsr,
+		product: postedProduct
 	});
 	const phoneUsr = RegisterPhoneScenario(config, tags, {});
 	LoginPhoneScenario(config, tags, { user: phoneUsr });

@@ -2,14 +2,14 @@ import { Type } from "@fastify/type-provider-typebox";
 import { StatusCodes } from "http-status-codes";
 import { PSServer } from "../types.js";
 import { ProductRepository } from "../repository/repo.product.js";
-import { ActivityTypes } from "../const/activity_type.const.js";
+import { ProductTypes } from "../const/product_type.const.js";
 
 export function productGetterHandler(
 	s: PSServer,
 	productRepo: ProductRepository,
 ) {
-	const ActivityTypeSchema = Type.Union(
-		ActivityTypes.map((v) => Type.Literal(v)),
+	const ProductTypeSchema = Type.Union(
+		ProductTypes.map((v) => Type.Literal(v)),
 	);
 
 	/**
@@ -24,7 +24,7 @@ export function productGetterHandler(
 					offset: Type.Optional(Type.Number()),
 					productId: Type.Optional(Type.String()),
 					sku: Type.Optional(Type.String()),
-					category: Type.Optional(ActivityTypeSchema),
+					category: Type.Optional(ProductTypeSchema),
 					sortBy: Type.Optional(
 						Type.Union([
 							Type.Literal("newest"),

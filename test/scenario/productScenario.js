@@ -21,17 +21,12 @@ import {
 import { getProduct, isProduct } from "../assertion/productAssertion.js";
 import { isFile } from "../assertion/fileAssertion.js";
 
-const activityTypes = [
-	"Walking",
-	"Yoga",
-	"Stretching",
-	"Cycling",
-	"Swimming",
-	"Dancing",
-	"Hiking",
-	"Running",
-	"HIIT",
-	"JumpRope",
+const ProductTypes = [
+	"Food",
+	"Beverage",
+	"Clothes",
+	"Furniture",
+	"Tools",
 ];
 
 /**
@@ -59,7 +54,7 @@ export function PostProductScenario(config, tags, info) {
 
 	const positivePayload1 = {
 		name: generateRandomName(),
-		category: activityTypes[generateRandomNumber(0, activityTypes.length - 1)],
+		category: ProductTypes[generateRandomNumber(0, ProductTypes.length - 1)],
 		qty: 1,
 		price: 100,
 		sku: `sku${generateRandomNumber(10000, 99999)}`,
@@ -69,22 +64,22 @@ export function PostProductScenario(config, tags, info) {
 	const positivePayload2 = clone(positivePayload1);
 	positivePayload2.sku = `sku${generateRandomNumber(10000, 99999)}`;
 	positivePayload2.category =
-		activityTypes[generateRandomNumber(0, activityTypes.length - 1)];
+		ProductTypes[generateRandomNumber(0, ProductTypes.length - 1)];
 
 	const positivePayload3 = clone(positivePayload1);
 	positivePayload3.sku = `sku${generateRandomNumber(10000, 99999)}`;
 	positivePayload3.category =
-		activityTypes[generateRandomNumber(0, activityTypes.length - 1)];
+		ProductTypes[generateRandomNumber(0, ProductTypes.length - 1)];
 
 	const positivePayload4 = clone(positivePayload1);
 	positivePayload4.sku = `sku${generateRandomNumber(10000, 99999)}`;
 	positivePayload4.category =
-		activityTypes[generateRandomNumber(0, activityTypes.length - 1)];
+		ProductTypes[generateRandomNumber(0, ProductTypes.length - 1)];
 
 	const positivePayload5 = clone(positivePayload1);
 	positivePayload5.sku = `sku${generateRandomNumber(10000, 99999)}`;
 	positivePayload5.category =
-		activityTypes[generateRandomNumber(0, activityTypes.length - 1)];
+		ProductTypes[generateRandomNumber(0, ProductTypes.length - 1)];
 
 	const negativePayload = clone(positivePayload1);
 	negativePayload.sku = `sku${generateRandomNumber(10000, 99999)}`;
@@ -292,12 +287,14 @@ export function PostProductScenario(config, tags, info) {
 }
 
 /**
- * @type {import("../types/scenario.js").Scenario<{user:import("../entity/app.js").User | undefined},import("../entity/app.js").Product|undefined>}
+ * @type {import("../types/scenario.js").Scenario<{user:import("../entity/app.js").User | undefined, product:import("../entity/app.js").Product|undefined},import("../entity/app.js").Product|undefined>}
  */
 export function GetProductScenario(config, tags, info) {
 	const featureName = "Get Product";
 	const route = config.baseUrl + "/v1/product";
 	const assertHandler = testGetAssert;
+
+	const postedProduct = info.product;
 
 	// --- Positive Case ---
 	/** @type {import("../types/testRequest.js").Checkers} */
@@ -379,7 +376,7 @@ export function GetProductScenario(config, tags, info) {
 			sortBy: "cheapest",
 		},
 		headers: {},
-		currentTestName: "success get product with limited date",
+		currentTestName: "success get cheapest product",
 		expectedCase: combine(positiveCases, {
 			["should have less than 6 items"]: (parsed, _res) =>
 				isTotalDataInRange(parsed, "[]", 0, 5),
@@ -388,9 +385,72 @@ export function GetProductScenario(config, tags, info) {
 		}),
 		tags: {},
 	});
-	// todo: get newest, oldest, sku (ngambil dari result sebelumnya), productId (ngambil dari result sebelumnya)
+
+	// newest
+	assertHandler({
+		featureName: featureName,
+		config: config,
+		route: route,
+		params: {
+			limit: 5,
+			offset: 0,
+			sortBy: "newest",
+		},
+		headers: {},
+		currentTestName: "success get newest product",
+		expectedCase: combine(positiveCases, {
+			["should have less than 6 items"]: (parsed, _res) =>
+				isTotalDataInRange(parsed, "[]", 0, 5),
+			["should have items within the range"]: (parsed, _res) =>
+				isOrdered(parsed, "[].createdAt", "desc"),
+		}),
+		tags: {},
+	});
+
+	// sku
+	const choosenSku = postedProduct.sku;
+	assertHandler({
+		featureName: featureName,
+		config: config,
+		route: route,
+		params: {
+			sku: choosenSku,
+		},
+		headers: {},
+		currentTestName: "success get sku",
+		expectedCase: combine(positiveCases, {
+			["should have only 1 item"]: (parsed, _res) =>
+				isTotalDataInRange(parsed, "[]", 0, 1),
+			["should have sku"]: (parsed, _res) =>
+				isEqual(parsed, "[].sku", choosenSku),
+		}),
+		tags: {},
+	});
+
+	// productId
+	const choosenProductId = postedProduct.productId;
+	assertHandler({
+		featureName: featureName,
+		config: config,
+		route: route,
+		params: {
+			productId: choosenProductId,
+		},
+		headers: {},
+		currentTestName: "success get sku",
+		expectedCase: combine(positiveCases, {
+			["should have only 1 item"]: (parsed, _res) =>
+				isTotalDataInRange(parsed, "[]", 0, 1),
+			["should exist"]: (parsed, _res) =>
+				isEqual(parsed, "[]._id", choosenProductId),
+		}),
+		tags: {},
+	});
+	
+	// todo: get productId (ngambil dari result sebelumnya)
+	
 	const choosenCategory =
-		activityTypes[generateRandomNumber(0, activityTypes.length - 1)];
+		ProductTypes[generateRandomNumber(0, ProductTypes.length - 1)];
 	assertHandler({
 		featureName: featureName,
 		config: config,
