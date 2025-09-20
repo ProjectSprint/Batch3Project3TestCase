@@ -407,6 +407,27 @@ export function GetProductScenario(config, tags, info) {
 		tags: {},
 	});
 
+	// oldest
+	assertHandler({
+		featureName: featureName,
+		config: config,
+		route: route,
+		params: {
+			limit: 5,
+			offset: 0,
+			sortBy: "newest",
+		},
+		headers: {},
+		currentTestName: "success get newest product",
+		expectedCase: combine(positiveCases, {
+			["should have less than 6 items"]: (parsed, _res) =>
+				isTotalDataInRange(parsed, "[]", 0, 5),
+			["should have items within the range"]: (parsed, _res) =>
+				isOrdered(parsed, "[].createdAt", "asc"),
+		}),
+		tags: {},
+	});
+
 	// sku
 	const choosenSku = postedProduct.sku;
 	assertHandler({
