@@ -9,8 +9,8 @@ pull:
 	git pull origin main
 
 # Pull and run tests in one command
-test-log: pull 
-	BASE_URL=$(BASE_URL) make pull-test 2>&1 | sed 's/"//g' > output.txt
+test-log: 
+	BASE_URL=$(BASE_URL) k6 run test/main.js 2>&1 | sed 's/"//g' > output.txt
 
 
 SCHEMA_DIR = test/schemas
