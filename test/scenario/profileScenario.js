@@ -23,13 +23,13 @@ export function GetProfileScenario(config, tags, info) {
 	const route = config.baseUrl + "/v1/user";
 	const assertHandler = testGetAssert;
 
-	const user = info.user;
-	if (!isUser(user)) {
-		console.error(`${featureName} needs a valid user`, user);
+	const mockUser = info.user;
+	if (!isUser(mockUser)) {
+		console.error(`${featureName} needs a valid user`, mockUser);
 		return undefined;
 	}
 
-	const header = { Authorization: `Bearer ${user.token}` };
+	const header = { Authorization: `Bearer ${mockUser.token}` };
 
 	if (config.runNegativeCase) {
 		assertHandler({
