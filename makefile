@@ -8,12 +8,10 @@ BASE_URL ?= http://localhost:30000
 pull:
 	git pull origin main
 
-# Run k6 tests with environment variable
-test:
-	DEBUG=$(DEBUG) BASE_URL=$(BASE_URL) k6 run test/main.js
-
 # Pull and run tests in one command
-pull-test: pull test
+test-log: pull 
+	BASE_URL=$(BASE_URL) make pull-test 2>&1 | sed 's/"//g' > output.txt
+
 
 SCHEMA_DIR = test/schemas
 $(SCHEMA_DIR):
