@@ -6,7 +6,46 @@ import { ProductRepository } from "../repository/repo.product.js";
 import { UserRepository } from "../repository/repo.user.js";
 import { FileRepository } from "../repository/repo.file.js";
 import { PaymentDetail, PurchaseItem } from "../entity/purchase.entity.js";
+import { callingCodes } from "../const/calling_code.const.js";
 
+const pattern = "^\\+(" + callingCodes.join("|") + ")\\d*$";
+const PurchaseSchema = Type.Object(
+	{
+		purchasedItems: Type.Array(
+			Type.Object({
+				productId: Type.String(),
+				qty: Type.Number({ minimum: 1 }),
+			}),
+			{ minItems: 1 },
+		),
+		senderName: Type.String({ minLength: 4, maxLength: 55 }),
+		senderContactType: Type.Union([
+			Type.Literal("email"),
+			Type.Literal("phone"),
+		]),
+		senderContactDetail: Type.String(),
+	},
+	{
+		allOf: [
+			{
+				if: { properties: { senderContactType: { const: "email" } } },
+				then: {
+					properties: {
+						senderContactDetail: { type: "string", format: "email" },
+					},
+				},
+			},
+			{
+				if: { properties: { senderContactType: { const: "phone" } } },
+				then: {
+					properties: {
+						senderContactDetail: { type: "string", pattern },
+					},
+				},
+			},
+		],
+	},
+);
 export function purchaseHandlers(
 	s: PSServer,
 	purchaseRepo: PurchaseRepository,
@@ -19,21 +58,7 @@ export function purchaseHandlers(
 		"/v1/purchase",
 		{
 			schema: {
-				body: Type.Object({
-					purchasedItems: Type.Array(
-						Type.Object({
-							productId: Type.String(),
-							qty: Type.Number({ minimum: 1 }),
-						}),
-						{ minItems: 1 },
-					),
-					senderName: Type.String({ minLength: 4, maxLength: 55 }),
-					senderContactType: Type.Union([
-						Type.Literal("email"),
-						Type.Literal("phone"),
-					]),
-					senderContactDetail: Type.String(),
-				}),
+				body: PurchaseSchema,
 			},
 		},
 		async (req, res) => {
@@ -143,7 +168,7 @@ export function purchaseHandlers(
 			const purchase = await purchaseRepo.get(purchaseId);
 			if (!purchase) {
 				return res
-					.status(StatusCodes.BAD_REQUEST)
+					.status(StatusCodes.NOT_FOUND)
 					.send({ message: "Invalid purchaseId" });
 			}
 

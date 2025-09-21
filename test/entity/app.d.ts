@@ -81,6 +81,7 @@ export type PurchaseRequest = {
 };
 
 export type PurchaseResponse = {
+	purchaseId: string;
 	purchasedItems: Array<Product>;
 	totalPrice: number;
 	paymentDetails: Array<{

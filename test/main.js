@@ -20,6 +20,10 @@ import {
 	PostProductScenario,
 	PutProductScenario,
 } from "./scenario/productScenario.js";
+import {
+	PostPurchaseIdScenario,
+	PostPurchaseScenario,
+} from "./scenario/purchaseScenario.js";
 // import {
 //   GetProfileScenario,
 //   PostProfileEmailScenario,
@@ -105,23 +109,33 @@ export default function () {
 		user: emailUsr,
 	});
 
-	const postedProduct = PostProductScenario(config, tags, {
+	let postedProducts = PostProductScenario(config, tags, {
 		user: emailUsr,
 		file: uploadedFile,
+		createCount: 10,
 	});
+	if (!postedProducts) {
+		return;
+	}
 	PutProductScenario(config, tags, {
 		user: emailUsr,
 		file: uploadedFile,
-		product: postedProduct,
+		product: postedProducts[0],
 	});
-	GetProductScenario(config, tags, {
-		user: emailUsr,
-		product: postedProduct,
-	});
+	GetProductScenario(config, tags, {});
 	DeleteProductScenario(config, tags, {
 		user: emailUsr,
-		product: postedProduct,
+		product: postedProducts[0],
 	});
+	postedProducts.shift();
+	const purchase = PostPurchaseScenario(config, tags, {
+		products: postedProducts,
+	});
+	PostPurchaseIdScenario(config, tags, {
+		file: uploadedFile,
+		purchase: purchase,
+	});
+
 	const phoneUsr = RegisterPhoneScenario(config, tags, {});
 	LoginPhoneScenario(config, tags, { user: phoneUsr });
 	// PostProductScenario(config, tags, { user: emailUsr });

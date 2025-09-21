@@ -4,8 +4,8 @@ import { StatusCodes } from "http-status-codes";
 import { UserRepository } from "../repository/repo.user.js";
 import { callingCodes } from "../const/calling_code.const.js";
 
+const pattern = "^\\+(" + callingCodes.join("|") + ")\\d*$";
 export function userPhoneRegistrar(s: PSServer, repo: UserRepository) {
-	const pattern = "^\\+(" + callingCodes.join("|") + ")\\d*$";
 	s.post(
 		"/v1/register/phone",
 		{

@@ -25,7 +25,7 @@ import { isFile } from "../assertion/fileAssertion.js";
 const productTypes = ["Food", "Beverage", "Clothes", "Furniture", "Tools"];
 
 /**
- * @type {import("../types/scenario.js").Scenario<{user:import("../entity/app.js").User | undefined, file: import("../entity/app.js").UploadedFile|undefined},import("../entity/app.js").Product | undefined>}
+ * @type {import("../types/scenario.js").Scenario<{user:import("../entity/app.js").User | undefined,createCount: number, file: import("../entity/app.js").UploadedFile|undefined},import("../entity/app.js").Product[] | undefined>}
  */
 export function PostProductScenario(config, tags, info) {
 	const featureName = "Post Product";
@@ -205,8 +205,51 @@ export function PostProductScenario(config, tags, info) {
 		});
 	}
 
+	/** @type{import("../entity/app.js").Product[]}  */
+	const resResults = [];
 	if (positiveResult.isSuccess) {
-		return getProduct(positiveResult.res, {}, featureName);
+		const posResJson = positiveResult.res.json();
+		if (!posResJson) {
+		}
+		if (isProduct(posResJson)) {
+			resResults.push(posResJson);
+		}
+
+		if (info.createCount > 1) {
+			for (let index = 1; index < info.createCount; index++) {
+				const resPayload = {
+					name: generateRandomName(),
+					category:
+						productTypes[generateRandomNumber(0, productTypes.length - 1)],
+					qty: 1,
+					price: 100,
+					sku: `sku${generateRandomNumber(10000, 99999)}`,
+					fileId: fileToTest.fileId,
+				};
+				const res = assertHandler({
+					currentTestName: "valid payload",
+					featureName: featureName,
+					route: route,
+					body: resPayload,
+					headers: positiveHeader,
+					expectedCase: {
+						["should return 201"]: (_parsed, res) => res.status === 201,
+					},
+					options: [],
+					config: config,
+					tags: {},
+				});
+				const resJson = res.res.json();
+				if (!resJson) {
+					continue;
+				}
+				if (isProduct(resJson)) {
+					resResults.push(resJson);
+				}
+			}
+		}
+
+		return resResults;
 	} else {
 		console.warn(
 			`${featureName} | Skipping getProduct due to failed assertions.`,

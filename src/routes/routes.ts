@@ -43,16 +43,20 @@ export function registerRoutes(s: PSServer) {
 		userEmailAutheticator(ins, userRepo);
 		userPhoneAuthenticator(ins, userRepo);
 		productGetterHandler(ins, productRepo);
+		fileCreator(ins, fileRepo);
+		purchaseHandlers(ins, purchaseRepo, productRepo, userRepo, fileRepo);
 	});
 
 	s.register((ins, _) => {
 		ins.addHook("onRequest", async (req, res) => {
-			const token = req.headers.authorization;
+			let token = req.headers.authorization;
 			// token is string | undefined
-			if (!token) {
+			if (!token && !token?.startsWith("Bearer")) {
 				res.status(StatusCodes.UNAUTHORIZED).send();
 				return;
 			}
+			token = token.substring(7, token.length);
+			console.log("token", token);
 			const userId = atob(token);
 			const user = await userRepo.get(userId);
 			if (!user) {
@@ -66,10 +70,8 @@ export function registerRoutes(s: PSServer) {
 		profileUpdaterHandler(ins, userRepo, fileRepo);
 		profileEmailLinkerHandler(ins, userRepo);
 		profilePhoneLinkerHandler(ins, userRepo);
-		fileCreator(ins, fileRepo);
 		productCreatorHandler(ins, productRepo, fileRepo);
 		productUpdaterHandler(ins, productRepo, fileRepo);
 		productDeleterHandler(ins, productRepo);
-		purchaseHandlers(ins, purchaseRepo, productRepo, userRepo, fileRepo);
 	});
 }

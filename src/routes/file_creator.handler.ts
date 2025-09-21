@@ -2,7 +2,7 @@ import { StatusCodes } from "http-status-codes";
 import { PSServer } from "../types.js";
 import { FileRepository } from "../repository/repo.file.js";
 import { randomUUID } from "crypto";
-import  path  from "path";
+import path from "path";
 
 const ALLOWED_MIME = ["image/jpeg", "image/jpg", "image/png"];
 const ALLOWED_EXT = ["jpg", "jpeg", "png"];
@@ -17,7 +17,7 @@ export function fileCreator(s: PSServer, repo: FileRepository) {
 		}
 
 		// Validate mimetype
-		const ext = path.extname(data.filename).toLowerCase().replace('.', '');
+		const ext = path.extname(data.filename).toLowerCase().replace(".", "");
 		if (!ALLOWED_MIME.includes(data.mimetype) && !ALLOWED_EXT.includes(ext)) {
 			return res
 				.status(StatusCodes.BAD_REQUEST)

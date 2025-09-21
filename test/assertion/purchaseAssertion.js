@@ -73,6 +73,7 @@ export function getPurchaseRequest(res, positivePayload, featureName) {
 
 export const PurchaseResponseSchema = object(
 	{
+		purchaseId: string(),
 		purchasedItems: array(ProductSchema),
 		totalPrice: number(),
 		paymentDetails: array(
@@ -96,7 +97,7 @@ export const PurchaseResponseSchema = object(
 		),
 	},
 	{
-		required: ["purchasedItems", "totalPrice", "paymentDetails"],
+		required: ["purchaseId", "purchasedItems", "totalPrice", "paymentDetails"],
 		additionalProperties: true,
 	},
 );
