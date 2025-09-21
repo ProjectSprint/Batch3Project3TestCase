@@ -13,8 +13,8 @@
 - ✅ Get Product
 - ✅ Patch Product
 - ✅ Delete Product
-- ❌ Post Purchase
-- ❌ Post Purchase Proof
+- ✅ Post Purchase
+- ✅ Post Purchase Proof
 
 ## Prerequisites
 - [ k6 ](https://k6.io/docs/get-started/installation/)
