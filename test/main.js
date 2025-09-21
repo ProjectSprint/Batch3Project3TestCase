@@ -24,22 +24,6 @@ import {
 	PostPurchaseIdScenario,
 	PostPurchaseScenario,
 } from "./scenario/purchaseScenario.js";
-// import {
-//   GetProfileScenario,
-//   PostProfileEmailScenario,
-//   PostProfilePhoneScenario,
-//   PutProfileScenario,
-// } from "./scenario/profileScenario.js";
-// import {
-//   PostPurchaseScenario,
-//   PostPurchaseIdScenario
-// } from "./scenario/purchaseScenario.js";
-// import {
-//   DeleteProductScenario,
-//   GetProductScenario,
-//   PostProductScenario,
-//   PutProductScenario
-// } from "./scenario/productScenario.js";
 
 export const options = {
 	vus: 1,
@@ -74,6 +58,7 @@ export default function () {
 		baseUrl: __ENV.BASE_URL ? __ENV.BASE_URL : "http://localhost:8080",
 		debug: __ENV.DEBUG ? true : false,
 		runNegativeCase: true,
+		runLoadTest: __ENV.LOAD_TEST ? true : false,
 	};
 
 	const tags = {
@@ -81,7 +66,21 @@ export default function () {
 	};
 	console.log(`k6 | Firing to ${config.baseUrl}`);
 
-	// ===== REGISTER TEST =====
+	if (config.runLoadTest) {
+	} else {
+		runScenarios(config, tags);
+	}
+
+	// ===== PROFILE TEST =====
+	// ===== DEPARTMENT TEST =====
+}
+/**
+ *
+ * @param {import("./types/config.js").Config} config ()
+ * @param {Record<string,string>} tags
+ * @returns
+ */
+function runScenarios(config, tags) {
 	const emailUsr = RegisterEmailScenario(config, tags, {});
 	LoginEmailScenario(config, tags, { user: emailUsr });
 
@@ -138,9 +137,4 @@ export default function () {
 
 	const phoneUsr = RegisterPhoneScenario(config, tags, {});
 	LoginPhoneScenario(config, tags, { user: phoneUsr });
-	// PostProductScenario(config, tags, { user: emailUsr });
-	// PostProfileEmailScenario(config, tags, { info: phoneUsr });
-
-	// ===== PROFILE TEST =====
-	// ===== DEPARTMENT TEST =====
 }

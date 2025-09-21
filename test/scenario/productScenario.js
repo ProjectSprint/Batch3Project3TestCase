@@ -454,7 +454,7 @@ export function GetProductScenario(config, tags, info) {
 			["should have only 1 item"]: (parsed, _res) =>
 				isTotalDataInRange(parsed, "[]", 0, 1),
 			["should exist"]: (parsed, _res) =>
-				isEqual(parsed, "[]._id", choosenProductId),
+				isEqual(parsed, "[].productId", choosenProductId),
 		}),
 		tags: {},
 	});
