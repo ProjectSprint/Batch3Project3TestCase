@@ -28,13 +28,13 @@
     ⚠️ Adjust the `BASE_URL` value to your backend path
 ## Cookbook 🍳
 - How can I know what's the payload that k6 give and what it receives? Run in debug mode:
-    ```bash
-        BASE_URL=http://localhost:8080 make test-debug
-   ```
+  ```bash
+  BASE_URL=http://localhost:8080 make test-debug
+  ```
 - Searching at the log is hard, how to save it into a file?
-    ```bash
-        BASE_URL=http://localhost:8080 make test-debug-log
-   ```
+  ```bash
+  BASE_URL=http://localhost:8080 make test-debug-log
+  ```
    now the test result will be at `output.txt`
 ## How to read the debug log?
 When you run `make test-debug` you will see this
@@ -70,6 +70,12 @@ time="2025-09-20T22:59:30+07:00" level=info msg="Get Profile | success get profi
 ```
 
 By that information, fix your backend and reach 100% Completion! 🎉
+
+### How to run load test?
+> ⚠️ Do not run the load test to our server!
+```bash
+BASE_URL=http://localhost:8080 make load-test
+```
 
 ### Environment Variables
 - `BASE_URL` (string,url) sets the base url of the backend
