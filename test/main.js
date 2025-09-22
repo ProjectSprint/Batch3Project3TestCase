@@ -24,14 +24,37 @@ import {
 	PostPurchaseIdScenario,
 	PostPurchaseScenario,
 } from "./scenario/purchaseScenario.js";
+import { runLoadTest } from "./loadTest.js";
 
-export const options = {
-	vus: 1,
-	iterations: 1,
-	tresholds: {
-		http_req_failed: ["count<1"],
-	},
-};
+const LOAD_TEST = __ENV.LOAD_TEST || "false";
+export const options =
+	LOAD_TEST == "true"
+		? {
+				discardResponseBodies: true,
+				scenarios: {
+					contacts: {
+						executor: "ramping-vus",
+						startVUs: 0,
+						stages: [
+							{ duration: "30s", target: 250 },
+							{ duration: "30s", target: 500 },
+							{ duration: "30s", target: 1000 },
+							{ duration: "30s", target: 2000 },
+							{ duration: "30s", target: 5000 },
+							{ duration: "30s", target: 8000 },
+							{ duration: "30s", target: 10000 },
+						],
+						gracefulRampDown: "0s",
+					},
+				},
+				thresholds: {
+					http_req_duration: ["p(95)<5000"], // 95% of requests should be below 5000ms
+				},
+			}
+		: {
+				vus: 1,
+				iterations: 1,
+			};
 
 const smallFile = open("./figure/image-50KB.jpg", "b");
 const medFile = open("./figure/image-100KB.jpg", "b");
@@ -64,15 +87,13 @@ export default function () {
 	const tags = {
 		env: "local",
 	};
-	console.log(`k6 | Firing to ${config.baseUrl}`);
 
 	if (config.runLoadTest) {
+		runLoadTest(config);
 	} else {
+		console.log(`k6 | Firing to ${config.baseUrl}`);
 		runScenarios(config, tags);
 	}
-
-	// ===== PROFILE TEST =====
-	// ===== DEPARTMENT TEST =====
 }
 /**
  *

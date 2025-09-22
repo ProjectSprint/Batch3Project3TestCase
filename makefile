@@ -2,18 +2,22 @@
 DEBUG ?= false
 BASE_URL ?= http://localhost:30000
 
-.PHONY: test pull-test
-
 # Pull latest changes from main branch
 pull:
 	git pull origin main
 
 # run test
 test:
+	git pull origin main;
 	BASE_URL=$(BASE_URL) k6 run test/main.js
+
+load-test:
+	git pull origin main;
+	BASE_URL=$(BASE_URL) LOAD_TEST=true k6 run test/main.js
 
 # run test
 test-debug:
+	git pull origin main;
 	BASE_URL=$(BASE_URL) DEBUG=true k6 run test/main.js
 
 # Pull and run tests in one command

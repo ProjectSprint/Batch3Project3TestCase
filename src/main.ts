@@ -11,6 +11,7 @@ const server = fastify({
 			strictTypes: true,
 		},
 	},
+	logger: true,
 }).withTypeProvider<TypeBoxTypeProvider>();
 
 // middlewares

@@ -1,8 +1,3 @@
-export enum ContactType {
-	phone = "phone",
-	email = "email",
-}
-
 export enum ProductCategory {
 	Food = "Food",
 	Beverage = "Beverage",
@@ -17,7 +12,7 @@ export type User = {
 	bankAccountName?: string;
 	bankAccountHolder?: string;
 	bankAccountNumber?: string;
-	imageUri?: string;
+	fileThumbnailUri?: string;
 	email: string;
 	phone: string;
 	password: string;
@@ -76,7 +71,7 @@ export type PurchaseRequest = {
 		qty: number;
 	}>;
 	senderName: string | null;
-	senderContactType: ContactType;
+	senderContactType: "phone" | "email";
 	senderContactDetail: string;
 };
 

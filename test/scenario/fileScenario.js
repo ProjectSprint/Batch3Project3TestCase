@@ -1,5 +1,4 @@
 import { file, get } from "k6/http";
-import { check } from "k6";
 import { getFile, isFile } from "../assertion/fileAssertion.js";
 import { testPostMultipartAssert } from "../helper/testRequest.js";
 import { isExists } from "../helper/assertion.js";

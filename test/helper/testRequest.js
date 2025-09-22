@@ -38,22 +38,15 @@ export function testPostMultipart(route, body, headers = {}, tags = {}) {
  * @param {string | import("k6").JSONValue} body - The request body data
  * @param {{ [name: string]: string }} headers - Request headers.
  * @param {{ [name: string]: string }} tags - Tags for the request
- * @param {import('../types/testRequest.d.ts').RequestBodyOptions[]} options - Additional options for the request.
  * @returns {import("k6/http").RefinedResponse<any>} - k6 http response.
  */
-export function testPostJson(
-	route,
-	body,
-	headers = {},
-	tags = {},
-	options = [],
-) {
-	let parsedBody =
-		typeof body === "string" && options.includes("plainBody")
-			? body
-			: JSON.stringify(body);
+export function testPostJson(route, body, headers = {}, tags = {}) {
+	let parsedBody = JSON.stringify(body);
 
-	const requestParams = { headers: headers, tags: tags };
+	const requestParams = {
+		headers: Object.assign({ "Content-Type": "application/json" }, headers),
+		tags: tags,
+	};
 	return http.post(route, parsedBody, requestParams);
 }
 
@@ -63,22 +56,15 @@ export function testPostJson(
  * @param {string | import("k6").JSONValue} body - The JSON data to send in the request body.
  * @param {{[name: string]: string}} headers - Request headers.
  * @param {{[name: string]: string}} tags - Request tags.
- * @param {import('../types/testRequest.d.ts').RequestBodyOptions[]} options - Additional options for the request.
  * @returns {import("k6/http").RefinedResponse<any>} - k6 http response.
  */
-export function testPatchJson(
-	route,
-	body,
-	headers = {},
-	tags = {},
-	options = [],
-) {
-	let parsedBody =
-		typeof body === "string" && options.includes("plainBody")
-			? body
-			: JSON.stringify(body);
+export function testPatchJson(route, body, headers = {}, tags = {}) {
+	let parsedBody = JSON.stringify(body);
 
-	const requestParams = { headers: headers, tags: tags };
+	const requestParams = {
+		headers: Object.assign({ "Content-Type": "application/json" }, headers),
+		tags: tags,
+	};
 	return http.patch(route, parsedBody, requestParams);
 }
 
@@ -88,22 +74,15 @@ export function testPatchJson(
  * @param {string | import("k6").JSONValue} body - The JSON data to send in the request body.
  * @param {{[name: string]: string}} headers - Request headers.
  * @param {{[name: string]: string}} tags - Request tags.
- * @param {import('../types/testRequest.d.ts').RequestBodyOptions[]} options - Additional options for the request.
  * @returns {import("k6/http").RefinedResponse<any>} - k6 http response.
  */
-export function testPutJson(
-	route,
-	body,
-	headers = {},
-	tags = {},
-	options = [],
-) {
-	let parsedBody =
-		typeof body === "string" && options.includes("plainBody")
-			? body
-			: JSON.stringify(body);
+export function testPutJson(route, body, headers = {}, tags = {}) {
+	let parsedBody = JSON.stringify(body);
 
-	const requestParams = { headers: headers, tags: tags };
+	const requestParams = {
+		headers: Object.assign({ "Content-Type": "application/json" }, headers),
+		tags: tags,
+	};
 	return http.put(route, parsedBody, requestParams);
 }
 
@@ -209,18 +188,13 @@ export function testPostJsonAssert(args) {
 		featureName,
 		route,
 		body,
-		headers: headersObj = {},
+		headers,
 		expectedCase,
-		options = [],
 		config,
 		tags = {},
 	} = args;
 
-	const headers = options.includes("noContentType")
-		? Object.assign({}, headersObj)
-		: Object.assign({ "Content-Type": "application/json" }, headersObj);
-
-	const res = testPostJson(route, body, headers, tags, options);
+	const res = testPostJson(route, body, headers, tags);
 	const isSuccess = check(
 		res,
 		getAssertChecks(
@@ -250,18 +224,13 @@ export function testPatchJsonAssert(args) {
 		featureName,
 		route,
 		body,
-		headers: headersObj = {},
+		headers = {},
 		expectedCase,
-		options = [],
 		config,
 		tags = {},
 	} = args;
 
-	const headers = options.includes("noContentType")
-		? Object.assign({}, headersObj)
-		: Object.assign({ "Content-Type": "application/json" }, headersObj);
-
-	const res = testPatchJson(route, body, headers, tags, options);
+	const res = testPatchJson(route, body, headers, tags);
 	const isSuccess = check(
 		res,
 		getAssertChecks(
@@ -291,18 +260,13 @@ export function testPutJsonAssert(args) {
 		featureName,
 		route,
 		body,
-		headers: headersObj = {},
+		headers = {},
 		expectedCase,
-		options = [],
 		config,
 		tags = {},
 	} = args;
 
-	const headers = options.includes("noContentType")
-		? Object.assign({}, headersObj)
-		: Object.assign({ "Content-Type": "application/json" }, headersObj);
-
-	const res = testPutJson(route, body, headers, tags, options);
+	const res = testPutJson(route, body, headers, tags);
 	const isSuccess = check(
 		res,
 		getAssertChecks(

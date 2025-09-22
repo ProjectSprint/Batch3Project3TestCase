@@ -56,7 +56,6 @@ export function registerRoutes(s: PSServer) {
 				return;
 			}
 			token = token.substring(7, token.length);
-			console.log("token", token);
 			const userId = atob(token);
 			const user = await userRepo.get(userId);
 			if (!user) {

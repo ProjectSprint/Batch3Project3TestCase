@@ -20,8 +20,8 @@ export function productGetterHandler(
 		{
 			schema: {
 				querystring: Type.Object({
-					limit: Type.Optional(Type.Number()),
-					offset: Type.Optional(Type.Number()),
+					limit: Type.Optional(Type.String()),
+					offset: Type.Optional(Type.String()),
 					productId: Type.Optional(Type.String()),
 					sku: Type.Optional(Type.String()),
 					category: Type.Optional(ProductTypeSchema),
@@ -40,8 +40,8 @@ export function productGetterHandler(
 			const { limit, offset, productId, sku, category, sortBy } = req.query;
 
 			const products = await productRepo.findAll({
-				limit,
-				offset,
+				limit: parseInt(limit || "0"),
+				offset: parseInt(offset || "0"),
 				productId,
 				sku,
 				category,

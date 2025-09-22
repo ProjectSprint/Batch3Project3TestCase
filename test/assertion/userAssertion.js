@@ -10,7 +10,7 @@ export const UserSchema = object(
 		email: nullable(string()),
 		fileId: string(),
 		fileUri: string(),
-		imageUri: string(),
+		fileThumbnailUri: string(),
 		password: string(),
 		phone: nullable(string()),
 		token: string(),
